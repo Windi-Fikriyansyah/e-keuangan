@@ -31,7 +31,9 @@ class BPKBController extends Controller
         $orderBy = $request->order[0]['dir'] ?? 'desc';
 
         // get data from products table
-        $query = DB::table('masterBpkb');
+        $query = DB::table('masterBpkb as a')
+            ->select('a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd')
+            ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd');
 
         // Search
         $search = $request->search;
@@ -73,10 +75,16 @@ class BPKBController extends Controller
 
         DB::beginTransaction();
         try {
+            DB::table('masterBpkb')->lockForUpdate()->get();
+
+            $nomorBaru = DB::table('masterBpkb')
+                ->selectRaw("ISNULL(MAX(nomorRegister),0)+1 as nomor")
+                ->first();
+
             DB::table('masterBpkb')
                 ->insert([
                     'kodeSkpd' => $request['kodeSkpd'],
-                    'nomorRegister' => $request['nomorRegister'],
+                    'nomorRegister' => $nomorBaru->nomor,
                     'nomorBpkb' => $request['nomorBpkb'],
                     'nomorPolisi' => $request['nomorPolisi'],
                     'namaPemilik' => $request['namaPemilik'],
@@ -136,8 +144,6 @@ class BPKBController extends Controller
             DB::table('masterBpkb')
                 ->where(['nomorRegister' => $request['nomorRegister'], 'kodeSkpd' => $request['kodeSkpd']])
                 ->update([
-                    'kodeSkpd' => $request['kodeSkpd'],
-                    'nomorRegister' => $request['nomorRegister'],
                     'nomorBpkb' => $request['nomorBpkb'],
                     'nomorPolisi' => $request['nomorPolisi'],
                     'namaPemilik' => $request['namaPemilik'],

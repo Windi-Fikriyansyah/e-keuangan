@@ -23,7 +23,7 @@ class TambahRequest extends FormRequest
     {
         return [
             'kodeSkpd' => 'required',
-            'nomorRegister' => 'required|max:255|unique:masterBpkb,nomorRegister',
+            'nomorRegister' => 'nullable|max:255|unique:masterBpkb,nomorRegister',
             'nomorBpkb' => 'required|max:255|unique:masterBpkb,nomorBpkb',
             'nomorPolisi' => 'required|max:255|unique:masterBpkb,nomorPolisi',
             'namaPemilik' => 'required|max:255',

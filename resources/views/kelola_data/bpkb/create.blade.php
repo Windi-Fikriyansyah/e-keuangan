@@ -51,18 +51,16 @@
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Nomor Register</label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-4">
                             <input class="form-control @error('nomorRegister') is-invalid @enderror" type="text"
-                                placeholder="Isi dengan nomor register" name="nomorRegister"
-                                value="{{ old('nomorRegister') }}" autofocus>
+                                placeholder="Tidak perlu diisi, otomatis" name="nomorRegister"
+                                value="{{ old('nomorRegister') }}" autofocus readonly style="background-color: #e9ecef">
                             @error('nomorRegister')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                    </div>
-                    <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Nomor BPKB</label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-4">
                             <input class="form-control @error('nomorBpkb') is-invalid @enderror" type="text"
                                 placeholder="Isi dengan nomor bpkb" name="nomorBpkb" value="{{ old('nomorBpkb') }}">
                             @error('nomorBpkb')
@@ -72,17 +70,14 @@
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Nomor Polisi</label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-4">
                             <input class="form-control @error('nomorPolisi') is-invalid @enderror" type="text"
                                 placeholder="Isi dengan nomor polisi" name="nomorPolisi" value="{{ old('nomorPolisi') }}">
                             @error('nomorPolisi')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nama Pemilik</label>
-                        <div class="col-sm-10">
+                        </div><label class="col-sm-2 col-form-label">Nama Pemilik</label>
+                        <div class="col-sm-4">
                             <input class="form-control @error('namaPemilik') is-invalid @enderror" type="text"
                                 placeholder="Isi dengan nama pemilik" name="namaPemilik" value="{{ old('namaPemilik') }}">
                             @error('namaPemilik')

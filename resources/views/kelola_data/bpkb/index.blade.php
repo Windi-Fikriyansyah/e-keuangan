@@ -28,6 +28,8 @@
                         <thead>
                             <tr>
                                 <th>Nomor Register</th>
+                                <th>Nomor BPKB</th>
+                                <th>Nomor Polisi</th>
                                 <th>SKPD</th>
                                 <th>Aksi</th>
                             </tr>
@@ -66,14 +68,29 @@
                 },
                 pageLength: 10,
                 searching: true,
-                aoColumns: [{
+                columns: [{
                         data: 'nomorRegister',
+                    }, {
+                        data: 'nomorBpkb',
+                    }, {
+                        data: 'nomorPolisi',
                     }, {
                         data: 'kodeSkpd',
                     },
                     {
                         data: 'aksi',
                         className: 'text-center'
+                    }
+                ],
+                columnDefs: [
+                    // Center align both header and body content of columns 1, 2 & 3
+                    {
+                        className: "dt-head-center",
+                        targets: ['_all']
+                    },
+                    {
+                        className: "dt-body-center",
+                        targets: [0, 1, 2, 4]
                     }
                 ]
             });
