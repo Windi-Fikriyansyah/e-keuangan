@@ -86,12 +86,12 @@
                     <ul class="submenu ">
 
                         <li class="submenu-item  ">
-                            <a href="{{ route('user.index') }}" class="submenu-link">BPKB</a>
+                            <a href="{{ route('kelola_data.bpkb.index') }}" class="submenu-link">BPKB</a>
 
                         </li>
 
                         <li class="submenu-item  ">
-                            <a href="{{ route('peran.index') }}" class="submenu-link">Sertifikat</a>
+                            <a href="{{ route('kelola_data.sertifikat.index') }}" class="submenu-link">Sertifikat</a>
 
                         </li>
 
