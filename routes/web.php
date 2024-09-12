@@ -54,7 +54,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('create', [BPKBController::class, 'create'])->name('create');
                 Route::post('store', [BPKBController::class, 'store'])->name('store');
                 Route::get('edit/{no_register}/{kd_skpd}', [BPKBController::class, 'edit'])->name('edit');
-                Route::post('update', [BPKBController::class, 'update'])->name('update');
+                Route::post('update/{id}', [BPKBController::class, 'update'])->name('update');
                 Route::post('delete', [BPKBController::class, 'delete'])->name('delete');
             });
 
