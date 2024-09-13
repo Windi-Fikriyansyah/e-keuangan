@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
 
 class BPKBController extends Controller
 {
@@ -53,8 +54,8 @@ class BPKBController extends Controller
 
         return DataTables::of($users)
             ->addColumn('aksi', function ($row) {
-                $btn = '<a href="' . route("peminjaman.bpkb.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px">Edit</a>';
-                $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger">Delete</a>';
+                $btn = '<a href="' . route("peminjaman.bpkb.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger"><span class="fa-fw select-all fas"></span></a>';
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -141,11 +142,25 @@ class BPKBController extends Controller
                 ->selectRaw("ISNULL(MAX(nomorUrut),0)+1 as nomor")
                 ->first();
 
+            if (Str::length($nomorBaru->nomor) == '1') {
+                $nomor = '00000' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '2') {
+                $nomor = '0000' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '3') {
+                $nomor = '000' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '4') {
+                $nomor = '00' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '5') {
+                $nomor = '0' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '6') {
+                $nomor = $nomorBaru->nomor;
+            }
+
             DB::table('pinjamanBpkb')
                 ->insert([
                     'kodeSkpd' => Auth::user()->kd_skpd,
                     'nomorUrut' => $nomorBaru->nomor,
-                    'nomorSurat' => '000.2.3.2/' . $nomorBaru->nomor . '/BPKAD-Aset',
+                    'nomorSurat' => '000.2.3.2/' . $nomor . '/BPKAD-Aset',
                     'tanggalPinjam' => $request['tanggalPinjam'],
                     'nomorRegister' => $request['nomorRegister'],
                     'nomorPolisi' => $request['nomorPolisi'],
