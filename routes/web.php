@@ -80,9 +80,11 @@ Route::middleware('auth')->group(function () {
                 Route::post('load', [PeminjamanBPKBController::class, 'load'])->name('load');
                 Route::get('create', [PeminjamanBPKBController::class, 'create'])->name('create');
                 Route::post('store', [PeminjamanBPKBController::class, 'store'])->name('store');
-                Route::get('edit/{no_register}/{kd_skpd}', [PeminjamanBPKBController::class, 'edit'])->name('edit');
-                Route::post('update', [PeminjamanBPKBController::class, 'update'])->name('update');
+                Route::get('edit/{no_surat}/{kd_skpd}', [PeminjamanBPKBController::class, 'edit'])->name('edit');
+                Route::post('update/{id}', [PeminjamanBPKBController::class, 'update'])->name('update');
                 Route::post('delete', [PeminjamanBPKBController::class, 'delete'])->name('delete');
+
+                Route::post('load_bpkb', [PeminjamanBPKBController::class, 'loadBpkb'])->name('load_bpkb');
             });
 
         // SERTIFIKAT

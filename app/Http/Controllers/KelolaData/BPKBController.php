@@ -32,7 +32,7 @@ class BPKBController extends Controller
 
         // get data from products table
         $query = DB::table('masterBpkb as a')
-            ->select('a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd', 'a.statusBpkb')
+            ->select('a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd', 'a.statusBpkb', 'a.statusPinjam')
             ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd');
 
         // Search
@@ -55,7 +55,7 @@ class BPKBController extends Controller
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route("kelola_data.bpkb.edit", ['no_register' => Crypt::encrypt($row->nomorRegister), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px">Edit</a>';
 
-                if ($row->statusBpkb == '0') {
+                if ($row->statusBpkb == '0' && $row->statusPinjam == '0') {
                     $btn .= '<a onclick="hapus(\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger">Delete</a>';
                 }
                 return $btn;
@@ -208,8 +208,8 @@ class BPKBController extends Controller
         try {
             DB::table('masterBpkb')
                 ->where([
-                    'nomorRegister' => $request['nomorRegister'],
-                    'kodeSkpd' => $request['kodeSkpd']
+                    'nomorRegister' => $request->nomorRegister,
+                    'kodeSkpd' => $request->kodeSkpd
                 ])
                 ->lockForUpdate()
                 ->first();
