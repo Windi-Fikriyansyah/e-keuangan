@@ -98,6 +98,26 @@
                     </ul>
                 </li>
 
+                <li class="sidebar-item  has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>Kelola Peminjaman</span>
+                    </a>
+                    <ul class="submenu ">
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('peminjaman.bpkb.index') }}" class="submenu-link">BPKB</a>
+
+                        </li>
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('peminjaman.sertifikat.index') }}" class="submenu-link">Sertifikat</a>
+
+                        </li>
+
+                    </ul>
+                </li>
+
             </ul>
         </div>
     </div>

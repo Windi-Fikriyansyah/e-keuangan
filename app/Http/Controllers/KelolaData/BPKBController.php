@@ -32,7 +32,7 @@ class BPKBController extends Controller
 
         // get data from products table
         $query = DB::table('masterBpkb as a')
-            ->select('a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd')
+            ->select('a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd', 'a.statusBpkb')
             ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd');
 
         // Search
@@ -54,7 +54,10 @@ class BPKBController extends Controller
         return DataTables::of($users)
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route("kelola_data.bpkb.edit", ['no_register' => Crypt::encrypt($row->nomorRegister), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px">Edit</a>';
-                $btn .= '<a onclick="hapus(\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger">Delete</a>';
+
+                if ($row->statusBpkb == '0') {
+                    $btn .= '<a onclick="hapus(\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger">Delete</a>';
+                }
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -106,6 +109,8 @@ class BPKBController extends Controller
                     'createdUsername' => Auth::user()->name,
                     'updatedDate' => date('Y-m-d H:i:s'),
                     'updatedUsername' => Auth::user()->name,
+                    'statusBpkb' => '0',
+                    'statusPinjam' => '0',
                 ]);
 
             DB::commit();
@@ -117,7 +122,7 @@ class BPKBController extends Controller
             return redirect()
                 ->route('kelola_data.bpkb.create')
                 ->withInput()
-                ->with('message', 'Data BPKB gagal disimpan!');
+                ->with('message', 'Data BPKB gagal disimpan!' . $e->getMessage());
         }
     }
 
@@ -138,11 +143,23 @@ class BPKBController extends Controller
 
     public function update(EditRequest $request, $id)
     {
-
         DB::beginTransaction();
         try {
             DB::table('masterBpkb')
-                ->where(['nomorRegister' => $request['nomorRegister'], 'kodeSkpd' => $request['kodeSkpd']])
+                ->where([
+                    'id' => $id,
+                    'nomorRegister' => $request['nomorRegister'],
+                    'kodeSkpd' => $request['kodeSkpd']
+                ])
+                ->lockForUpdate()
+                ->first();
+
+            DB::table('masterBpkb')
+                ->where([
+                    'id' => $id,
+                    'nomorRegister' => $request['nomorRegister'],
+                    'kodeSkpd' => $request['kodeSkpd']
+                ])
                 ->update([
                     'nomorBpkb' => $request['nomorBpkb'],
                     'nomorPolisi' => $request['nomorPolisi'],
@@ -190,7 +207,18 @@ class BPKBController extends Controller
         DB::beginTransaction();
         try {
             DB::table('masterBpkb')
-                ->where(['nomorRegister' => $request->nomorRegister, 'kodeSkpd' => $request->kodeSkpd])
+                ->where([
+                    'nomorRegister' => $request['nomorRegister'],
+                    'kodeSkpd' => $request['kodeSkpd']
+                ])
+                ->lockForUpdate()
+                ->first();
+
+            DB::table('masterBpkb')
+                ->where([
+                    'nomorRegister' => $request->nomorRegister,
+                    'kodeSkpd' => $request->kodeSkpd
+                ])
                 ->delete();
 
             DB::commit();
