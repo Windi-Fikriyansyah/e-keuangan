@@ -42,6 +42,99 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="modalCetak" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cetak Form Peminjaman BPKB</h5>
+                    <button type="button" class="close rounded-pill" data-bs-dismiss="modal" aria-label="Close">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Nomor Surat</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="nomorSurat" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Nomor Register</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="nomorRegister" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Tanda Tangan</label>
+                        <div class="col-sm-8">
+                            <select class="form-select select_option" id="tandaTangan" data-placeholder="Silahkan Pilih">
+                                <option value="" selected>Silahkan Pilih</option>
+                                @foreach ($daftarTandaTangan as $item)
+                                    <option value="{{ $item->nip }}">{{ $item->nip }} | {{ $item->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="flex: 1;align-items:center;justify-content:center">
+                    <button type="button" class="btn btn-dark ms-1 cetak" data-tipe="layar">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Layar</span>
+                    </button>
+                    <button type="button" class="btn btn-danger ms-1 cetak" data-tipe="pdf">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalPengajuan" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalScrollableTitle">Pengajuan Peminjaman BPKB</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Nomor Surat</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="nomorSuratPengajuan" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Nomor Register</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="nomorRegisterPengajuan" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">File Pengajuan</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" id="filePengajuan" type="file">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="display: flex;justify-content:center;align-items:center">
+
+                    <button type="button" class="btn btn-success ms-1" data-bs-dismiss="modal">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Ajukan</span>
+                    </button><button type="button" class="btn btn-danger ms-1" data-bs-dismiss="modal">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Batal Ajukan</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @push('js')
     <style>
@@ -97,6 +190,45 @@
                         targets: [0, 1, 2, 4]
                     }
                 ]
+            });
+
+            $('.cetak').on('click', function() {
+                let nomorSurat = $('#nomorSurat').val();
+                let nomorRegister = $('#nomorRegister').val();
+                let tandaTangan = $('#tandaTangan').val();
+                let tipe = $(this).data('tipe');
+
+                if (!nomorSurat) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Nomor surat tidak boleh kosong",
+                        icon: "warning"
+                    });
+                }
+
+                if (!nomorRegister) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Nomor register tidak boleh kosong",
+                        icon: "warning"
+                    });
+                }
+
+                if (!tandaTangan) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silahkan pilih tanda tangan",
+                        icon: "warning"
+                    });
+                }
+
+                let url = new URL("{{ route('peminjaman.bpkb.cetak') }}");
+                let searchParams = url.searchParams;
+                searchParams.append("nomorSurat", nomorSurat);
+                searchParams.append("nomorRegister", nomorRegister);
+                searchParams.append("tandaTangan", tandaTangan);
+                searchParams.append("tipe", tipe);
+                window.open(url.toString(), "_blank");
             });
         });
 
@@ -154,6 +286,18 @@
                     });
                 }
             });
+        }
+
+        function cetak(nomorSurat, nomorRegister, kodeSkpd) {
+            $('#nomorSurat').val(nomorSurat);
+            $('#nomorRegister').val(nomorRegister);
+            $('#modalCetak').modal('show');
+        }
+
+        function pengajuan(nomorSurat, nomorRegister, kodeSkpd) {
+            $('#nomorSuratPengajuan').val(nomorSurat);
+            $('#nomorRegisterPengajuan').val(nomorRegister);
+            $('#modalPengajuan').modal('show');
         }
     </script>
 @endpush

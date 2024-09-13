@@ -23,6 +23,11 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 
+<style>
+    .readonlyInput {
+        background-color: #e9ecef
+    }
+</style>
 <script>
     $('.select_option').select2({
         theme: "bootstrap-5",

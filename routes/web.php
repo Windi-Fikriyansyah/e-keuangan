@@ -85,6 +85,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('delete', [PeminjamanBPKBController::class, 'delete'])->name('delete');
 
                 Route::post('load_bpkb', [PeminjamanBPKBController::class, 'loadBpkb'])->name('load_bpkb');
+                Route::get('cetak', [PeminjamanBPKBController::class, 'cetakPeminjaman'])->name('cetak');
             });
 
         // SERTIFIKAT

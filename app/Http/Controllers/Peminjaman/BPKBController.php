@@ -12,12 +12,17 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
+use PDF;
 
 class BPKBController extends Controller
 {
     public function index()
     {
-        return view('kelola_peminjaman.bpkb.index');
+        $daftarTandaTangan = DB::table('masterTtd')
+            ->where(['kodeSkpd' => Auth::user()->kd_skpd])
+            ->get();
+
+        return view('kelola_peminjaman.bpkb.index', compact('daftarTandaTangan'));
     }
 
     public function load(Request $request)
@@ -55,7 +60,9 @@ class BPKBController extends Controller
         return DataTables::of($users)
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route("peminjaman.bpkb.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
-                $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger"><span class="fa-fw select-all fas"></span></a>';
+                $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                $btn .= '<a onclick="cetak(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                $btn .= '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -318,6 +325,46 @@ class BPKBController extends Controller
                 'status' => false,
                 'message' => 'Data gagal dihapus!'
             ], 500);
+        }
+    }
+
+    public function cetakPeminjaman(Request $request)
+    {
+        $nomorSurat = $request->nomorSurat;
+        $nomorRegister = $request->nomorRegister;
+        $tandaTangan = $request->tandaTangan;
+        $tipe = $request->tipe;
+        $kodeSkpd = Auth::user()->kd_skpd;
+
+        $data = [
+            'dataSkpd' => DB::table('masterSkpd')
+                ->select('namaSkpd')
+                ->where(['kodeSkpd' => $kodeSkpd])
+                ->first(),
+            'dataPeminjaman' => DB::table('pinjamanBpkb')
+                ->where([
+                    'nomorSurat' => $nomorSurat,
+                    'nomorRegister' => $nomorRegister,
+                    'kodeSkpd' => $kodeSkpd
+                ])
+                ->first(),
+            'tandaTangan' => DB::table('masterTtd')
+                ->where(['nip' => $tandaTangan])
+                ->first(),
+            'tipe' => $tipe
+        ];
+
+        $view = view('kelola_peminjaman.bpkb.cetak')->with($data);
+
+        if ($tipe == 'layar') {
+            return $view;
+        } else if ($tipe == 'pdf') {
+            $pdf = PDF::loadHtml($view)
+                ->setPaper('legal')
+                ->setOrientation('portrait')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+            return $pdf->stream('FormPeminjamanBPKB.pdf');
         }
     }
 }
