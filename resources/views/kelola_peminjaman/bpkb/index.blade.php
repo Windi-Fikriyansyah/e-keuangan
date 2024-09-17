@@ -94,7 +94,7 @@
 
     <div class="modal fade" id="modalPengajuan" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalScrollableTitle">Pengajuan Peminjaman BPKB</h5>
@@ -103,35 +103,52 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="row mb-3">
-                        <label class="col-sm-4 col-form-label">Nomor Surat</label>
-                        <div class="col-sm-8">
-                            <input class="form-control readonlyInput" id="nomorSuratPengajuan" type="text" readonly>
+                    <form action="" enctype="multipart/form-data" id="formPengajuan" method="POST">
+                        <div class="row mb-3">
+                            <label class="col-sm-4 col-form-label">Nomor Surat</label>
+                            <div class="col-sm-8">
+                                <input class="form-control readonlyInput" id="nomorSuratPengajuan"
+                                    name="nomorSuratPengajuan" type="text" readonly>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label class="col-sm-4 col-form-label">Nomor Register</label>
-                        <div class="col-sm-8">
-                            <input class="form-control readonlyInput" id="nomorRegisterPengajuan" type="text" readonly>
+                        <div class="row mb-3">
+                            <label class="col-sm-4 col-form-label">Nomor Register</label>
+                            <div class="col-sm-8">
+                                <input class="form-control readonlyInput" id="nomorRegisterPengajuan"
+                                    name="nomorRegisterPengajuan" type="text" readonly>
+                                <input class="form-control readonlyInput" id="statusPengajuan" name="statusPengajuan"
+                                    type="text" hidden>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label class="col-sm-4 col-form-label">File Pengajuan</label>
-                        <div class="col-sm-8">
-                            <input class="form-control" id="filePengajuan" type="file">
+                        <div class="row mb-3">
+                            <div class="col-md-12 text-center">
+                                <button type="submit" class="btn btn-success ms-1" data-tipe="ajukan"
+                                    id="AjukanPengajuan">
+                                    <i class="bx bx-check d-block d-sm-none"></i>
+                                    <span class="d-none d-sm-block">Ajukan</span>
+                                </button>
+                                <button type="submit" class="btn btn-danger ms-1" data-tipe="batalkan"
+                                    id="BatalkanPengajuan">
+                                    <i class="bx bx-check d-block d-sm-none"></i>
+                                    <span class="d-none d-sm-block">Batal Ajukan</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-4 col-form-label">File Pengajuan</label>
+                            <div class="col-sm-8">
+                                <input class="form-control" id="filePengajuan" name="filePengajuan" type="file"
+                                    onchange="fileValidation()">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-12">
+                                <iframe style="width: 100%;height:100vh" id="tampilanFilePengajuan"></iframe>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div class="modal-footer" style="display: flex;justify-content:center;align-items:center">
 
-                    <button type="button" class="btn btn-success ms-1" data-bs-dismiss="modal">
-                        <i class="bx bx-check d-block d-sm-none"></i>
-                        <span class="d-none d-sm-block">Ajukan</span>
-                    </button><button type="button" class="btn btn-danger ms-1" data-bs-dismiss="modal">
-                        <i class="bx bx-check d-block d-sm-none"></i>
-                        <span class="d-none d-sm-block">Batal Ajukan</span>
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -204,6 +221,7 @@
                         text: "Nomor surat tidak boleh kosong",
                         icon: "warning"
                     });
+                    return;
                 }
 
                 if (!nomorRegister) {
@@ -212,6 +230,7 @@
                         text: "Nomor register tidak boleh kosong",
                         icon: "warning"
                     });
+                    return;
                 }
 
                 if (!tandaTangan) {
@@ -220,6 +239,7 @@
                         text: "Silahkan pilih tanda tangan",
                         icon: "warning"
                     });
+                    return;
                 }
 
                 let url = new URL("{{ route('peminjaman.bpkb.cetak') }}");
@@ -230,7 +250,153 @@
                 searchParams.append("tipe", tipe);
                 window.open(url.toString(), "_blank");
             });
+
+            // $('.pengajuan').on('click', function() {
+            //     let tipe = $(this).data('tipe');
+            //     let nomorSuratPengajuan = $("#nomorSuratPengajuan").val();
+            //     let nomorRegisterPengajuan = $("#nomorRegisterPengajuan").val();
+            //     let filePengajuan = $("#filePengajuan")[0].files[0];
+
+            //     console.log(filePengajuan)
+
+            //     if (!nomorSuratPengajuan) {
+            //         Swal.fire({
+            //             title: "Peringatan!",
+            //             text: "Nomor surat tidak boleh kosong",
+            //             icon: "warning"
+            //         });
+            //         return;
+            //     }
+
+            //     if (!nomorRegisterPengajuan) {
+            //         Swal.fire({
+            //             title: "Peringatan!",
+            //             text: "Nomor register tidak boleh kosong",
+            //             icon: "warning"
+            //         });
+            //         return;
+            //     }
+
+            //     if (!filePengajuan) {
+            //         Swal.fire({
+            //             title: "Peringatan!",
+            //             text: "File Pengajuan tidak boleh kosong",
+            //             icon: "warning"
+            //         });
+            //         return;
+            //     }
+
+            //     $.ajax({
+            //         url: "{{ route('peminjaman.bpkb.pengajuan') }}",
+            //         type: "POST",
+            //         enctype: 'multipart/form-data',
+            //         data: {
+            //             _token: '{{ csrf_token() }}',
+            //             nomorSuratPengajuan: nomorSuratPengajuan,
+            //             nomorRegisterPengajuan: nomorRegisterPengajuan,
+            //             filePengajuan: JSON.stringify(filePengajuan),
+            //             tipe: tipe,
+            //         },
+            //         success: function(response) {},
+            //         error: function(e) {
+            //             swalWithBootstrapButtons.fire({
+            //                 title: "Gagal!",
+            //                 text: e.responseJSON.message,
+            //                 icon: "error"
+            //             });
+            //         },
+            //     });
+            // });
+
+            $('#formPengajuan').on('submit', function(e) {
+                e.preventDefault();
+
+                let form = $('#formPengajuan')[0];
+                let formData = new FormData(form);
+
+                let nomorSuratPengajuan = $("#nomorSuratPengajuan").val();
+                let nomorRegisterPengajuan = $("#nomorRegisterPengajuan").val();
+                let statusPengajuan = $("#statusPengajuan").val();
+                let filePengajuan = $("#filePengajuan").val();
+
+                if (!nomorSuratPengajuan) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Nomor surat tidak boleh kosong",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!nomorRegisterPengajuan) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Nomor register tidak boleh kosong",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!filePengajuan && statusPengajuan == '0') {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "File Pengajuan tidak boleh kosong",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                formData.append('nomorSuratPengajuan', $('input[name=nomorSuratPengajuan]').val())
+                formData.append('nomorRegisterPengajuan', $('input[name=nomorRegisterPengajuan]').val())
+
+                if (statusPengajuan == '0') {
+                    formData.append("filePengajuan", $('input[name=filePengajuan]')[0].files[0]);
+                }
+
+                $.ajax({
+                    url: "{{ route('peminjaman.bpkb.pengajuan') }}",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        Swal.fire({
+                            title: "Berhasil!",
+                            text: response.message,
+                            icon: "success"
+                        });
+
+                        $('#bpkb').DataTable().ajax.reload();
+
+                        document.getElementById('filePengajuan').value = '';
+                        document.getElementById('tampilanFilePengajuan').src = '';
+
+                        $('#modalPengajuan').modal('hide');
+                    },
+                    error: function(e) {
+                        Swal.fire({
+                            title: "Gagal!",
+                            text: e.responseJSON.message,
+                            icon: "error"
+                        });
+                    },
+                });
+            })
         });
+
+        function fileValidation() {
+            const fileInput = document.getElementById('filePengajuan');
+            const fileSize = (fileInput.files[0].size / 1024 / 1024).toFixed(2);
+            if (fileSize > 5) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "File pengajuan tidak boleh lebih dari 5MB",
+                    icon: "warning"
+                });
+                fileInput.value = '';
+                return false;
+            }
+        }
 
         function hapus(nomorSurat, nomorRegister, kodeSkpd) {
             const swalWithBootstrapButtons = Swal.mixin({
@@ -294,9 +460,23 @@
             $('#modalCetak').modal('show');
         }
 
-        function pengajuan(nomorSurat, nomorRegister, kodeSkpd) {
+        function pengajuan(nomorSurat, nomorRegister, kodeSkpd, file, statusPengajuan) {
             $('#nomorSuratPengajuan').val(nomorSurat);
             $('#nomorRegisterPengajuan').val(nomorRegister);
+            $('#statusPengajuan').val(statusPengajuan);
+
+            $('#AjukanPengajuan').prop('hidden', true);
+            $('#BatalkanPengajuan').prop('hidden', true)
+
+            const formatFile = `storage/images/Peminjaman/BPKB/${kodeSkpd}/${file}`;
+
+            statusPengajuan == '0' ? $('#AjukanPengajuan').prop('hidden', false) : $('#BatalkanPengajuan').prop('hidden',
+                false);
+
+            console.log(file)
+            console.log(formatFile)
+
+            file ? document.getElementById('tampilanFilePengajuan').src = `{{ asset('${formatFile}') }}` : '';
             $('#modalPengajuan').modal('show');
         }
     </script>

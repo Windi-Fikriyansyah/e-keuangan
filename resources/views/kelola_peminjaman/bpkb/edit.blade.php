@@ -259,7 +259,9 @@
                         </div>
                     </div>
                     <div class="mb-3 text-end">
-                        <button class="btn btn-primary" type="submit">Simpan</button>
+                        @if ($dataPinjam->statusPengajuan == '0')
+                            <button class="btn btn-primary" type="submit">Simpan</button>
+                        @endif
                         <a href="{{ route('peminjaman.bpkb.index') }}" class="btn btn-warning">Kembali</a>
                     </div>
                 </form>
