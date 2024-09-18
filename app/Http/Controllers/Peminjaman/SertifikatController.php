@@ -11,12 +11,18 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use PDF;
 
 class SertifikatController extends Controller
 {
     public function index()
     {
-        return view('kelola_peminjaman.sertifikat.index');
+        $daftarTandaTangan = DB::table('masterTtd')
+            ->where(['kodeSkpd' => Auth::user()->kd_skpd])
+            ->get();
+        return view('kelola_peminjaman.sertifikat.index', compact('daftarTandaTangan'));
     }
 
     public function load(Request $request)
@@ -29,7 +35,7 @@ class SertifikatController extends Controller
         $orderBy = $request->order[0]['dir'] ?? 'desc';
 
         $query = DB::table('pinjamanSertifikat as a')
-            ->select('a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.kodeSkpd', 'b.namaSkpd')
+            ->select('a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat','a.statusPengajuan', 'a.NIB','a.file', 'a.kodeSkpd', 'b.namaSkpd')
             ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd');
 
         $search = $request->search;
@@ -48,11 +54,17 @@ class SertifikatController extends Controller
         $users = $query->skip($skip)->take($pageLength)->get();
 
         return DataTables::of($users)
-            ->addColumn('aksi', function ($row) {
-                $btn = '<a href="' . route("peminjaman.sertifikat.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px">Edit</a>';
-                $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger">Delete</a>';
-                return $btn;
-            })
+        ->addColumn('aksi', function ($row) {
+            $btn = '<a href="' . route("peminjaman.sertifikat.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+            if ($row->statusPengajuan == '0') {
+                $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+            } else {
+                $btn .= '';
+            }
+            $btn .= '<a onclick="cetak(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+            $btn .= '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
+            return $btn;
+        })
             ->rawColumns(['aksi'])
             ->make(true);
     }
@@ -151,15 +163,7 @@ class SertifikatController extends Controller
                 ->lockForUpdate()
                 ->get();
 
-                if ($request->hasFile('file')) {
-                    $file = $request->file('file');
-                    $nomorUrut = $this->generateNomorUrut();
-                    $fileName = 'sertifikat_' . $nomorUrut . '_' . Auth::user()->kd_skpd . '.' . $file->getClientOriginalExtension();
-                    $filePath = $file->storeAs($fileName, 'public');
-                    $validatedData['nomorUrut'] = $nomorUrut;
-                } else {
-                    throw new \Exception('File tidak ditemukan');
-                }
+
 
             $nomorUrut = $this->generateNomorUrut();
 
@@ -178,7 +182,8 @@ class SertifikatController extends Controller
                     'namaKsbtgn' => $validatedData['namaKsbtgn'],
                     'nipKsbtgn' => $validatedData['nipKsbtgn'],
                     'noTelpKsbtgn' => $validatedData['noTelpKsbtgn'],
-                    'file' => $filePath,
+                    'file' => 'N/A',
+                    'statusPengajuan' => '0',
                     'nomorUrut' => $nomorUrut,
                     'createdDate' => now()->setTimezone('Asia/Jakarta'),
                     'createdUsername' => Auth::user()->name,
@@ -213,22 +218,22 @@ class SertifikatController extends Controller
         $nomorSurat = Crypt::decrypt($nomorSurat);
         $kodeSkpd = Crypt::decrypt($kodeSkpd);
 
-        $dataPinjam = DB::table('pinjamanBpkb')
+        $dataPinjam = DB::table('pinjamanSertifikat')
             ->where(['nomorSurat' => $nomorSurat, 'kodeSkpd' => $kodeSkpd])
             ->first();
 
-        $dataBpkb = DB::table('masterSertifikat')
+        $dataSertifikat = DB::table('masterSertifikat')
             ->where(['nomorRegister' => $dataPinjam->nomorRegister, 'kodeSkpd' => $kodeSkpd])
             ->first();
 
-        return view('kelola_peminjaman.bpkb.edit', compact('dataPinjam', 'dataBpkb'));
+        return view('kelola_peminjaman.sertifikat.edit', compact('dataPinjam', 'dataSertifikat'));
     }
 
     public function update(EditRequest $request, $id)
     {
         DB::beginTransaction();
         try {
-            DB::table('pinjamanBpkb')
+            DB::table('pinjamanSertifikat')
                 ->where([
                     'id' => $id,
                     'nomorSurat' => $request['nomorSurat'],
@@ -237,7 +242,7 @@ class SertifikatController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            DB::table('pinjamanBpkb')
+            DB::table('pinjamanSertifikat')
                 ->where([
                     'id' => $id,
                     'nomorSurat' => $request['nomorSurat'],
@@ -245,29 +250,30 @@ class SertifikatController extends Controller
                 ])
                 ->update([
                     'tanggalPinjam' => $request['tanggalPinjam'],
-                    'namaPbp' => $request['namaPbp'],
-                    'nipPbp' => $request['nipPbp'],
-                    'nomorTelpPbp' => $request['nomorTelpPbp'],
+                    'namaKsbtgn' => $request['namaKsbtgn'],
+                    'nipKsbtgn' => $request['nipKsbtgn'],
+                    'noTelpKsbtgn' => $request['noTelpKsbtgn'],
+                    'peruntukan' => $request['peruntukan'],
                     'updatedDate' => date('Y-m-d H:i:s'),
                     'updatedUsername' => Auth::user()->name,
                 ]);
 
             DB::commit();
             return redirect()
-                ->route('peminjaman.bpkb.index')
-                ->with('message', 'Peminjaman BPKB berhasil diupdate!');
+                ->route('peminjaman.sertifikat.index')
+                ->with('message', 'Peminjaman Sertifikat berhasil diupdate!');
         } catch (Exception $e) {
             DB::rollBack();
             return redirect()
                 ->route(
-                    'peminjaman.bpkb.edit',
+                    'peminjaman.sertifikat.edit',
                     [
                         'no_surat' => Crypt::encrypt($request['nomorSurat']),
                         'kd_skpd' => Crypt::encrypt($request['kodeSkpd']),
                     ]
                 )
                 ->withInput()
-                ->with('message', 'Peminjaman BPKB gagal diupdate!');
+                ->with('message', 'Peminjaman Sertifikat gagal diupdate!');
         }
     }
 
@@ -275,7 +281,7 @@ class SertifikatController extends Controller
     {
         DB::beginTransaction();
         try {
-            DB::table('pinjamanBpkb')
+            DB::table('pinjamanSertifikat')
                 ->where([
                     'nomorSurat' => $request->nomorSurat,
                     'kodeSkpd' => $request->kodeSkpd
@@ -283,14 +289,14 @@ class SertifikatController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            DB::table('pinjamanBpkb')
+            DB::table('pinjamanSertifikat')
                 ->where([
                     'nomorSurat' => $request->nomorSurat,
                     'kodeSkpd' => $request->kodeSkpd
                 ])
                 ->delete();
 
-            $cekBpkb = DB::table('pinjamanBpkb')
+            $cekSertifikat = DB::table('pinjamanSertifikat')
                 ->where([
                     'nomorRegister' => $request->nomorRegister,
                     'kodeSkpd' => $request->kodeSkpd
@@ -303,7 +309,7 @@ class SertifikatController extends Controller
                     'kodeSkpd' => $request->kodeSkpd
                 ]);
 
-            if ($cekBpkb > 0) {
+            if ($cekSertifikat > 0) {
                 $masterSertifikat
                     ->update([
                         'statusPinjam' => '0'
@@ -312,7 +318,7 @@ class SertifikatController extends Controller
                 $masterSertifikat
                     ->update([
                         'statusPinjam' => '0',
-                        'statusBpkb' => '0'
+                        'statusSertifikat' => '0'
                     ]);
             }
 
@@ -326,6 +332,121 @@ class SertifikatController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Data gagal dihapus!'
+            ], 500);
+        }
+    }
+
+    public function cetakPeminjaman(Request $request)
+    {
+        $nomorSurat = $request->nomorSurat;
+        $nomorRegister = $request->nomorRegister;
+        $tandaTangan = $request->tandaTangan;
+        $tipe = $request->tipe;
+        $kodeSkpd = Auth::user()->kd_skpd;
+
+        $data = [
+            'dataSkpd' => DB::table('masterSkpd')
+                ->select('namaSkpd')
+                ->where(['kodeSkpd' => $kodeSkpd])
+                ->first(),
+            'dataPeminjaman' => DB::table('pinjamanSertifikat')
+                ->where([
+                    'nomorSurat' => $nomorSurat,
+                    'nomorRegister' => $nomorRegister,
+                    'kodeSkpd' => $kodeSkpd
+                ])
+                ->first(),
+            'tandaTangan' => DB::table('masterTtd')
+                ->where(['nip' => $tandaTangan])
+                ->first(),
+            'tipe' => $tipe
+        ];
+
+        $view = view('kelola_peminjaman.sertifikat.cetak')->with($data);
+
+        if ($tipe == 'layar') {
+            return $view;
+        } else if ($tipe == 'pdf') {
+            $pdf = PDF::loadHtml($view)
+                ->setPaper('legal')
+                ->setOrientation('portrait')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+            return $pdf->stream('FormPeminjamanSertifikat.pdf');
+        }
+    }
+
+    public function handleFile($file, $tipeFile, $request)
+    {
+        $extension = $file->extension();
+
+        $name =  $tipeFile . '_' . explode("/", $request->nomorSuratPengajuan)[1] . '_' . Auth::user()->kd_skpd . '_' . date('dmyHis') . '.' . $extension;
+
+        // TIPE FILE => CONTOH TIFE FILE NYA SPM UP
+        // NO SPM => NOMOR URUT SPM
+        // KD SKPD => KODE SKPD SPM
+        // DATE => RANDOM TANGGAL DAN WAKTU
+        // EXTENSION => EXTENSION FILE
+
+        return $name;
+    }
+
+    public function pengajuanPeminjaman(Request $request)
+    {
+        $nomorSuratPengajuan =  $request->nomorSuratPengajuan;
+        $nomorRegisterPengajuan =  $request->nomorRegisterPengajuan;
+        $filePengajuan =  $request->filePengajuan;
+
+        DB::beginTransaction();
+        try {
+            $dataPeminjaman = DB::table('pinjamanSertifikat')
+                ->where([
+                    'nomorSurat' => $nomorSuratPengajuan,
+                    'nomorRegister' => $nomorRegisterPengajuan,
+                    'kodeSkpd' => Auth::user()->kd_skpd
+                ])
+                ->first();
+
+            $file = isset($filePengajuan) ? $this->handleFile($filePengajuan, 'Sertifikat', $request) : null;
+
+            if ($dataPeminjaman->statusPengajuan == '0') {
+                DB::table('pinjamanSertifikat')
+                    ->where([
+                        'nomorSurat' => $nomorSuratPengajuan,
+                        'nomorRegister' => $nomorRegisterPengajuan,
+                        'kodeSkpd' => Auth::user()->kd_skpd
+                    ])
+                    ->update([
+                        'statusPengajuan' => '1',
+                        'file' => $file
+                    ]);
+
+                Storage::putFileAs('public/images/Peminjaman/Sertifikat/' . Auth::user()->kd_skpd . '/', $filePengajuan, $file);
+            } else {
+                DB::table('pinjamanSertifikat')
+                    ->where([
+                        'nomorSurat' => $nomorSuratPengajuan,
+                        'nomorRegister' => $nomorRegisterPengajuan,
+                        'kodeSkpd' => Auth::user()->kd_skpd
+                    ])
+                    ->update([
+                        'statusPengajuan' => '0',
+                        'file' => ''
+                    ]);
+
+                unlink(storage_path('app/public/images/Peminjaman/Sertifikat/' . Auth::user()->kd_skpd . '/' . '/' . $dataPeminjaman->file));
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => $dataPeminjaman->statusPengajuan == '0' ? 'Pengajuan berhasil diajukan' : 'Pengajuan berhasil dibatalkan'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => true,
+                'message' => $dataPeminjaman->statusPengajuan == '0' ? 'Pengajuan tidak berhasil diajukan' : 'Pengajuan tidak berhasil dibatalkan'
             ], 500);
         }
     }

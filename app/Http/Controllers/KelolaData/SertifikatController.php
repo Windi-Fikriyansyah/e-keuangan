@@ -41,7 +41,7 @@ class SertifikatController extends Controller
     public function load(Request $request)
     {
         if ($request->ajax()) {
-            $data = MasterSertifikat::select('id','nomorRegister','kodeSkpd', 'nib','nomorSertifikat','tanggalSertifikat','luas','hak', 'createdDate','createdUsername','updatedDate','updatedUsername');
+            $data = MasterSertifikat::select('id','nomorRegister','statusSertifikat','statusPinjam','kodeSkpd', 'nib','nomorSertifikat','tanggalSertifikat','luas','hak', 'createdDate','createdUsername','updatedDate','updatedUsername');
             $search = $request->search;
 
             if ($search) {
@@ -57,10 +57,10 @@ class SertifikatController extends Controller
             ->addColumn('aksi', function ($row) {
 
 
-                $btn = '<a href="' . route("kelola_data.sertifikat.edit", ['no_register' => Crypt::encrypt($row->nomorRegister), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px">Edit</a>';
+                $btn = '<a href="' . route("kelola_data.sertifikat.edit", ['no_register' => Crypt::encrypt($row->nomorRegister), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
 
                 if ($row->statusSertifikat == '0' && $row->statusPinjam == '0') {
-                    $btn .= '<a onclick="hapus(\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger">Delete</a>';
+                    $btn .= '<a onclick="hapus(\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger"><span class="fa-fw select-all fas"></span></a>';
                 }
                 return $btn;
             })

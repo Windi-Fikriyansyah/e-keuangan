@@ -26,7 +26,7 @@ class TambahRequest extends FormRequest
             'namaKsbtgn' => 'required|max:255',
             'nipKsbtgn' => 'required|regex:/^[0-9-]+$/',
             'noTelpKsbtgn' => 'required|regex:/^[0-9-]+$/',
-            'file' => 'required|file|mimes:pdf,doc,docx|max:2048'
+
         ];
     }
 
@@ -44,10 +44,7 @@ class TambahRequest extends FormRequest
             'peruntukan.max' => 'Peruntukan hanya bisa diisi 255 karakter',
             'nipKsbtgn.regex' => 'NIP Ksbtgn hanya bisa diisi angka dan tanda hubung (-)',
             'noTelpKsbtgn.regex' => 'Nomor telepon Ksbtgn hanya bisa diisi angka dan tanda hubung (-)',
-            'file.required' => 'File wajib diunggah',
-            'file.file' => 'Upload harus berupa file',
-            'file.mimes' => 'File harus berupa PDF, DOC, atau DOCX',
-            'file.max' => 'Ukuran file maksimal 2MB',
+
         ];
     }
 }

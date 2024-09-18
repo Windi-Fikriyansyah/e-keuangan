@@ -40,8 +40,8 @@ class AsalUsulTanahController extends Controller
             ->addColumn('aksi', function ($row) {
 
 
-                $btn = '<a href="' . route("kelola_data.asalUsul.edit", Crypt::encrypt($row->id)) . '" class="btn btn-md btn-warning" style="margin-right:4px">Edit</a>';
-                $btn .= '<a href="javascript:void(0)" onclick="hapus(\'' . $row->id . '\')" class="btn btn-md btn-danger">Delete</a>';
+                $btn = '<a href="' . route("kelola_data.asalUsul.edit", Crypt::encrypt($row->id)) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                $btn .= '<a href="javascript:void(0)" onclick="hapus(\'' . $row->id . '\')" class="btn btn-md btn-danger"><span class="fa-fw select-all fas"></span></a>';
                 return $btn;
             })
             ->rawColumns(['aksi'])
