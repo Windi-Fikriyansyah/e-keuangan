@@ -34,6 +34,8 @@
         integrity="sha512-n1PBkhxQLVIma0hnm731gu/40gByOeBjlm5Z/PgwNxhJnyW1wYG8v7gPJDT6jpk0cMHfL8vUGUVjz3t4gXyZYQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+
+        <link rel="stylesheet" href="{{ asset('template/assets/extensions/choices.js/public/assets/styles/choices.css') }}">
     <link rel="stylesheet"
         href="{{ asset('template/assets/extensions/@fortawesome/fontawesome-free/css/all.min.css') }}">
 </head>

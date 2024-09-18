@@ -90,11 +90,29 @@
 
                         </li>
 
-                        <li class="submenu-item  ">
+                        {{-- <li class="submenu-item  ">
                             <a href="{{ route('kelola_data.sertifikat.index') }}" class="submenu-link">Sertifikat</a>
+
+                        </li> --}}
+
+                        <li class="submenu-item">
+                            <a href="{{ route('kelola_data.skpd.index') }}" class="submenu-link">SKPD</a>
 
                         </li>
 
+                        <li class="submenu-item  ">
+                            <a href="{{ route('kelola_data.sertifikat.index') }}" class="submenu-link">SERTIFIKAT</a>
+
+                        </li>
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('kelola_data.master_ttd.index') }}" class="submenu-link">TTD</a>
+
+                        </li>
+                        <li class="submenu-item  ">
+                            <a href="{{ route('kelola_data.asalUsul.index') }}" class="submenu-link">AsalUsul</a>
+
+                        </li>
                     </ul>
                 </li>
 

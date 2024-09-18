@@ -3,6 +3,7 @@
 use App\Http\Controllers\KelolaAkses\PermissionController;
 use App\Http\Controllers\KelolaAkses\RoleController;
 use App\Http\Controllers\KelolaAkses\UserController;
+use App\Http\Controllers\KelolaData\AsalUsulTanahController;
 use App\Http\Controllers\KelolaData\BPKBController;
 use App\Http\Controllers\KelolaData\SertifikatController;
 use App\Http\Controllers\Laporan\BPKBController as LaporanBPKBController;
@@ -12,7 +13,11 @@ use App\Http\Controllers\Peminjaman\SertifikatController as PeminjamanSertifikat
 use App\Http\Controllers\Penyerahan\BPKBController as PenyerahanBPKBController;
 use App\Http\Controllers\Penyerahan\SertifikatController as PenyerahanSertifikatController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\KelolaData\SKPDController;
+use App\Http\Controllers\KelolaData\MasterSertifikatController;
+use App\Http\Controllers\KelolaData\MasterTtdController;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -46,8 +51,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('user', UserController::class);
     Route::post('user/load', [UserController::class, 'load'])->name('user.load');
 
-    // Kelola Data
-    Route::prefix('kelola_data')->as('kelola_data.')->group(function () {
+        // Kelola Data
+        Route::prefix('kelola_data')->as('kelola_data.')->group(function () {
+        // SKPD
+        Route::group(['prefix' => 'skpd'], function () {
+            Route::get('', [SKPDController::class, 'index'])->name('skpd.index');
+            Route::post('load', [SKPDController::class, 'load'])->name('skpd.load');
+            Route::get('create', [SKPDController::class, 'create'])->name('skpd.create');
+            Route::post('store', [SKPDController::class, 'store'])->name('skpd.store');
+            Route::get('edit/{id}', [SKPDController::class, 'edit'])->name('skpd.edit');
+            Route::put('update/{id}', [SKPDController::class, 'update'])->name('skpd.update');
+            Route::delete('/{id}', [SKPDController::class, 'destroy'])->name('skpd.destroy');
+        });
         // BPKB
         Route::prefix('bpkb')->as('bpkb.')
             ->group(function () {
@@ -61,15 +76,45 @@ Route::middleware('auth')->group(function () {
             });
 
         // SERTIFIKAT
-        Route::prefix('sertifikat')->as('sertifikat.')
-            ->group(function () {
-                Route::get('', [SertifikatController::class, 'index'])->name('index');
-                Route::post('load', [SertifikatController::class, 'load'])->name('load');
-                Route::get('create', [SertifikatController::class, 'create'])->name('create');
-                Route::post('store', [SertifikatController::class, 'store'])->name('store');
-                Route::get('edit/{no_register}/{kd_skpd}', [SertifikatController::class, 'edit'])->name('edit');
-                Route::post('update', [SertifikatController::class, 'update'])->name('update');
-                Route::post('delete', [SertifikatController::class, 'delete'])->name('delete');
+        // Route::prefix('sertifikat')->as('sertifikat.')
+        //     ->group(function () {
+        //         Route::get('', [SertifikatController::class, 'index'])->name('index');
+        //         Route::post('load', [SertifikatController::class, 'load'])->name('load');
+        //         Route::get('create', [SertifikatController::class, 'create'])->name('create');
+        //         Route::post('store', [SertifikatController::class, 'store'])->name('store');
+        //         Route::get('edit/{no_register}/{kd_skpd}', [SertifikatController::class, 'edit'])->name('edit');
+        //         Route::post('update', [SertifikatController::class, 'update'])->name('update');
+        //         Route::post('delete', [SertifikatController::class, 'delete'])->name('delete');
+        //     });
+
+            Route::group(['prefix' => 'sertifikat'], function () {
+                Route::get('', [SertifikatController::class, 'index'])->name('sertifikat.index');
+                Route::post('load', [SertifikatController::class, 'load'])->name('sertifikat.load');
+                Route::get('create', [SertifikatController::class, 'create'])->name('sertifikat.create');
+                Route::post('store', [SertifikatController::class, 'store'])->name('sertifikat.store');
+                Route::get('edit/{no_register}/{kd_skpd}', [SertifikatController::class, 'edit'])->name('sertifikat.edit');
+                Route::post('update/{id}', [SertifikatController::class, 'update'])->name('sertifikat.update');
+                Route::delete('/{id}', [SertifikatController::class, 'destroy'])->name('sertifikat.destroy');
+            });
+
+            Route::group(['prefix' => 'master_ttd'], function () {
+                Route::get('', [MasterTtdController::class, 'index'])->name('master_ttd.index');
+                Route::post('load', [MasterTtdController::class, 'load'])->name('master_ttd.load');
+                Route::get('create', [MasterTtdController::class, 'create'])->name('master_ttd.create');
+                Route::post('', [MasterTtdController::class, 'store'])->name('master_ttd.store');
+                Route::get('edit/{id}', [MasterTtdController::class, 'edit'])->name('master_ttd.edit');
+                Route::put('update/{id}', [MasterTtdController::class, 'update'])->name('master_ttd.update');
+                Route::delete('/{id}', [MasterTtdController::class, 'destroy'])->name('master_ttd.destroy');
+            });
+
+            Route::group(['prefix' => 'asalUsul'], function () {
+                Route::get('', [AsalUsulTanahController::class, 'index'])->name('asalUsul.index');
+                Route::post('load', [AsalUsulTanahController::class, 'load'])->name('asalUsul.load');
+                Route::get('create', [AsalUsulTanahController::class, 'create'])->name('asalUsul.create');
+                Route::post('', [AsalUsulTanahController::class, 'store'])->name('asalUsul.store');
+                Route::get('edit/{id}', [AsalUsulTanahController::class, 'edit'])->name('asalUsul.edit');
+                Route::put('update/{id}', [AsalUsulTanahController::class, 'update'])->name('asalUsul.update');
+                Route::delete('/{id}', [AsalUsulTanahController::class, 'destroy'])->name('asalUsul.destroy');
             });
     });
 
@@ -98,9 +143,11 @@ Route::middleware('auth')->group(function () {
                 Route::post('load', [PeminjamanSertifikatController::class, 'load'])->name('load');
                 Route::get('create', [PeminjamanSertifikatController::class, 'create'])->name('create');
                 Route::post('store', [PeminjamanSertifikatController::class, 'store'])->name('store');
-                Route::get('edit/{no_register}/{kd_skpd}', [PeminjamanSertifikatController::class, 'edit'])->name('edit');
+                Route::get('edit/{no_surat}/{kd_skpd}', [PeminjamanSertifikatController::class, 'edit'])->name('edit');
                 Route::post('update', [PeminjamanSertifikatController::class, 'update'])->name('update');
                 Route::post('delete', [PeminjamanSertifikatController::class, 'delete'])->name('delete');
+
+                Route::post('load_sertifikat', [PeminjamanSertifikatController::class, 'loadSertifikat'])->name('load_sertifikat');
             });
     });
 

@@ -9,6 +9,8 @@
 <!-- Need: Apexcharts -->
 {{-- <script src="{{ asset('template/assets/extensions/apexcharts/apexcharts.min.js') }}"></script> --}}
 {{-- <script src="{{ asset('template/assets/static/js/pages/dashboard.js') }}"></script> --}}
+<script src="{{ asset('template/assets/extensions/choices.js/public/assets/scripts/choices.js') }}"></script>
+<script src="{{ asset('template/assets/static/js/pages/form-element-select.js') }}"></script>
 
 
 <script src="{{ asset('template/assets/extensions/jquery/jquery.min.js') }}"></script>
