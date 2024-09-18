@@ -6,6 +6,8 @@ use App\Http\Controllers\KelolaAkses\UserController;
 use App\Http\Controllers\KelolaData\AsalUsulTanahController;
 use App\Http\Controllers\KelolaData\BPKBController;
 use App\Http\Controllers\KelolaData\SertifikatController;
+use App\Http\Controllers\Laporan\BPKBController as LaporanBPKBController;
+use App\Http\Controllers\Laporan\SertifikatController as LaporanSertifikatController;
 use App\Http\Controllers\Peminjaman\BPKBController as PeminjamanBPKBController;
 use App\Http\Controllers\Peminjaman\SertifikatController as PeminjamanSertifikatController;
 use App\Http\Controllers\Penyerahan\BPKBController as PenyerahanBPKBController;
@@ -130,6 +132,8 @@ Route::middleware('auth')->group(function () {
                 Route::post('delete', [PeminjamanBPKBController::class, 'delete'])->name('delete');
 
                 Route::post('load_bpkb', [PeminjamanBPKBController::class, 'loadBpkb'])->name('load_bpkb');
+                Route::get('cetak', [PeminjamanBPKBController::class, 'cetakPeminjaman'])->name('cetak');
+                Route::post('pengajuan', [PeminjamanBPKBController::class, 'pengajuanPeminjaman'])->name('pengajuan');
             });
 
         // SERTIFIKAT
@@ -171,6 +175,21 @@ Route::middleware('auth')->group(function () {
                 Route::get('edit/{no_register}/{kd_skpd}', [PenyerahanSertifikatController::class, 'edit'])->name('edit');
                 Route::post('update', [PenyerahanSertifikatController::class, 'update'])->name('update');
                 Route::post('delete', [PenyerahanSertifikatController::class, 'delete'])->name('delete');
+            });
+    });
+
+    // LAPORAN
+    Route::prefix('laporan')->as('laporan.')->group(function () {
+        // BPKB
+        Route::prefix('bpkb')->as('bpkb.')
+            ->group(function () {
+                Route::get('', [LaporanBPKBController::class, 'index'])->name('index');
+            });
+
+        // SERTIFIKAT
+        Route::prefix('sertifikat')->as('sertifikat.')
+            ->group(function () {
+                Route::get('', [LaporanSertifikatController::class, 'index'])->name('index');
             });
     });
 });

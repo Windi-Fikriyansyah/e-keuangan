@@ -10,13 +10,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
+use PDF;
 
 class BPKBController extends Controller
 {
     public function index()
     {
-        return view('kelola_peminjaman.bpkb.index');
+        $daftarTandaTangan = DB::table('masterTtd')
+            ->where(['kodeSkpd' => Auth::user()->kd_skpd])
+            ->get();
+
+        return view('kelola_peminjaman.bpkb.index', compact('daftarTandaTangan'));
     }
 
     public function load(Request $request)
@@ -32,7 +39,7 @@ class BPKBController extends Controller
 
         // get data from products table
         $query = DB::table('pinjamanBpkb as a')
-            ->select('a.nomorSurat', 'a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd')
+            ->select('a.nomorSurat', 'a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd', 'a.file', 'a.statusPengajuan')
             ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd');
 
         // Search
@@ -53,8 +60,14 @@ class BPKBController extends Controller
 
         return DataTables::of($users)
             ->addColumn('aksi', function ($row) {
-                $btn = '<a href="' . route("peminjaman.bpkb.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px">Edit</a>';
-                $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger">Delete</a>';
+                $btn = '<a href="' . route("peminjaman.bpkb.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                if ($row->statusPengajuan == '0') {
+                    $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                } else {
+                    $btn .= '';
+                }
+                $btn .= '<a onclick="cetak(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                $btn .= '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -141,11 +154,25 @@ class BPKBController extends Controller
                 ->selectRaw("ISNULL(MAX(nomorUrut),0)+1 as nomor")
                 ->first();
 
+            if (Str::length($nomorBaru->nomor) == '1') {
+                $nomor = '00000' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '2') {
+                $nomor = '0000' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '3') {
+                $nomor = '000' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '4') {
+                $nomor = '00' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '5') {
+                $nomor = '0' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '6') {
+                $nomor = $nomorBaru->nomor;
+            }
+
             DB::table('pinjamanBpkb')
                 ->insert([
                     'kodeSkpd' => Auth::user()->kd_skpd,
                     'nomorUrut' => $nomorBaru->nomor,
-                    'nomorSurat' => '000.2.3.2/' . $nomorBaru->nomor . '/BPKAD-Aset',
+                    'nomorSurat' => '000.2.3.2/' . $nomor . '/BPKAD-Aset',
                     'tanggalPinjam' => $request['tanggalPinjam'],
                     'nomorRegister' => $request['nomorRegister'],
                     'nomorPolisi' => $request['nomorPolisi'],
@@ -302,6 +329,121 @@ class BPKBController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Data gagal dihapus!'
+            ], 500);
+        }
+    }
+
+    public function cetakPeminjaman(Request $request)
+    {
+        $nomorSurat = $request->nomorSurat;
+        $nomorRegister = $request->nomorRegister;
+        $tandaTangan = $request->tandaTangan;
+        $tipe = $request->tipe;
+        $kodeSkpd = Auth::user()->kd_skpd;
+
+        $data = [
+            'dataSkpd' => DB::table('masterSkpd')
+                ->select('namaSkpd')
+                ->where(['kodeSkpd' => $kodeSkpd])
+                ->first(),
+            'dataPeminjaman' => DB::table('pinjamanBpkb')
+                ->where([
+                    'nomorSurat' => $nomorSurat,
+                    'nomorRegister' => $nomorRegister,
+                    'kodeSkpd' => $kodeSkpd
+                ])
+                ->first(),
+            'tandaTangan' => DB::table('masterTtd')
+                ->where(['nip' => $tandaTangan])
+                ->first(),
+            'tipe' => $tipe
+        ];
+
+        $view = view('kelola_peminjaman.bpkb.cetak')->with($data);
+
+        if ($tipe == 'layar') {
+            return $view;
+        } else if ($tipe == 'pdf') {
+            $pdf = PDF::loadHtml($view)
+                ->setPaper('legal')
+                ->setOrientation('portrait')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+            return $pdf->stream('FormPeminjamanBPKB.pdf');
+        }
+    }
+
+    public function handleFile($file, $tipeFile, $request)
+    {
+        $extension = $file->extension();
+
+        $name =  $tipeFile . '_' . explode("/", $request->nomorSuratPengajuan)[1] . '_' . Auth::user()->kd_skpd . '_' . date('dmyHis') . '.' . $extension;
+
+        // TIPE FILE => CONTOH TIFE FILE NYA SPM UP
+        // NO SPM => NOMOR URUT SPM
+        // KD SKPD => KODE SKPD SPM
+        // DATE => RANDOM TANGGAL DAN WAKTU
+        // EXTENSION => EXTENSION FILE
+
+        return $name;
+    }
+
+    public function pengajuanPeminjaman(Request $request)
+    {
+        $nomorSuratPengajuan =  $request->nomorSuratPengajuan;
+        $nomorRegisterPengajuan =  $request->nomorRegisterPengajuan;
+        $filePengajuan =  $request->filePengajuan;
+
+        DB::beginTransaction();
+        try {
+            $dataPeminjaman = DB::table('pinjamanBpkb')
+                ->where([
+                    'nomorSurat' => $nomorSuratPengajuan,
+                    'nomorRegister' => $nomorRegisterPengajuan,
+                    'kodeSkpd' => Auth::user()->kd_skpd
+                ])
+                ->first();
+
+            $file = isset($filePengajuan) ? $this->handleFile($filePengajuan, 'BPKB', $request) : null;
+
+            if ($dataPeminjaman->statusPengajuan == '0') {
+                DB::table('pinjamanBpkb')
+                    ->where([
+                        'nomorSurat' => $nomorSuratPengajuan,
+                        'nomorRegister' => $nomorRegisterPengajuan,
+                        'kodeSkpd' => Auth::user()->kd_skpd
+                    ])
+                    ->update([
+                        'statusPengajuan' => '1',
+                        'file' => $file
+                    ]);
+
+                Storage::putFileAs('public/images/Peminjaman/BPKB/' . Auth::user()->kd_skpd . '/', $filePengajuan, $file);
+            } else {
+                DB::table('pinjamanBpkb')
+                    ->where([
+                        'nomorSurat' => $nomorSuratPengajuan,
+                        'nomorRegister' => $nomorRegisterPengajuan,
+                        'kodeSkpd' => Auth::user()->kd_skpd
+                    ])
+                    ->update([
+                        'statusPengajuan' => '0',
+                        'file' => ''
+                    ]);
+
+                unlink(storage_path('app/public/images/Peminjaman/BPKB/' . Auth::user()->kd_skpd . '/' . '/' . $dataPeminjaman->file));
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => $dataPeminjaman->statusPengajuan == '0' ? 'Pengajuan berhasil diajukan' : 'Pengajuan berhasil dibatalkan'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => true,
+                'message' => $dataPeminjaman->statusPengajuan == '0' ? 'Pengajuan tidak berhasil diajukan' : 'Pengajuan tidak berhasil dibatalkan'
             ], 500);
         }
     }
