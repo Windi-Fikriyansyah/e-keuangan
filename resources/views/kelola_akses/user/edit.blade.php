@@ -99,8 +99,7 @@
                                 id="role" data-placeholder="Silahkan Pilih">
                                 <option value="" selected>Silahkan Pilih</option>
                                 @foreach ($daftar_peran as $peran)
-                                    <option value="{{ $peran->uuid }}"
-                                        {{ $data->role == $peran->uuid ? 'selected' : '' }}>
+                                    <option value="{{ $peran->id }}" {{ $data->role == $peran->id ? 'selected' : '' }}>
                                         {{ $peran->name }}</option>
                                 @endforeach
                             </select>
