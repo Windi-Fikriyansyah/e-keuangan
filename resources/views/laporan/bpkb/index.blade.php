@@ -194,12 +194,8 @@
                     <div class="mb-3 row">
                         <div class="col-md-12">
                             <label class="form-label">Tanda Tangan</label>
-                            <select class="form-control select2-rekapPeminjaman" style=" width: 100%;"
-                                id="ttdrekapPeminjaman">
+                            <select class="form-control" style=" width: 100%;" id="ttdrekapPeminjaman">
                                 <option value="" disabled selected>Silahkan Pilih</option>
-                                @foreach ($daftarTtd as $ttd)
-                                    <option value="{{ $ttd->nip }}">{{ $ttd->nama }}</option>
-                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -565,9 +561,46 @@
                 }
             });
 
+            $('#ttdrekapPeminjaman').select2({
+                theme: "bootstrap-5",
+                width: "100%",
+                placeholder: "Silahkan Pilih...",
+                ajax: {
+                    url: "{{ route('laporan.bpkb.tandaTangan') }}",
+                    dataType: 'json',
+                    type: "POST",
+                    data: function(params) {
+                        let query = {
+                            q: $.trim(params.term)
+                        }
+
+                        let kodeSkpd = $('#kd_skpdrekapPeminjaman').val();
+
+                        if (kodeSkpd) query.kodeSkpd = kodeSkpd;
+
+                        return query;
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map((ttd) => {
+                                return {
+                                    text: ttd.nama,
+                                    id: ttd.nip,
+                                };
+                            }),
+                            pagination: {
+                                more: data.current_page < data.last_page,
+                            },
+                        };
+                    },
+                    cache: true
+                }
+            });
+
             $('#kd_skpdrekapPeminjaman').on('select2:select', function() {
                 $('#jenisrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
                 $('#merkrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
+                $('#ttdrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
             }).trigger('select2:select');
 
             $('#jenisrekapPeminjaman').on('select2:select', function() {
@@ -594,6 +627,7 @@
                 $('#tahunrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
                 $('#jenisrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
                 $('#merkrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
+                $('#ttdrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
             });
 
             $('#pilihan_skpdrekapPeminjaman').on('click', function() {
@@ -605,6 +639,7 @@
                 $('#tahunrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
                 $('#jenisrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
                 $('#merkrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
+                $('#ttdrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
             });
 
             $('.cetakrekapPeminjaman').on('click', function() {

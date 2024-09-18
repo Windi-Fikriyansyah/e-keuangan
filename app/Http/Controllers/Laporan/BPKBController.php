@@ -97,6 +97,20 @@ class BPKBController extends Controller
         return response()->json($daftarMerk);
     }
 
+    public function tandaTangan(Request $request)
+    {
+
+        $ttd = DB::table('masterTtd')
+            ->where(function ($query) use ($request) {
+                if ($request->kodeSkpd) {
+                    $query->where('kodeSkpd', $request->kodeSkpd);
+                }
+            })
+            ->get();
+
+        return response()->json($ttd);
+    }
+
     public function cetakRekapBpkb(Request $request)
     {
         $pilihan = $request->pilihan;
