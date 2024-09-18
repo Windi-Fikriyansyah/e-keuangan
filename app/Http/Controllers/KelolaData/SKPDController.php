@@ -65,8 +65,8 @@ class SKPDController extends Controller
 
 
         Skpd::create([
-            'kodeSKPD' => $request->kodeSKPD,
-            'namaSKPD' => $request->namaSKPD,
+            'kodeSkpd' => $request->kodeSKPD,
+            'namaSkpd' => $request->namaSKPD,
         ]);
 
         return redirect()->route('kelola_data.skpd.index')->with('message', 'Data berhasil ditambahkan.');

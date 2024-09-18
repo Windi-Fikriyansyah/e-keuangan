@@ -154,8 +154,8 @@
                         <div class="col-sm-4">
                             <select class="form-control @error('balikNama') is-invalid @enderror" name="balikNama">
                                 <option value="" disabled {{ old('balikNama', $dataSertifikat->balikNama) === null ? 'selected' : '' }}>Pilih Balik Nama</option>
-                                <option value="1" {{ old('balikNama', $dataSertifikat->balikNama) == '1' ? 'selected' : '' }}>Ya</option>
-                                <option value="0" {{ old('balikNama', $dataSertifikat->balikNama) == '0' ? 'selected' : '' }}>Tidak</option>
+                                <option value="1" {{ old('balikNama', $dataSertifikat->balikNama) == '1' ? 'selected' : '' }}>Sudah</option>
+                                <option value="0" {{ old('balikNama', $dataSertifikat->balikNama) == '0' ? 'selected' : '' }}>Belum</option>
                             </select>
 
                             @error('balikNama')

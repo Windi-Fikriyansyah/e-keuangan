@@ -139,9 +139,11 @@ Route::middleware('auth')->group(function () {
                 Route::post('load', [PeminjamanSertifikatController::class, 'load'])->name('load');
                 Route::get('create', [PeminjamanSertifikatController::class, 'create'])->name('create');
                 Route::post('store', [PeminjamanSertifikatController::class, 'store'])->name('store');
-                Route::get('edit/{no_register}/{kd_skpd}', [PeminjamanSertifikatController::class, 'edit'])->name('edit');
+                Route::get('edit/{no_surat}/{kd_skpd}', [PeminjamanSertifikatController::class, 'edit'])->name('edit');
                 Route::post('update', [PeminjamanSertifikatController::class, 'update'])->name('update');
                 Route::post('delete', [PeminjamanSertifikatController::class, 'delete'])->name('delete');
+
+                Route::post('load_sertifikat', [PeminjamanSertifikatController::class, 'loadSertifikat'])->name('load_sertifikat');
             });
     });
 
