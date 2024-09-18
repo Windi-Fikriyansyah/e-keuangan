@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
 
 class BPKBController extends Controller
 {
@@ -84,10 +85,24 @@ class BPKBController extends Controller
                 ->selectRaw("ISNULL(MAX(nomorRegister),0)+1 as nomor")
                 ->first();
 
+            if (Str::length($nomorBaru->nomor) == '1') {
+                $nomor = '00000' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '2') {
+                $nomor = '0000' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '3') {
+                $nomor = '000' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '4') {
+                $nomor = '00' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '5') {
+                $nomor = '0' . $nomorBaru->nomor;
+            } else if (Str::length($nomorBaru->nomor) == '6') {
+                $nomor = $nomorBaru->nomor;
+            }
+
             DB::table('masterBpkb')
                 ->insert([
                     'kodeSkpd' => $request['kodeSkpd'],
-                    'nomorRegister' => $nomorBaru->nomor,
+                    'nomorRegister' => $nomor,
                     'nomorBpkb' => $request['nomorBpkb'],
                     'nomorPolisi' => $request['nomorPolisi'],
                     'namaPemilik' => $request['namaPemilik'],

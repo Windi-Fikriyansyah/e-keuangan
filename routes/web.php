@@ -137,6 +137,11 @@ Route::middleware('auth')->group(function () {
         Route::prefix('bpkb')->as('bpkb.')
             ->group(function () {
                 Route::get('', [LaporanBPKBController::class, 'index'])->name('index');
+                Route::post('tahun', [LaporanBPKBController::class, 'tahun'])->name('tahun');
+                Route::post('jenis', [LaporanBPKBController::class, 'jenis'])->name('jenis');
+                Route::post('merk', [LaporanBPKBController::class, 'merk'])->name('merk');
+                Route::get('cetakRekapBpkb', [LaporanBPKBController::class, 'cetakRekapBpkb'])->name('cetakRekapBpkb');
+                Route::get('cetakRekapPeminjaman', [LaporanBPKBController::class, 'cetakRekapPeminjaman'])->name('cetakRekapPeminjaman');
             });
 
         // SERTIFIKAT
