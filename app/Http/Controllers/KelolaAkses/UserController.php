@@ -74,10 +74,9 @@ class UserController extends Controller
      */
     public function create()
     {
-        $kd_skpd = DB::connection('simakda')
-            ->table('ms_skpd')
-            ->select('kd_skpd', 'nm_skpd')
-            ->orderBy('kd_skpd')
+        $kd_skpd = DB::table('masterSkpd')
+            ->select('kodeSkpd as kd_skpd', 'namaSkpd as nm_skpd')
+            ->orderBy('kodeSkpd')
             ->get();
 
         $daftar_peran = Role::all();
@@ -91,6 +90,7 @@ class UserController extends Controller
     public function store(UserRequest $request)
     {
         DB::beginTransaction();
+
         try {
             $user = User::create([
                 'name' => $request->name,
@@ -99,11 +99,11 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
                 'tipe' => $request->tipe,
                 'status_aktif' => $request->status_aktif,
-                'role' => $request->role,
+                'role' => (int)$request->role,
                 'jabatan' => $request->jabatan,
             ]);
 
-            $user->syncRoles($request->role);
+            $user->syncRoles((int)$request->role);
 
             DB::commit();
             return redirect()
@@ -130,10 +130,9 @@ class UserController extends Controller
     {
         $id = Crypt::decrypt($id);
 
-        $kd_skpd = DB::connection('simakda')
-            ->table('ms_skpd')
-            ->select('kd_skpd', 'nm_skpd')
-            ->orderBy('kd_skpd')
+        $kd_skpd = DB::table('masterSkpd')
+            ->select('kodeSkpd as kd_skpd', 'namaSkpd as nm_skpd')
+            ->orderBy('kodeSkpd')
             ->get();
 
         $data = User::find($id);
@@ -160,11 +159,11 @@ class UserController extends Controller
                     // 'password' => Hash::make($request->password),
                     'tipe' => $request->tipe,
                     'status_aktif' => $request->status_aktif,
-                    'role' => $request->role,
+                    'role' => (int)$request->role,
                     'jabatan' => $request->jabatan,
                 ]);
 
-            $user->syncRoles($request->role);
+            $user->syncRoles((int)$request->role);
 
             DB::commit();
             return redirect()

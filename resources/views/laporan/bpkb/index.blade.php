@@ -6,18 +6,20 @@
     </div>
     <div class="page-content">
         <div class="row">
-            <div class="col-md-6">
-                <div class="card card-info collapsed-card card-outline" id="rekap_bpkb">
-                    <div class="card-body">
-                        {{ 'Rekap Data BPKB' }}
-                        <a class="card-block stretched-link" href="#">
+            @if (Auth::user()->tipe == 'admin')
+                <div class="col-md-6">
+                    <div class="card card-info collapsed-card card-outline" id="rekap_bpkb">
+                        <div class="card-body">
+                            {{ 'Rekap Data BPKB' }}
+                            <a class="card-block stretched-link" href="#">
 
-                        </a>
-                        <i class="fa fa-chevron-right float-end mt-2"></i>
+                            </a>
+                            <i class="fa fa-chevron-right float-end mt-2"></i>
 
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
             <div class="col-md-6">
                 <div class="card card-info collapsed-card card-outline" id="rekap_peminjaman">
                     <div class="card-body">
