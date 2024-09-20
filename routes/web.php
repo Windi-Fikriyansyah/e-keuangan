@@ -197,6 +197,12 @@ Route::middleware('auth')->group(function () {
         Route::prefix('sertifikat')->as('sertifikat.')
             ->group(function () {
                 Route::get('', [LaporanSertifikatController::class, 'index'])->name('index');
+                Route::post('balikNama', [LaporanSertifikatController::class, 'balikNama'])->name('balikNama');
+                Route::post('hak', [LaporanSertifikatController::class, 'hak'])->name('hak');
+                Route::post('asalUsul', [LaporanSertifikatController::class, 'asalUsul'])->name('asalUsul');
+                Route::post('tandaTangan', [LaporanSertifikatController::class, 'tandaTangan'])->name('tandaTangan');
+                Route::get('cetakRekapSertifikat', [LaporanSertifikatController::class, 'cetakRekapSertifikat'])->name('cetakRekapSertifikat');
+                Route::get('cetakRekapPeminjaman', [LaporanSertifikatController::class, 'cetakRekapPeminjaman'])->name('cetakRekapPeminjaman');
             });
     });
 });
