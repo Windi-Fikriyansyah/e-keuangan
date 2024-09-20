@@ -473,9 +473,6 @@
             statusPengajuan == '0' ? $('#AjukanPengajuan').prop('hidden', false) : $('#BatalkanPengajuan').prop('hidden',
                 false);
 
-            console.log(file)
-            console.log(formatFile)
-
             file ? document.getElementById('tampilanFilePengajuan').src = `{{ asset('${formatFile}') }}` : '';
             $('#modalPengajuan').modal('show');
         }

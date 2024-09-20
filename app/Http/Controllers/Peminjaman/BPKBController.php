@@ -394,16 +394,28 @@ class BPKBController extends Controller
         $nomorRegisterPengajuan =  $request->nomorRegisterPengajuan;
         $filePengajuan =  $request->filePengajuan;
 
+        $dataPeminjaman = DB::table('pinjamanBpkb')
+            ->where([
+                'nomorSurat' => $nomorSuratPengajuan,
+                'nomorRegister' => $nomorRegisterPengajuan,
+                'kodeSkpd' => Auth::user()->kd_skpd
+            ])
+            ->first();
+
+        $request->validate([
+            'nomorSuratPengajuan' => 'required',
+            'nomorRegisterPengajuan' => 'required',
+            'filePengajuan' => $dataPeminjaman->statusPengajuan == '0' ? 'required|mimes:pdf|max:5000' : 'nullable',
+        ], [
+            'nomorSuratPengajuan.required' => 'Nomor surat pengajuan tidak boleh kosong',
+            'nomorRegisterPengajuan.required' => 'Nomor register pengajuan tidak boleh kosong',
+            'filePengajuan.required' => 'File pengajuan tidak boleh kosong',
+            'filePengajuan.mimes' => 'File pengajuan wajib PDF',
+            'filePengajuan.max' => 'File pengajuan maksimal 5MB',
+        ]);
+
         DB::beginTransaction();
         try {
-            $dataPeminjaman = DB::table('pinjamanBpkb')
-                ->where([
-                    'nomorSurat' => $nomorSuratPengajuan,
-                    'nomorRegister' => $nomorRegisterPengajuan,
-                    'kodeSkpd' => Auth::user()->kd_skpd
-                ])
-                ->first();
-
             $file = isset($filePengajuan) ? $this->handleFile($filePengajuan, 'BPKB', $request) : null;
 
             if ($dataPeminjaman->statusPengajuan == '0') {
@@ -431,7 +443,7 @@ class BPKBController extends Controller
                         'file' => ''
                     ]);
 
-                unlink(storage_path('app/public/images/Peminjaman/BPKB/' . Auth::user()->kd_skpd . '/' . '/' . $dataPeminjaman->file));
+                unlink(storage_path('app/public/images/Peminjaman/BPKB/' . Auth::user()->kd_skpd . '/' . $dataPeminjaman->file));
             }
 
             DB::commit();
