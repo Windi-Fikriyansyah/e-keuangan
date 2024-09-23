@@ -16,6 +16,12 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KelolaData\SKPDController;
 use App\Http\Controllers\KelolaData\MasterSertifikatController;
 use App\Http\Controllers\KelolaData\MasterTtdController;
+use App\Http\Controllers\VerifikasiAdmin\BPKBController as VerifikasiAdminBPKBController;
+use App\Http\Controllers\VerifikasiAdmin\SertifikatController as VerifikasiAdminSertifikatController;
+use App\Http\Controllers\VerifikasiOperator\BPKBController as VerifikasiOperatorBPKBController;
+use App\Http\Controllers\VerifikasiOperator\SertifikatController as VerifikasiOperatorSertifikatController;
+use App\Http\Controllers\VerifikasiPenyelia\BPKBController as VerifikasiPenyeliaBPKBController;
+use App\Http\Controllers\VerifikasiPenyelia\SertifikatController as VerifikasiPenyeliaSertifikatController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -197,6 +203,55 @@ Route::middleware('auth')->group(function () {
         Route::prefix('sertifikat')->as('sertifikat.')
             ->group(function () {
                 Route::get('', [LaporanSertifikatController::class, 'index'])->name('index');
+            });
+    });
+
+    // VERIFIKASI OPERATOR
+    Route::prefix('verifikasi_operator')->as('verifikasi_operator.')->group(function () {
+        // BPKB
+        Route::prefix('bpkb')->as('bpkb.')
+            ->group(function () {
+                Route::get('', [VerifikasiOperatorBPKBController::class, 'index'])->name('index');
+                Route::post('load', [VerifikasiOperatorBPKBController::class, 'load'])->name('load');
+            });
+
+        // SERTIFIKAT
+        Route::prefix('sertifikat')->as('sertifikat.')
+            ->group(function () {
+                Route::get('', [VerifikasiOperatorSertifikatController::class, 'index'])->name('index');
+                Route::post('load', [VerifikasiOperatorSertifikatController::class, 'load'])->name('load');
+            });
+    });
+
+    Route::prefix('verifikasi_admin')->as('verifikasi_admin.')->group(function () {
+        // BPKB
+        Route::prefix('bpkb')->as('bpkb.')
+            ->group(function () {
+                Route::get('', [VerifikasiAdminBPKBController::class, 'index'])->name('index');
+                Route::post('load', [VerifikasiAdminBPKBController::class, 'load'])->name('load');
+            });
+
+        // SERTIFIKAT
+        Route::prefix('sertifikat')->as('sertifikat.')
+            ->group(function () {
+                Route::get('', [VerifikasiAdminSertifikatController::class, 'index'])->name('index');
+                Route::post('load', [VerifikasiAdminSertifikatController::class, 'load'])->name('load');
+            });
+    });
+
+    Route::prefix('verifikasi_penyelia')->as('verifikasi_penyelia.')->group(function () {
+        // BPKB
+        Route::prefix('bpkb')->as('bpkb.')
+            ->group(function () {
+                Route::get('', [VerifikasiPenyeliaBPKBController::class, 'index'])->name('index');
+                Route::post('load', [VerifikasiPenyeliaBPKBController::class, 'load'])->name('load');
+            });
+
+        // SERTIFIKAT
+        Route::prefix('sertifikat')->as('sertifikat.')
+            ->group(function () {
+                Route::get('', [VerifikasiPenyeliaSertifikatController::class, 'index'])->name('index');
+                Route::post('load', [VerifikasiPenyeliaSertifikatController::class, 'load'])->name('load');
             });
     });
 });
