@@ -156,6 +156,69 @@
                     </ul>
                 </li>
 
+                <li class="sidebar-item  has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>Verifikasi Operator</span>
+                    </a>
+                    <ul class="submenu ">
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('verifikasi_operator.bpkb.index') }}" class="submenu-link">BPKB</a>
+
+                        </li>
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('verifikasi_operator.sertifikat.index') }}"
+                                class="submenu-link">Sertifikat</a>
+
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li class="sidebar-item  has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>Verifikasi Admin</span>
+                    </a>
+                    <ul class="submenu ">
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('verifikasi_admin.bpkb.index') }}" class="submenu-link">BPKB</a>
+
+                        </li>
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('verifikasi_admin.sertifikat.index') }}"
+                                class="submenu-link">Sertifikat</a>
+
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li class="sidebar-item  has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>Verifikasi Penyelia</span>
+                    </a>
+                    <ul class="submenu ">
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('verifikasi_penyelia.bpkb.index') }}" class="submenu-link">BPKB</a>
+
+                        </li>
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('verifikasi_penyelia.sertifikat.index') }}"
+                                class="submenu-link">Sertifikat</a>
+
+                        </li>
+
+                    </ul>
+                </li>
+
             </ul>
         </div>
     </div>
