@@ -25,6 +25,7 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 
+
 <style>
     .readonlyInput {
         background-color: #e9ecef
@@ -41,5 +42,6 @@
         theme: 'bootstrap-5'
     });
 </script>
+
 
 @stack('js')

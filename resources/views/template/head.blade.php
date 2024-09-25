@@ -38,4 +38,6 @@
         <link rel="stylesheet" href="{{ asset('template/assets/extensions/choices.js/public/assets/styles/choices.css') }}">
     <link rel="stylesheet"
         href="{{ asset('template/assets/extensions/@fortawesome/fontawesome-free/css/all.min.css') }}">
+
+
 </head>

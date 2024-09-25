@@ -226,6 +226,9 @@ Route::middleware('auth')->group(function () {
             ->group(function () {
                 Route::get('', [VerifikasiOperatorSertifikatController::class, 'index'])->name('index');
                 Route::post('load', [VerifikasiOperatorSertifikatController::class, 'load'])->name('load');
+                Route::post('verif', [VerifikasiOperatorSertifikatController::class, 'verif'])->name('verif');
+                Route::post('verifikasi_operator', [VerifikasiOperatorSertifikatController::class, 'verifikasi_operator'])->name('verifikasi_operator');
+                Route::post('batalkan', [VerifikasiOperatorSertifikatController::class, 'batalkan'])->name('batalkan');
             });
     });
 
@@ -242,6 +245,9 @@ Route::middleware('auth')->group(function () {
             ->group(function () {
                 Route::get('', [VerifikasiAdminSertifikatController::class, 'index'])->name('index');
                 Route::post('load', [VerifikasiAdminSertifikatController::class, 'load'])->name('load');
+                Route::post('verif', [VerifikasiAdminSertifikatController::class, 'verif'])->name('verif');
+                Route::post('verifikasi_admin', [VerifikasiAdminSertifikatController::class, 'verifikasi_admin'])->name('verifikasi_admin');
+                Route::post('batalkan', [VerifikasiAdminSertifikatController::class, 'batalkan'])->name('batalkan');
             });
     });
 
@@ -258,6 +264,9 @@ Route::middleware('auth')->group(function () {
             ->group(function () {
                 Route::get('', [VerifikasiPenyeliaSertifikatController::class, 'index'])->name('index');
                 Route::post('load', [VerifikasiPenyeliaSertifikatController::class, 'load'])->name('load');
+                Route::post('verif', [VerifikasiPenyeliaSertifikatController::class, 'verif'])->name('verif');
+                Route::post('verifikasi_penyelia', [VerifikasiPenyeliaSertifikatController::class, 'verifikasi_penyelia'])->name('verifikasi_penyelia');
+                Route::post('batalkan', [VerifikasiPenyeliaSertifikatController::class, 'batalkan'])->name('batalkan');
             });
     });
 });
