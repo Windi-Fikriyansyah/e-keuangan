@@ -26,6 +26,7 @@ class TambahRequest extends FormRequest
             'namaPbp' => 'required|max:255',
             'nipPbp' => 'required|integer',
             'nomorTelpPbp' => 'required|integer',
+            'keperluan' => 'required|string|max:5000'
         ];
     }
 
@@ -46,6 +47,8 @@ class TambahRequest extends FormRequest
             'nipPbp.integer' => 'NIP Pengurus Barang Pengguna hanya bisa diisi angka',
             'nomorTelpPbp.required' => 'Nomor telepon Pengurus Barang Pengguna wajib diisi',
             'nomorTelpPbp.integer' => 'Nomor telepon Pengurus Barang Pengguna hanya bisa diisi angka',
+            'keperluan.required' => 'Keperluan wajib diisi',
+            'keperluan.max' => 'Keperluan hanya bisa diisi 5000 abjad',
         ];
     }
 }

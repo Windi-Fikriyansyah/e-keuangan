@@ -41,6 +41,18 @@
         dropdownParent: $('#modal_cetak .modal-content'),
         theme: 'bootstrap-5'
     });
+
+    function tanggalIndonesia(date) {
+        const event = new Date(date);
+        const options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        };
+
+        return event.toLocaleDateString('id-ID', options)
+    }
 </script>
 
 

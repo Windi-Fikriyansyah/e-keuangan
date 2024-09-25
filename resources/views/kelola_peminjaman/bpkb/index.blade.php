@@ -460,7 +460,7 @@
             $('#modalCetak').modal('show');
         }
 
-        function pengajuan(nomorSurat, nomorRegister, kodeSkpd, file, statusPengajuan) {
+        function pengajuan(nomorSurat, nomorRegister, kodeSkpd, file, statusPengajuan, statusVerifikasiOperator) {
             $('#nomorSuratPengajuan').val(nomorSurat);
             $('#nomorRegisterPengajuan').val(nomorRegister);
             $('#statusPengajuan').val(statusPengajuan);
@@ -470,8 +470,14 @@
 
             const formatFile = `storage/images/Peminjaman/BPKB/${kodeSkpd}/${file}`;
 
-            statusPengajuan == '0' ? $('#AjukanPengajuan').prop('hidden', false) : $('#BatalkanPengajuan').prop('hidden',
-                false);
+            // statusPengajuan == '0' ? $('#AjukanPengajuan').prop('hidden', false) : $('#BatalkanPengajuan').prop('hidden',
+            //     false);
+
+            if (statusPengajuan == '0') {
+                $('#AjukanPengajuan').prop('hidden', false)
+            } else if (statusPengajuan == '1' && statusVerifikasiOperator != '1') {
+                $('#BatalkanPengajuan').prop('hidden', false)
+            }
 
             file ? document.getElementById('tampilanFilePengajuan').src = `{{ asset('${formatFile}') }}` : '';
             $('#modalPengajuan').modal('show');

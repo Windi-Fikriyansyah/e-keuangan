@@ -219,6 +219,7 @@ Route::middleware('auth')->group(function () {
             ->group(function () {
                 Route::get('', [VerifikasiOperatorBPKBController::class, 'index'])->name('index');
                 Route::post('load', [VerifikasiOperatorBPKBController::class, 'load'])->name('load');
+                Route::post('verifikasi', [VerifikasiOperatorBPKBController::class, 'verifikasi'])->name('verifikasi');
             });
 
         // SERTIFIKAT

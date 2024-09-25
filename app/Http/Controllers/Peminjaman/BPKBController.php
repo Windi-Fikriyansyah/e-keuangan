@@ -39,7 +39,7 @@ class BPKBController extends Controller
 
         // get data from products table
         $query = DB::table('pinjamanBpkb as a')
-            ->select('a.nomorSurat', 'a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd', 'a.file', 'a.statusPengajuan')
+            ->select('a.nomorSurat', 'a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd', 'a.file', 'a.statusPengajuan', 'statusVerifikasiOperator')
             ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd');
 
         // Search
@@ -67,7 +67,7 @@ class BPKBController extends Controller
                     $btn .= '';
                 }
                 $btn .= '<a onclick="cetak(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
-                $btn .= '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
+                $btn .= '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\',\'' . $row->statusVerifikasiOperator . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -186,6 +186,7 @@ class BPKBController extends Controller
                     'createdUsername' => Auth::user()->name,
                     'updatedDate' => date('Y-m-d H:i:s'),
                     'updatedUsername' => Auth::user()->name,
+                    'keperluan' => $request['keperluan']
                 ]);
 
             DB::table('masterBpkb')
@@ -253,6 +254,7 @@ class BPKBController extends Controller
                     'nomorTelpPbp' => $request['nomorTelpPbp'],
                     'updatedDate' => date('Y-m-d H:i:s'),
                     'updatedUsername' => Auth::user()->name,
+                    'keperluan' => $request['keperluan']
                 ]);
 
             DB::commit();

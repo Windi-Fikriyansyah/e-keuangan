@@ -258,6 +258,16 @@
                             @enderror
                         </div>
                     </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Keperluan</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control @error('keperluan') is-invalid @enderror" type="text" name="keperluan"
+                                placeholder="Isi keperluan peminjaman BPKB">{{ $dataPinjam->keperluan }}</textarea>
+                            @error('keperluan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
                     <div class="mb-3 text-end">
                         @if ($dataPinjam->statusPengajuan == '0')
                             <button class="btn btn-primary" type="submit">Simpan</button>
