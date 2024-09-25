@@ -239,6 +239,7 @@ Route::middleware('auth')->group(function () {
             ->group(function () {
                 Route::get('', [VerifikasiAdminBPKBController::class, 'index'])->name('index');
                 Route::post('load', [VerifikasiAdminBPKBController::class, 'load'])->name('load');
+                Route::post('verifikasi', [VerifikasiAdminBPKBController::class, 'verifikasi'])->name('verifikasi');
             });
 
         // SERTIFIKAT
