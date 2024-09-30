@@ -219,6 +219,46 @@
                     </ul>
                 </li>
 
+                <li class="sidebar-item  has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>BAST</span>
+                    </a>
+                    <ul class="submenu ">
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('bast.bpkb.index') }}" class="submenu-link">BPKB</a>
+
+                        </li>
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('bast.sertifikat.index') }}" class="submenu-link">Sertifikat</a>
+
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li class="sidebar-item  has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>Pengembalian</span>
+                    </a>
+                    <ul class="submenu ">
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('pengembalian.bpkb.index') }}" class="submenu-link">BPKB</a>
+
+                        </li>
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('pengembalian.sertifikat.index') }}"
+                                class="submenu-link">Sertifikat</a>
+
+                        </li>
+
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>

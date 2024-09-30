@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\BAST\BPKBController as BASTBPKBController;
+use App\Http\Controllers\BAST\SertifikatController as BASTSertifikatController;
 use App\Http\Controllers\KelolaAkses\PermissionController;
 use App\Http\Controllers\KelolaAkses\RoleController;
 use App\Http\Controllers\KelolaAkses\UserController;
@@ -16,6 +18,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KelolaData\SKPDController;
 use App\Http\Controllers\KelolaData\MasterSertifikatController;
 use App\Http\Controllers\KelolaData\MasterTtdController;
+use App\Http\Controllers\Pengembalian\BPKBController as PengembalianBPKBController;
+use App\Http\Controllers\Pengembalian\SertifikatController as PengembalianSertifikatController;
 use App\Http\Controllers\VerifikasiAdmin\BPKBController as VerifikasiAdminBPKBController;
 use App\Http\Controllers\VerifikasiAdmin\SertifikatController as VerifikasiAdminSertifikatController;
 use App\Http\Controllers\VerifikasiOperator\BPKBController as VerifikasiOperatorBPKBController;
@@ -270,6 +274,38 @@ Route::middleware('auth')->group(function () {
                 Route::post('verif', [VerifikasiPenyeliaSertifikatController::class, 'verif'])->name('verif');
                 Route::post('verifikasi_penyelia', [VerifikasiPenyeliaSertifikatController::class, 'verifikasi_penyelia'])->name('verifikasi_penyelia');
                 Route::post('batalkan', [VerifikasiPenyeliaSertifikatController::class, 'batalkan'])->name('batalkan');
+            });
+    });
+
+    Route::prefix('bast')->as('bast.')->group(function () {
+        // BPKB
+        Route::prefix('bpkb')->as('bpkb.')
+            ->group(function () {
+                Route::get('', [BASTBPKBController::class, 'index'])->name('index');
+                Route::post('load', [BASTBPKBController::class, 'load'])->name('load');
+            });
+
+        // SERTIFIKAT
+        Route::prefix('sertifikat')->as('sertifikat.')
+            ->group(function () {
+                Route::get('', [BASTSertifikatController::class, 'index'])->name('index');
+                Route::post('load', [BASTSertifikatController::class, 'load'])->name('load');
+            });
+    });
+
+    Route::prefix('pengembalian')->as('pengembalian.')->group(function () {
+        // BPKB
+        Route::prefix('bpkb')->as('bpkb.')
+            ->group(function () {
+                Route::get('', [PengembalianBPKBController::class, 'index'])->name('index');
+                Route::post('load', [PengembalianBPKBController::class, 'load'])->name('load');
+            });
+
+        // SERTIFIKAT
+        Route::prefix('sertifikat')->as('sertifikat.')
+            ->group(function () {
+                Route::get('', [PengembalianSertifikatController::class, 'index'])->name('index');
+                Route::post('load', [PengembalianSertifikatController::class, 'load'])->name('load');
             });
     });
 });
