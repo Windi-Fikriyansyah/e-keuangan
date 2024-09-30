@@ -219,6 +219,27 @@
                     </ul>
                 </li>
 
+                <li class="sidebar-item  has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>Verifikasi Bast</span>
+                    </a>
+                    <ul class="submenu ">
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('verifikasi_penyelia.bpkb.index') }}" class="submenu-link">BPKB</a>
+
+                        </li>
+
+                        <li class="submenu-item  ">
+                            <a href="{{ route('verifikasi_bast.sertifikat.index') }}"
+                                class="submenu-link">Sertifikat</a>
+
+                        </li>
+
+                    </ul>
+                </li>
+
             </ul>
         </div>
     </div>

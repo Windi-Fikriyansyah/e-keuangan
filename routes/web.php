@@ -22,6 +22,8 @@ use App\Http\Controllers\VerifikasiOperator\BPKBController as VerifikasiOperator
 use App\Http\Controllers\VerifikasiOperator\SertifikatController as VerifikasiOperatorSertifikatController;
 use App\Http\Controllers\VerifikasiPenyelia\BPKBController as VerifikasiPenyeliaBPKBController;
 use App\Http\Controllers\VerifikasiPenyelia\SertifikatController as VerifikasiPenyeliaSertifikatController;
+use App\Http\Controllers\VerifikasiBast\SertifikatController as VerifikasiBastSertifikatController;
+
 use Illuminate\Support\Facades\Route;
 
 
@@ -270,6 +272,26 @@ Route::middleware('auth')->group(function () {
                 Route::post('verif', [VerifikasiPenyeliaSertifikatController::class, 'verif'])->name('verif');
                 Route::post('verifikasi_penyelia', [VerifikasiPenyeliaSertifikatController::class, 'verifikasi_penyelia'])->name('verifikasi_penyelia');
                 Route::post('batalkan', [VerifikasiPenyeliaSertifikatController::class, 'batalkan'])->name('batalkan');
+            });
+    });
+
+    Route::prefix('verifikasi_bast')->as('verifikasi_bast.')->group(function () {
+        // BPKB
+        Route::prefix('bpkb')->as('bpkb.')
+            ->group(function () {
+                Route::get('', [VerifikasiPenyeliaBPKBController::class, 'index'])->name('index');
+                Route::post('load', [VerifikasiPenyeliaBPKBController::class, 'load'])->name('load');
+                Route::post('verifikasi', [VerifikasiPenyeliaBPKBController::class, 'verifikasi'])->name('verifikasi');
+            });
+
+        // SERTIFIKAT
+        Route::prefix('sertifikat')->as('sertifikat.')
+            ->group(function () {
+                Route::get('', [VerifikasiBastSertifikatController::class, 'index'])->name('index');
+                Route::post('load', [VerifikasiBastSertifikatController::class, 'load'])->name('load');
+                Route::post('verif', [VerifikasiBastSertifikatController::class, 'verif'])->name('verif');
+                Route::post('verifikasi_bast', [VerifikasiBastSertifikatController::class, 'verifikasi_bast'])->name('verifikasi_bast');
+                Route::post('batalkan', [VerifikasiBastSertifikatController::class, 'batalkan'])->name('batalkan');
             });
     });
 });
