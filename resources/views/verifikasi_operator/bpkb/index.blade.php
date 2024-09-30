@@ -168,6 +168,14 @@
                         data.search = $('input[type="search"]').val();
                     }
                 },
+                createdRow: function(row, data, index) {
+                    if (data.statusVerifikasiOperator == "1" && data.statusVerifAdmin != "1") {
+                        $(row).css("background-color", "#90EE90");
+                    } else if (data.statusVerifikasiOperator == "1" && data.statusVerifAdmin ==
+                        "1") {
+                        $(row).css("background-color", "#ADD8E6");
+                    }
+                },
                 pageLength: 10,
                 searching: true,
                 columns: [{
@@ -277,6 +285,9 @@
                         tanggalVerifikasi: tanggalVerifikasi,
                         tipe: 'setuju',
                     },
+                    beforeSend: function() {
+                        $("#overlay").fadeIn(100);
+                    },
                     success: function(response) {
                         Swal.fire({
                             title: "Berhasil!",
@@ -313,6 +324,9 @@
                             icon: "error"
                         });
                     },
+                    complete: function(data) {
+                        $("#overlay").fadeOut(100);
+                    }
                 });
             });
 
@@ -333,6 +347,9 @@
                         _token: '{{ csrf_token() }}',
                         selectedData: selectedData,
                         tipe: 'batal',
+                    },
+                    beforeSend: function() {
+                        $("#overlay").fadeIn(100);
                     },
                     success: function(response) {
                         Swal.fire({
@@ -370,6 +387,9 @@
                             icon: "error"
                         });
                     },
+                    complete: function(data) {
+                        $("#overlay").fadeOut(100);
+                    }
                 });
             });
         });

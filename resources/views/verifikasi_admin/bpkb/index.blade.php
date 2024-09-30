@@ -173,6 +173,14 @@
                         data.search = $('input[type="search"]').val();
                     }
                 },
+                createdRow: function(row, data, index) {
+                    if (data.statusVerifAdmin == "1" && data.statusVerifPenyelia != "1") {
+                        $(row).css("background-color", "#90EE90");
+                    } else if (data.statusVerifAdmin == "1" && data.statusVerifPenyelia ==
+                        "1") {
+                        $(row).css("background-color", "#ADD8E6");
+                    }
+                },
                 pageLength: 10,
                 searching: true,
                 columns: [{
