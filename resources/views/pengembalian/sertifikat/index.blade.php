@@ -197,7 +197,10 @@
                     $('#nipKsbtgn').text(data.nipKsbtgn);
                     $('#noTelpKsbtgn').text(data.noTelpKsbtgn);
 
-                     if (data.statusPengembalian == 1) {
+                    if (data.statusBast == 1) {
+                        $('#VerifPenyelia').addClass('d-none');
+                        $('#BatalkanVerif').addClass('d-none');
+                    } else if (data.statusVerifPenyelia == 1) {
                         $('#VerifPenyelia').addClass('d-none');
                         $('#BatalkanVerif').removeClass('d-none');
                     } else {
