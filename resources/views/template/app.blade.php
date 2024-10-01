@@ -4,6 +4,11 @@
 @include('template.head')
 
 <body>
+    <div id="overlay">
+        <div class="cv-spinner">
+            <span class="spinner"></span>
+        </div>
+    </div>
     <script src="{{ asset('template/assets/static/js/initTheme.js') }}"></script>
 
     <div id="app">

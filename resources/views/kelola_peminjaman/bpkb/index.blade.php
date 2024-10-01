@@ -179,6 +179,13 @@
                 },
                 pageLength: 10,
                 searching: true,
+                createdRow: function(row, data, index) {
+                    if (data.statusPengajuan == "1" && data.statusVerifikasiOperator != "1") {
+                        $(row).css("background-color", "#90EE90");
+                    } else if (data.statusPengajuan == "1" && data.statusVerifikasiOperator == "1") {
+                        $(row).css("background-color", "#ADD8E6");
+                    }
+                },
                 columns: [{
                         data: 'nomorSurat',
                     }, {
@@ -251,63 +258,6 @@
                 window.open(url.toString(), "_blank");
             });
 
-            // $('.pengajuan').on('click', function() {
-            //     let tipe = $(this).data('tipe');
-            //     let nomorSuratPengajuan = $("#nomorSuratPengajuan").val();
-            //     let nomorRegisterPengajuan = $("#nomorRegisterPengajuan").val();
-            //     let filePengajuan = $("#filePengajuan")[0].files[0];
-
-            //     console.log(filePengajuan)
-
-            //     if (!nomorSuratPengajuan) {
-            //         Swal.fire({
-            //             title: "Peringatan!",
-            //             text: "Nomor surat tidak boleh kosong",
-            //             icon: "warning"
-            //         });
-            //         return;
-            //     }
-
-            //     if (!nomorRegisterPengajuan) {
-            //         Swal.fire({
-            //             title: "Peringatan!",
-            //             text: "Nomor register tidak boleh kosong",
-            //             icon: "warning"
-            //         });
-            //         return;
-            //     }
-
-            //     if (!filePengajuan) {
-            //         Swal.fire({
-            //             title: "Peringatan!",
-            //             text: "File Pengajuan tidak boleh kosong",
-            //             icon: "warning"
-            //         });
-            //         return;
-            //     }
-
-            //     $.ajax({
-            //         url: "{{ route('peminjaman.bpkb.pengajuan') }}",
-            //         type: "POST",
-            //         enctype: 'multipart/form-data',
-            //         data: {
-            //             _token: '{{ csrf_token() }}',
-            //             nomorSuratPengajuan: nomorSuratPengajuan,
-            //             nomorRegisterPengajuan: nomorRegisterPengajuan,
-            //             filePengajuan: JSON.stringify(filePengajuan),
-            //             tipe: tipe,
-            //         },
-            //         success: function(response) {},
-            //         error: function(e) {
-            //             swalWithBootstrapButtons.fire({
-            //                 title: "Gagal!",
-            //                 text: e.responseJSON.message,
-            //                 icon: "error"
-            //             });
-            //         },
-            //     });
-            // });
-
             $('#formPengajuan').on('submit', function(e) {
                 e.preventDefault();
 
@@ -359,6 +309,9 @@
                     data: formData,
                     processData: false,
                     contentType: false,
+                    beforeSend: function() {
+                        $("#overlay").fadeIn(100);
+                    },
                     success: function(response) {
                         Swal.fire({
                             title: "Berhasil!",
@@ -380,6 +333,9 @@
                             icon: "error"
                         });
                     },
+                    complete: function(data) {
+                        $("#overlay").fadeOut(100);
+                    }
                 });
             })
         });

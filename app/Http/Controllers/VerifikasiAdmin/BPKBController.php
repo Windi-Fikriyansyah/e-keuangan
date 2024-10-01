@@ -63,6 +63,22 @@ class BPKBController extends Controller
         $tanggalVerifikasi = $request->tanggalVerifikasi;
         $tipe = $request->tipe;
 
+        $dataPeminjaman = DB::table('pinjamanBpkb')
+            ->where([
+                'nomorSurat' => $selectedData['nomorSurat'],
+                'nomorRegister' => $selectedData['nomorRegister'],
+                'kodeSkpd' => $selectedData['kodeSkpd']
+            ])
+            ->first();
+
+        // CEK TELAH VERIFIKASI PENYELIA
+        if ($dataPeminjaman->statusVerifPenyelia == '1') {
+            return response()->json([
+                'status' => true,
+                'message' => 'Batal Verifikasi tidak dapat dilakukan, data telah diverifikasi oleh penyelia! Silahkan refresh!'
+            ], 500);
+        }
+
         DB::beginTransaction();
         try {
             DB::table('pinjamanBpkb')

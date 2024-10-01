@@ -88,15 +88,15 @@
                   <td id="peruntukan"></td>
                 </tr>
                 <tr>
-                  <th>Nama KSBTGN</th>
+                  <th>Nama Kepala Sub Bagian Tata Guna Tanah</th>
                   <td id="namaKsbtgn"></td>
                 </tr>
                 <tr>
-                  <th>NIP KSBTGN</th>
+                  <th>NIP Kepala Sub Bagian Tata Guna Tanah</th>
                   <td id="nipKsbtgn"></td>
                 </tr>
                 <tr>
-                  <th>No. Telp KSBTGN</th>
+                  <th>No. Telp Kepala Sub Bagian Tata Guna Tanah</th>
                   <td id="noTelpKsbtgn"></td>
                 </tr>
               </table>

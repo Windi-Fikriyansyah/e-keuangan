@@ -1,8 +1,8 @@
 @extends('template.app')
-@section('title', 'Verifikasi Bast Sertifikat')
+@section('title', 'Pengembalian Sertifikat')
 @section('content')
     <div class="page-heading">
-        <h3>Verifikasi Bast Sertifikat</h3>
+        <h3>Pengembalian Sertifikat</h3>
     </div>
     <div class="page-content">
         @if (session('message'))
@@ -44,18 +44,13 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="verifModalLabel">Verifikasi Pinjaman Sertifikat</h5>
+              <h5 class="modal-title" id="verifModalLabel">Pengembalian Sertifikat</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#verifModal').modal('hide');">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div class="modal-body">
               <table class="table table-bordered">
-                <tr>
-                    <th>Nomor Bast</th>
-                    <td id="nomorBast">Terisi Otomatis</td>
-                  </tr>
-                <tr>
                 <tr>
                     <th>Nomor Surat</th>
                     <td id="nomorSurat"></td>
@@ -109,7 +104,7 @@
             <div class="modal-footer">
                 <div class="row mb-3">
                     <div class="col-md-12 text-center">
-                        <button type="button" class="btn btn-success ms-1" id="VerifBast">
+                        <button type="button" class="btn btn-success ms-1" id="VerifPenyelia">
                             <i class="bx bx-check d-block d-sm-none"></i>
                             <span class="d-none d-sm-block">Verifikasi</span>
                         </button>
@@ -147,7 +142,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('bast.sertifikat.load') }}",
+                    url: "{{ route('pengembalian.sertifikat.load') }}",
                     type: "POST",
                     data: function(data) {
                         data.search = data.search.value;
@@ -182,7 +177,7 @@
 
         function verif(nomorSurat) {
             $.ajax({
-                url: '{{ route("bast.sertifikat.verif") }}',
+                url: '{{ route("pengembalian.sertifikat.verif") }}',
                 type: 'POST',
                 data: {
                     nomorSurat: nomorSurat,
@@ -202,14 +197,11 @@
                     $('#nipKsbtgn').text(data.nipKsbtgn);
                     $('#noTelpKsbtgn').text(data.noTelpKsbtgn);
 
-                    if (data.statusPengembalian == 1) {
-                        $('#VerifBast').addClass('d-none');
-                        $('#BatalkanVerif').addClass('d-none');
-                    } else if (data.statusBast == 1) {
-                        $('#VerifBast').addClass('d-none');
+                     if (data.statusPengembalian == 1) {
+                        $('#VerifPenyelia').addClass('d-none');
                         $('#BatalkanVerif').removeClass('d-none');
                     } else {
-                        $('#VerifBast').removeClass('d-none');
+                        $('#VerifPenyelia').removeClass('d-none');
                         $('#BatalkanVerif').addClass('d-none');
                     }
 
@@ -222,17 +214,18 @@
             });
         }
 
-        $('#VerifBast').on('click', function() {
+        $('#VerifPenyelia').on('click', function() {
             var nomorSurat = $('#nomorSurat').text();
+
             $.ajax({
-                url: '{{ route("bast.sertifikat.verifikasi_bast") }}',
+                url: '{{ route("pengembalian.sertifikat.pengembalian") }}',
                 type: 'POST',
                 data: {
                     nomorSurat: nomorSurat,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(data) {
-                    $('#VerifBast').addClass('d-none');
+                    $('#VerifPenyelia').addClass('d-none');
                     $('#BatalkanVerif').removeClass('d-none');
 
                     Swal.fire({
@@ -256,7 +249,7 @@
             var nomorSurat = $('#nomorSurat').text();
 
             $.ajax({
-                url: '{{ route("bast.sertifikat.batalkan") }}',
+                url: '{{ route("pengembalian.sertifikat.batalkan") }}',
                 type: 'POST',
                 data: {
                     nomorSurat: nomorSurat,
@@ -264,7 +257,7 @@
                 },
                 success: function(data) {
                     $('#BatalkanVerif').addClass('d-none');
-                    $('#VerifBast').removeClass('d-none');
+                    $('#VerifPenyelia').removeClass('d-none');
 
                     Swal.fire({
                         icon: 'warning',

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\VerifikasiBast;
+namespace App\Http\Controllers\Pengembalian;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -13,7 +13,7 @@ class SertifikatController extends Controller
 {
     public function index()
     {
-        return view('verifikasi_bast.sertifikat.index');
+        return view('pengembalian.sertifikat.index');
     }
 
     public function load(Request $request)
@@ -22,7 +22,7 @@ class SertifikatController extends Controller
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
         ->select('a.nomorSurat', 'a.nomorRegister','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSertifikat', 'a.statusPengajuan', 'a.NIB', 'a.file', 'a.kodeSkpd', 'b.namaSkpd')
         ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd')
-        ->where('a.statusVerifPenyelia', 1);
+        ->where('a.statusBast', 1);
 
 
         $search = $request->search;
@@ -47,7 +47,7 @@ class SertifikatController extends Controller
         ->take($request->input('length'))
         ->get();
     $totalData = DB::table('pinjamanSertifikat')
-        ->where('statusVerifPenyelia', 1)
+        ->where('statusBast', 1)
         ->count();
 
 
@@ -74,7 +74,7 @@ class SertifikatController extends Controller
         $nomorSurat = $request->input('nomorSurat');
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn', 'a.noTelpKsbtgn')
+            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.statusPengembalian','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn', 'a.noTelpKsbtgn')
             ->where('a.nomorSurat', $nomorSurat)
             ->first();
 
@@ -102,11 +102,9 @@ class SertifikatController extends Controller
             throw $e;
         }
     }
-    public function verifikasi_bast(Request $request)
+    public function pengembalian(Request $request)
     {
 
-        $nomorUrutBast = $this->generateNomorUrut();
-        $nomorBast = '000.2.3.2/' . $nomorUrutBast . '/BAST/BPKAD-Aset';
         $validated = $request->validate([
             'nomorSurat' => 'required|string',
 
@@ -115,10 +113,8 @@ class SertifikatController extends Controller
         DB::table('pinjamanSertifikat')
             ->where('nomorSurat', $validated['nomorSurat'])
             ->update([
-                'statusBast' => 1,
-                'nomorBast' => $nomorBast,
-                'nomorUrutBast' => $nomorUrutBast,
-                'tanggalBast' => now()->setTimezone('Asia/Jakarta')
+                'statusPengembalian' => 1,
+                'tanggalPengembalian' => now()->setTimezone('Asia/Jakarta')
             ]);
 
         return response()->json(['success' => true]);
@@ -132,7 +128,7 @@ class SertifikatController extends Controller
 
         DB::table('pinjamanSertifikat')
         ->where('nomorSurat', $validated['nomorSurat'])
-        ->update(['statusBast' => 0]);
+        ->update(['statusPengembalian' => 0]);
 
         return response()->json(['success' => true]);
     }

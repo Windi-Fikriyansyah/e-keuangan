@@ -404,6 +404,14 @@ class BPKBController extends Controller
             ])
             ->first();
 
+        // CEK TELAH VERIFIKASI OPERATOR
+        if ($dataPeminjaman->statusVerifikasiOperator == '1') {
+            return response()->json([
+                'status' => true,
+                'message' => 'Peminjaman tidak dapat dibatalkan, data telah diverifikasi oleh operator! Silahkan refresh!'
+            ], 500);
+        }
+
         $request->validate([
             'nomorSuratPengajuan' => 'required',
             'nomorRegisterPengajuan' => 'required',
