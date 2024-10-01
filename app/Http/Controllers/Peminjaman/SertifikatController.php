@@ -305,12 +305,30 @@ class SertifikatController extends Controller
     {
         DB::beginTransaction();
         try {
+           $dataPinjaman = DB::table('pinjamanSertifikat')
+            ->where([
+                'nomorSurat' => $request->nomorSurat,
+                'kodeSkpd' => $request->kodeSkpd
+            ])
+            ->lockForUpdate()
+            ->first();
+
+
             DB::table('pinjamanSertifikat')
                 ->where([
                     'nomorSurat' => $request->nomorSurat,
                     'kodeSkpd' => $request->kodeSkpd
                 ])
-                ->lockForUpdate()
+                ->delete();
+
+
+            $pinjamanSebelumnya = DB::table('pinjamanSertifikat')
+                ->where([
+                    'nomorRegister' => $dataPinjaman->nomorRegister,
+                    'kodeSkpd' => $dataPinjaman->kodeSkpd,
+                ])
+                ->where('nomorUrut', '<', $dataPinjaman->nomorUrut)
+                ->orderByDesc('nomorUrut')
                 ->first();
 
             DB::table('pinjamanSertifikat')
@@ -345,6 +363,16 @@ class SertifikatController extends Controller
                         'statusSertifikat' => '0'
                     ]);
             }
+
+            DB::table('pinjamanSertifikat')
+                ->where([
+                    'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
+                    'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
+                    'kodeSkpd' => $pinjamanSebelumnya->kodeSkpd,
+                ])
+                ->update([
+                    'statusPinjamLagi' => '0'
+                ]);
 
             DB::commit();
             return response()->json([
