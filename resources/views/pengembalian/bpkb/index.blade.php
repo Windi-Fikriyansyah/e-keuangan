@@ -1,8 +1,8 @@
 @extends('template.app')
-@section('title', 'Verifikasi Penyelia')
+@section('title', 'Pengembalian BPKB')
 @section('content')
     <div class="page-heading">
-        <h3>Verifikasi Penyelia</h3>
+        <h3>Pengembalian BPKB</h3>
     </div>
     <div class="page-content">
         @if (session('message'))
@@ -24,10 +24,10 @@
                     <table class="table align-middle mb-0" id="bpkb" style="width: 100%">
                         <thead>
                             <tr>
+                                <th>Tanggal Kembali</th>
+                                <th>Nomor BAST</th>
+                                <th>Tanggal BAST</th>
                                 <th>Nomor Surat</th>
-                                <th>Nomor Register</th>
-                                <th>Nomor BPKB</th>
-                                <th>Nomor Polisi</th>
                                 <th>SKPD</th>
                                 <th>Aksi</th>
                             </tr>
@@ -45,21 +45,21 @@
         <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalScrollableTitle">Verifikasi Peminjaman BPKB</h5>
+                    <h5 class="modal-title" id="exampleModalScrollableTitle">Pengembalian Peminjaman BPKB</h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <i data-feather="x"></i>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Tanggal Verifikasi</label>
+                        <label class="col-sm-2 col-form-label">Tanggal Pengembalian</label>
                         <div class="col-sm-4">
-                            <input class="form-control" id="tanggalVerifikasi" name="tanggalVerifikasi" type="date">
+                            <input class="form-control" id="tanggalPengembalian" name="tanggalPengembalian" type="date">
                         </div>
-                        <label class="col-sm-2 col-form-label">Tanggal Ver. Admin</label>
+                        <label class="col-sm-2 col-form-label">Tanggal BAST</label>
                         <div class="col-sm-4">
-                            <input class="form-control readonlyInput" id="tanggalVerifikasiAdmin"
-                                name="tanggalVerifikasiAdmin" type="text" readonly>
+                            <input class="form-control readonlyInput" id="tanggalBast" name="tanggalBast" type="text"
+                                readonly>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -68,9 +68,9 @@
                             <input class="form-control readonlyInput" id="nomorSurat" name="nomorSurat" type="text"
                                 readonly>
                         </div>
-                        <label class="col-sm-2 col-form-label">Tanggal Pinjam</label>
+                        <label class="col-sm-2 col-form-label">Nomor BAST</label>
                         <div class="col-sm-4">
-                            <input class="form-control readonlyInput" id="tanggalPinjam" name="tanggalPinjam" type="text"
+                            <input class="form-control readonlyInput" id="nomorBast" name="nomorBast" type="text"
                                 readonly>
                         </div>
                     </div>
@@ -167,16 +167,16 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('verifikasi_penyelia.bpkb.load') }}",
+                    url: "{{ route('pengembalian.bpkb.load') }}",
                     type: "POST",
                     data: function(data) {
                         data.search = $('input[type="search"]').val();
                     }
                 },
                 createdRow: function(row, data, index) {
-                    if (data.statusVerifPenyelia == "1" && data.statusBast != "1") {
+                    if (data.statusPengembalian == "1" && data.statusPinjamLagi != "1") {
                         $(row).css("background-color", "#90EE90");
-                    } else if (data.statusVerifPenyelia == "1" && data.statusBast ==
+                    } else if (data.statusPengembalian == "1" && data.statusPinjamLagi ==
                         "1") {
                         $(row).css("background-color", "#ADD8E6");
                     }
@@ -184,13 +184,13 @@
                 pageLength: 10,
                 searching: true,
                 columns: [{
+                        data: 'tanggalPengembalian',
+                    }, {
+                        data: 'nomorBast',
+                    }, {
+                        data: 'tanggalBast',
+                    }, {
                         data: 'nomorSurat',
-                    }, {
-                        data: 'nomorRegister',
-                    }, {
-                        data: 'nomorBpkb',
-                    }, {
-                        data: 'nomorPolisi',
                     }, {
                         data: 'namaSkpd',
                     },
@@ -215,14 +215,13 @@
 
             let selectedData;
 
-            $('#bpkb tbody').on('click', '.verifikasi', function() {
+            $('#bpkb tbody').on('click', '.kembali', function() {
                 selectedData = bpkb.row($(this).parents('tr')).data();
 
-                $('#tanggalVerifikasi').val(selectedData.tanggalVerifPenyelia);
+                $('#tanggalPengembalian').val(selectedData.tanggalPengembalian);
+                $('#nomorBast').val(selectedData.nomorBast);
+                $('#tanggalBast').val(tanggalIndonesia(selectedData.tanggalBast));
                 $('#nomorSurat').val(selectedData.nomorSurat);
-                $('#tanggalPinjam').val(tanggalIndonesia(selectedData.tanggalPinjam));
-                $('#tanggalVerifikasiAdmin').val(tanggalIndonesia(selectedData
-                    .tanggalVerifAdmin));
                 $('#nomorRegister').val(selectedData.nomorRegister);
                 $('#nomorPolisi').val(selectedData.nomorPolisi);
                 $('#nomorRangka').val(selectedData.nomorRangka);
@@ -235,10 +234,10 @@
 
                 $('#setujuVerifikasi').prop('hidden', true);
                 $('#batalVerifikasi').prop('hidden', true);
-
-                if (selectedData.statusVerifPenyelia != '1') {
+                console.log(selectedData)
+                if (selectedData.statusPengembalian != '1') {
                     $('#setujuVerifikasi').prop('hidden', false);
-                } else if (selectedData.statusVerifPenyelia == '1' && selectedData.statusBast !=
+                } else if (selectedData.statusPengembalian == '1' && selectedData.statusPinjamLagi !=
                     '1') {
                     $('#batalVerifikasi').prop('hidden', false);
                 }
@@ -262,9 +261,9 @@
                     return;
                 }
 
-                let tanggalVerifikasi = $('#tanggalVerifikasi').val();
+                let tanggalPengembalian = $('#tanggalPengembalian').val();
 
-                if (!tanggalVerifikasi) {
+                if (!tanggalPengembalian) {
                     Swal.fire({
                         title: "Peringatan!",
                         text: "Silahkan pilih tanggal verifikasi!",
@@ -274,44 +273,35 @@
                 }
 
 
-                if (tanggalVerifikasi < selectedData.tanggalPinjam) {
+                if (tanggalPengembalian < selectedData.tanggalBast) {
                     Swal.fire({
                         title: "Peringatan!",
-                        text: "Tanggal verifikasi tidak boleh lebih kecil dari tanggal pinjam!",
-                        icon: "warning"
-                    });
-                    return;
-                }
-
-                if (tanggalVerifikasi < selectedData.tanggalVerifAdmin) {
-                    Swal.fire({
-                        title: "Peringatan!",
-                        text: "Tanggal verifikasi tidak boleh lebih kecil dari tanggal verifikasi admin!",
+                        text: "Tanggal pengembalian tidak boleh lebih kecil dari tanggal BAST!",
                         icon: "warning"
                     });
                     return;
                 }
 
                 $.ajax({
-                    url: "{{ route('verifikasi_penyelia.bpkb.verifikasi') }}",
+                    url: "{{ route('pengembalian.bpkb.verifikasi') }}",
                     type: "POST",
                     data: {
                         _token: '{{ csrf_token() }}',
                         selectedData: selectedData,
-                        tanggalVerifikasi: tanggalVerifikasi,
+                        tanggalPengembalian: tanggalPengembalian,
                         tipe: 'setuju',
                     },
                     success: function(response) {
                         Swal.fire({
                             title: "Berhasil!",
-                            text: "Pengajuan berhasil diverifikasi",
+                            text: "Pengembalian berhasil diverifikasi",
                             icon: "success"
                         });
 
-                        $('#tanggalVerifikasi').val(null);
+                        $('#tanggalPengembalian').val(null);
+                        $('#nomorBast').val(null);
+                        $('#tanggalBast').val(null);
                         $('#nomorSurat').val(null);
-                        $('#tanggalPinjam').val(null);
-                        $('#tanggalVerifikasiAdmin').val(null);
                         $('#nomorRegister').val(null);
                         $('#nomorPolisi').val(null);
                         $('#nomorRangka').val(null);
@@ -352,7 +342,7 @@
                 }
 
                 $.ajax({
-                    url: "{{ route('verifikasi_penyelia.bpkb.verifikasi') }}",
+                    url: "{{ route('pengembalian.bpkb.verifikasi') }}",
                     type: "POST",
                     data: {
                         _token: '{{ csrf_token() }}',
@@ -362,14 +352,14 @@
                     success: function(response) {
                         Swal.fire({
                             title: "Berhasil!",
-                            text: "Pengajuan berhasil batal verifikasi",
+                            text: "Pengembalian berhasil batal verifikasi",
                             icon: "success"
                         });
 
-                        $('#tanggalVerifikasi').val(null);
+                        $('#tanggalPengembalian').val(null);
+                        $('#nomorBast').val(null);
+                        $('#tanggalBast').val(null);
                         $('#nomorSurat').val(null);
-                        $('#tanggalPinjam').val(null);
-                        $('#tanggalVerifikasiAdmin').val(null);
                         $('#nomorRegister').val(null);
                         $('#nomorPolisi').val(null);
                         $('#nomorRangka').val(null);

@@ -283,6 +283,8 @@ Route::middleware('auth')->group(function () {
             ->group(function () {
                 Route::get('', [BASTBPKBController::class, 'index'])->name('index');
                 Route::post('load', [BASTBPKBController::class, 'load'])->name('load');
+                Route::post('simpan', [BASTBPKBController::class, 'simpan'])->name('simpan');
+                Route::post('hapus', [BASTBPKBController::class, 'hapus'])->name('hapus');
             });
 
         // SERTIFIKAT
@@ -299,6 +301,7 @@ Route::middleware('auth')->group(function () {
             ->group(function () {
                 Route::get('', [PengembalianBPKBController::class, 'index'])->name('index');
                 Route::post('load', [PengembalianBPKBController::class, 'load'])->name('load');
+                Route::post('verifikasi', [PengembalianBPKBController::class, 'verifikasi'])->name('verifikasi');
             });
 
         // SERTIFIKAT

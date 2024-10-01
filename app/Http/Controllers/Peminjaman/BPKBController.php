@@ -199,6 +199,26 @@ class BPKBController extends Controller
                     'statusPinjam' => '1'
                 ]);
 
+            // PROTEKSI SEMUA PEMINJAMAN LAINNYA SELAIN PEMINJAMAN YANG DIBUAT
+            $pinjamanSebelumnya = DB::table('pinjamanBpkb')
+                ->where([
+                    'nomorRegister' => $request['nomorRegister'],
+                    'kodeSkpd' => Auth::user()->kd_skpd,
+                ])
+                ->where('nomorUrut', '<', $nomorBaru->nomor)
+                ->orderByDesc('nomorUrut')
+                ->first();
+
+            DB::table('pinjamanBpkb')
+                ->where([
+                    'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
+                    'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
+                    'kodeSkpd' => $pinjamanSebelumnya->kodeSkpd,
+                ])
+                ->update([
+                    'statusPinjamLagi' => '1'
+                ]);
+
             DB::commit();
             return redirect()
                 ->route('peminjaman.bpkb.index')
@@ -288,6 +308,22 @@ class BPKBController extends Controller
                 ->lockForUpdate()
                 ->first();
 
+            $dataPinjaman = DB::table('pinjamanBpkb')
+                ->where([
+                    'nomorSurat' => $request->nomorSurat,
+                    'kodeSkpd' => $request->kodeSkpd
+                ])
+                ->first();
+
+            $pinjamanSebelumnya = DB::table('pinjamanBpkb')
+                ->where([
+                    'nomorRegister' => $dataPinjaman->nomorRegister,
+                    'kodeSkpd' => $dataPinjaman->kodeSkpd,
+                ])
+                ->where('nomorUrut', '<', $dataPinjaman->nomorUrut)
+                ->orderByDesc('nomorUrut')
+                ->first();
+
             DB::table('pinjamanBpkb')
                 ->where([
                     'nomorSurat' => $request->nomorSurat,
@@ -320,6 +356,16 @@ class BPKBController extends Controller
                         'statusBpkb' => '0'
                     ]);
             }
+
+            DB::table('pinjamanBpkb')
+                ->where([
+                    'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
+                    'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
+                    'kodeSkpd' => $pinjamanSebelumnya->kodeSkpd,
+                ])
+                ->update([
+                    'statusPinjamLagi' => '0'
+                ]);
 
             DB::commit();
             return response()->json([
