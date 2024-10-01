@@ -206,6 +206,25 @@ class SertifikatController extends Controller
                     'statusPinjam' => '1'
                 ]);
 
+            $pinjamanSebelumnya = DB::table('pinjamanSertifikat')
+                ->where([
+                    'nomorRegister' => $request['nomorRegister'],
+                    'kodeSkpd' => Auth::user()->kd_skpd,
+                ])
+                ->where('nomorUrut', '<', $nomorUrut)
+                ->orderByDesc('nomorUrut')
+                ->first();
+
+            DB::table('pinjamanSertifikat')
+                ->where([
+                    'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
+                    'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
+                    'kodeSkpd' => $pinjamanSebelumnya->kodeSkpd,
+                ])
+                ->update([
+                    'statusPinjamLagi' => '1'
+                ]);
+
             DB::commit();
             return redirect()
                 ->route('peminjaman.sertifikat.index')

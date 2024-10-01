@@ -52,6 +52,11 @@
             <div class="modal-body">
               <table class="table table-bordered">
                 <tr>
+                    <th>kode Skpd</th>
+                    <td id="kodeSkpd"></td>
+                  </tr>
+                <tr>
+                <tr>
                     <th>Nomor Surat</th>
                     <td id="nomorSurat"></td>
                   </tr>
@@ -184,6 +189,7 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(data) {
+                    $('#kodeSkpd').text(data.kodeSkpd);
                     $('#nomorSurat').text(data.nomorSurat);
                     $('#tanggalPinjam').text(data.tanggalPinjam);
                     $('#nomorRegister').text(data.nomorRegister);
@@ -197,10 +203,10 @@
                     $('#nipKsbtgn').text(data.nipKsbtgn);
                     $('#noTelpKsbtgn').text(data.noTelpKsbtgn);
 
-                    if (data.statusBast == 1) {
+                    if (data.statusPengembalian == 1 && data.statusPinjamLagi == 1) {
                         $('#VerifPenyelia').addClass('d-none');
                         $('#BatalkanVerif').addClass('d-none');
-                    } else if (data.statusVerifPenyelia == 1) {
+                    } else if (data.statusPengembalian == 1 && data.statusPinjamLagi !== 1) {
                         $('#VerifPenyelia').addClass('d-none');
                         $('#BatalkanVerif').removeClass('d-none');
                     } else {
@@ -219,12 +225,16 @@
 
         $('#VerifPenyelia').on('click', function() {
             var nomorSurat = $('#nomorSurat').text();
+            var kodeSkpd = $('#kodeSkpd').text();
+            var nomorRegister = $('#nomorRegister').text();
 
             $.ajax({
                 url: '{{ route("pengembalian.sertifikat.pengembalian") }}',
                 type: 'POST',
                 data: {
                     nomorSurat: nomorSurat,
+                    kodeSkpd: kodeSkpd,
+                    nomorRegister: nomorRegister,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(data) {
@@ -250,12 +260,15 @@
 
         $('#BatalkanVerif').on('click', function() {
             var nomorSurat = $('#nomorSurat').text();
-
+            var kodeSkpd = $('#kodeSkpd').text();
+            var nomorRegister = $('#nomorRegister').text();
             $.ajax({
                 url: '{{ route("pengembalian.sertifikat.batalkan") }}',
                 type: 'POST',
                 data: {
                     nomorSurat: nomorSurat,
+                    kodeSkpd: kodeSkpd,
+                    nomorRegister: nomorRegister,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(data) {

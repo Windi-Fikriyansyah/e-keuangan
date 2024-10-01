@@ -20,7 +20,7 @@ class SertifikatController extends Controller
     {
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-        ->select('a.nomorSurat', 'a.nomorRegister','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSertifikat', 'a.statusPengajuan', 'a.NIB', 'a.file', 'a.kodeSkpd', 'b.namaSkpd')
+        ->select('a.nomorSurat', 'a.nomorRegister','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSertifikat', 'a.statusPengajuan', 'a.NIB', 'a.file', 'a.kodeSkpd','a.statusPinjamLagi', 'b.namaSkpd')
         ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd')
         ->where('a.statusBast', 1);
 
@@ -54,7 +54,7 @@ class SertifikatController extends Controller
     return DataTables::of($pinjamanSertifikat)
         ->addColumn('aksi', function ($row) {
 
-            if ($row->statusBast == '1') {
+            if ($row->statusPengembalian == '1' && $row->statusPinjamLagi == '1') {
                 $btn = '<a onclick="verif(\'' . $row->nomorSurat . '\')" class="btn btn-md btn-success"><span class="fa-fw select-all fas"></span></a>';
             } else {
                 $btn = '<a onclick="verif(\'' . $row->nomorSurat . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
@@ -74,7 +74,7 @@ class SertifikatController extends Controller
         $nomorSurat = $request->input('nomorSurat');
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.statusPengembalian','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn', 'a.noTelpKsbtgn')
+            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.statusPinjamLagi','a.statusPengembalian','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn','a.kodeSkpd', 'a.noTelpKsbtgn')
             ->where('a.nomorSurat', $nomorSurat)
             ->first();
 
@@ -107,15 +107,29 @@ class SertifikatController extends Controller
 
         $validated = $request->validate([
             'nomorSurat' => 'required|string',
+            'kodeSkpd' => 'required|string',
+            'nomorRegister' => 'required|string',
 
         ]);
 
-        DB::table('pinjamanSertifikat')
-            ->where('nomorSurat', $validated['nomorSurat'])
-            ->update([
-                'statusPengembalian' => 1,
-                'tanggalPengembalian' => now()->setTimezone('Asia/Jakarta')
-            ]);
+        DB::transaction(function () use ($validated) {
+            DB::table('pinjamanSertifikat')
+                ->where('nomorSurat', $validated['nomorSurat'])
+                ->update([
+                    'statusPengembalian' => 1,
+                    'tanggalPengembalian' => now()->setTimezone('Asia/Jakarta'),
+                    'statusPinjamLagi' => '0'
+                ]);
+
+            DB::table('masterSertifikat')
+                ->where([
+                    'nomorRegister' => $validated['nomorRegister'],
+                    'kodeSkpd' => $validated['kodeSkpd'],
+                ])
+                ->update([
+                    'statusPinjam' => 0,
+                ]);
+        });
 
         return response()->json(['success' => true]);
     }
@@ -124,11 +138,22 @@ class SertifikatController extends Controller
     {
         $validated = $request->validate([
             'nomorSurat' => 'required|string',
+            'kodeSkpd' => 'required|string',
+            'nomorRegister' => 'required|string',
         ]);
 
         DB::table('pinjamanSertifikat')
         ->where('nomorSurat', $validated['nomorSurat'])
         ->update(['statusPengembalian' => 0]);
+
+        DB::table('masterSertifikat')
+                ->where([
+                    'nomorRegister' => $validated['nomorRegister'],
+                    'kodeSkpd' => $validated['kodeSkpd'],
+                ])
+                ->update([
+                    'statusPinjam' => 1,
+                ]);
 
         return response()->json(['success' => true]);
     }
