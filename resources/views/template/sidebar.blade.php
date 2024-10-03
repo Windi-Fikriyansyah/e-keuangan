@@ -49,218 +49,40 @@
                         <i class="bi bi-grid-fill"></i>
                         <span>Dashboard</span>
                     </a>
-
-
                 </li>
 
-                <li class="sidebar-item  has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Kelola Akses</span>
-                    </a>
-                    <ul class="submenu ">
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('user.index') }}" class="submenu-link">Pengguna</a>
-
+                @php
+                    $menu_tipe1 = filter_menu();
+                    $menu_tipe2 = sub_menu();
+                @endphp
+                @foreach ($menu_tipe1 as $tipe1)
+                    @if ($tipe1->link)
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{{ route($tipe1->link) }}">
+                                <i class="bi bi-stack"></i>
+                                <span>{{ $tipe1->name }}</span>
+                            </a>
                         </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('peran.index') }}" class="submenu-link">Peran</a>
-
+                    @else
+                        <li class="sidebar-item has-sub">
+                            <a href="#" class='sidebar-link'>
+                                <i class="bi bi-stack"></i>
+                                <span>{{ $tipe1->name }}</span>
+                            </a>
+                            <ul class="submenu">
+                                @foreach ($menu_tipe2 as $tipe2)
+                                    @if ($tipe2->parent == $tipe1->id)
+                                        <li class="submenu-item">
+                                            <a href="{{ route($tipe2->link) }}" class="submenu-link">
+                                                {{ $tipe2->name }}
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endforeach
+                            </ul>
                         </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('akses.index') }}" class="submenu-link">Akses</a>
-
-                        </li>
-
-                    </ul>
-                </li>
-
-                <li class="sidebar-item  has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Kelola Data</span>
-                    </a>
-                    <ul class="submenu ">
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('kelola_data.bpkb.index') }}" class="submenu-link">BPKB</a>
-
-                        </li>
-
-                        {{-- <li class="submenu-item  ">
-                            <a href="{{ route('kelola_data.sertifikat.index') }}" class="submenu-link">Sertifikat</a>
-
-                        </li> --}}
-
-                        <li class="submenu-item">
-                            <a href="{{ route('kelola_data.skpd.index') }}" class="submenu-link">SKPD</a>
-
-                        </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('kelola_data.sertifikat.index') }}" class="submenu-link">SERTIFIKAT</a>
-
-                        </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('kelola_data.master_ttd.index') }}" class="submenu-link">TTD</a>
-
-                        </li>
-                        <li class="submenu-item  ">
-                            <a href="{{ route('kelola_data.asalUsul.index') }}" class="submenu-link">AsalUsul</a>
-
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="sidebar-item  has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Kelola Peminjaman</span>
-                    </a>
-                    <ul class="submenu ">
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('peminjaman.bpkb.index') }}" class="submenu-link">BPKB</a>
-
-                        </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('peminjaman.sertifikat.index') }}" class="submenu-link">Sertifikat</a>
-
-                        </li>
-
-                    </ul>
-                </li>
-
-                <li class="sidebar-item  has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Laporan</span>
-                    </a>
-                    <ul class="submenu ">
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('laporan.bpkb.index') }}" class="submenu-link">BPKB</a>
-
-                        </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('laporan.sertifikat.index') }}" class="submenu-link">Sertifikat</a>
-
-                        </li>
-
-                    </ul>
-                </li>
-
-                <li class="sidebar-item  has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Verifikasi Operator</span>
-                    </a>
-                    <ul class="submenu ">
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('verifikasi_operator.bpkb.index') }}" class="submenu-link">BPKB</a>
-
-                        </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('verifikasi_operator.sertifikat.index') }}"
-                                class="submenu-link">Sertifikat</a>
-
-                        </li>
-
-                    </ul>
-                </li>
-
-                <li class="sidebar-item  has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Verifikasi Admin</span>
-                    </a>
-                    <ul class="submenu ">
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('verifikasi_admin.bpkb.index') }}" class="submenu-link">BPKB</a>
-
-                        </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('verifikasi_admin.sertifikat.index') }}"
-                                class="submenu-link">Sertifikat</a>
-
-                        </li>
-
-                    </ul>
-                </li>
-
-                <li class="sidebar-item  has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Verifikasi Penyelia</span>
-                    </a>
-                    <ul class="submenu ">
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('verifikasi_penyelia.bpkb.index') }}" class="submenu-link">BPKB</a>
-
-                        </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('verifikasi_penyelia.sertifikat.index') }}"
-                                class="submenu-link">Sertifikat</a>
-
-                        </li>
-
-                    </ul>
-                </li>
-
-                <li class="sidebar-item  has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-
-                        <span>BAST</span>
-                    </a>
-                    <ul class="submenu ">
-
-                        <li class="submenu-item  ">
-
-                            <a href="{{ route('bast.bpkb.index') }}" class="submenu-link">BPKB</a>
-
-                        </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('bast.sertifikat.index') }}" class="submenu-link">Sertifikat</a>
-
-                        </li>
-
-                    </ul>
-                </li>
-
-                <li class="sidebar-item  has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Pengembalian</span>
-                    </a>
-                    <ul class="submenu ">
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('pengembalian.bpkb.index') }}" class="submenu-link">BPKB</a>
-
-                        </li>
-
-                        <li class="submenu-item  ">
-                            <a href="{{ route('pengembalian.sertifikat.index') }}"
-                                class="submenu-link">Sertifikat</a>
-
-                        </li>
-
-                    </ul>
-                </li>
+                    @endif
+                @endforeach
             </ul>
         </div>
     </div>
