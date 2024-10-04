@@ -3,6 +3,8 @@
 namespace App\Http\Requests\KelolaData\BPKB;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class EditRequest extends FormRequest
 {
@@ -21,6 +23,12 @@ class EditRequest extends FormRequest
      */
     public function rules(): array
     {
+        $dataBpkb = DB::table('masterBpkb')
+            ->where(['id' => $this->id])
+            ->first();
+
+        $this->redirect = 'kelola_data/bpkb/edit/' . Crypt::encrypt($dataBpkb->nomorRegister) . '/' . Crypt::encrypt($dataBpkb->kodeSkpd);
+
         return [
             'kodeSkpd' => 'required',
             'nomorRegister' => 'required|max:255|unique:masterBpkb,nomorRegister,' . $this->id,

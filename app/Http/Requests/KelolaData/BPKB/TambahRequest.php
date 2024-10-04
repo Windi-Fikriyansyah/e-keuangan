@@ -21,6 +21,8 @@ class TambahRequest extends FormRequest
      */
     public function rules(): array
     {
+        $this->redirect = 'kelola_data/bpkb/create';
+
         return [
             'kodeSkpd' => 'required',
             'nomorRegister' => 'nullable|max:255|unique:masterBpkb,nomorRegister',
