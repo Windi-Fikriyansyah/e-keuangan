@@ -3,6 +3,7 @@
 namespace App\Http\Requests\KelolaAkses;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\Rule;
 
 class RoleRequest extends FormRequest
@@ -22,7 +23,11 @@ class RoleRequest extends FormRequest
      */
     public function rules(): array
     {
-        // dd($this->route('peran'));
+        if (request()->isMethod('post')) {
+            $this->redirect = 'peran/create';
+        } elseif (request()->isMethod('put')) {
+            $this->redirect = 'peran/' . Crypt::encrypt($this->peran) . '/edit';
+        }
         return [
             'name' => [
                 'required',

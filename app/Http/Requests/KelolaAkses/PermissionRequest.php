@@ -3,6 +3,7 @@
 namespace App\Http\Requests\KelolaAkses;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\Rule;
 
 class PermissionRequest extends FormRequest
@@ -22,6 +23,12 @@ class PermissionRequest extends FormRequest
      */
     public function rules(): array
     {
+        if (request()->isMethod('post')) {
+            $this->redirect = 'akses/create';
+        } elseif (request()->isMethod('put')) {
+            $this->redirect = 'akses/' . Crypt::encrypt($this->akse) . '/edit';
+        }
+
         return [
             'name' => [
                 'required',
