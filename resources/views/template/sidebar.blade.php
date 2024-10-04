@@ -83,6 +83,17 @@
                         </li>
                     @endif
                 @endforeach
+
+                <li class="sidebar-item">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <a href="{{ route('logout') }}" class='sidebar-link'
+                            onclick="event.preventDefault(); this.closest('form').submit();"">
+                            <i class="bi bi-grid-fill"></i>
+                            <span>Logout</span>
+                        </a>
+                    </form>
+                </li>
             </ul>
         </div>
     </div>
