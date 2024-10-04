@@ -26,6 +26,11 @@
                                     <h3 class="mb-4">Login</h3>
                                 </div>
                             </div>
+                            @if (\Session::has('error'))
+                                <div class="alert alert-danger">
+                                    {!! \Session::get('error') !!}
+                                </div>
+                            @endif
                             <form action="{{ route('login.store') }}" method="POST">
                                 @csrf
                                 <div class="form-group mt-3 mb-3">
