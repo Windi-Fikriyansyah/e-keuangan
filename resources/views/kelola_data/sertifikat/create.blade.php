@@ -188,7 +188,7 @@
 
                     <div class="mb-3 text-end">
                         <button class="btn btn-primary" type="submit">Simpan</button>
-                        <a href="{{ route('kelola_data.bpkb.index') }}" class="btn btn-warning">Kembali</a>
+                        <a href="{{ route('kelola_data.sertifikat.index') }}" class="btn btn-warning">Kembali</a>
                     </div>
                 </form>
             </div>

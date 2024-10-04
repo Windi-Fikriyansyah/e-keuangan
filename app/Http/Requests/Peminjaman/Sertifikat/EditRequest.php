@@ -4,6 +4,8 @@ namespace App\Http\Requests\Peminjaman\Sertifikat;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 class EditRequest extends FormRequest
 {
     /**
@@ -16,6 +18,10 @@ class EditRequest extends FormRequest
 
     public function rules(): array
     {
+        $dataSertifikat = DB::table('pinjamanSertifikat')
+            ->where(['id' => $this->id])
+            ->first();
+        $this->redirect = 'peminjaman/sertifikat/edit/' . Crypt::encrypt($dataSertifikat->nomorSurat) . '/' . Crypt::encrypt($dataSertifikat->kodeSkpd);
         return [
             'nomorSurat' => 'required|max:255|unique:pinjamanSertifikat,nomorSurat,' . $this->id,
             'tanggalPinjam' => 'required|date',
@@ -33,18 +39,18 @@ class EditRequest extends FormRequest
         return [
             'nomorRegister.required' => 'Nomor Register wajib dipilih',
             'nomorRegister.max' => 'Nomor Register hanya bisa diisi 255 abjad',
-            'nomorSertifikat.required' => 'Nomor BPKB wajib diisi',
-            'nomorSertifikat.max' => 'Nomor BPKB hanya bisa diisi 255 abjad',
-            'nib.required' => 'Nomor Polisi wajib diisi',
-            'nib.max' => 'Nomor Polisi hanya bisa diisi 255 abjad',
+            'nomorSertifikat.required' => 'Nomor Sertifikat wajib diisi',
+            'nomorSertifikat.max' => 'Nomor Sertifikat hanya bisa diisi 255 abjad',
+            'nib.required' => 'NIB wajib diisi',
+            'nib.max' => 'NIB hanya bisa diisi 255 abjad',
             'nomorRangka.required' => 'Nomor Rangka wajib diisi',
             'nomorRangka.max' => 'Nomor Rangka hanya bisa diisi 255 abjad',
-            'namaKsbtgn.required' => 'Nama Pengurus Barang Pengguna wajib diisi',
-            'namaKsbtgn.max' => 'Nama Pengurus Barang Pengguna hanya bisa diisi 255 abjad',
-            'nipKsbtgn.required' => 'NIP Pengurus Barang Pengguna wajib diisi',
-            'nipKsbtgn.integer' => 'NIP Pengurus Barang Pengguna hanya bisa diisi angka',
-            'noTelpKsbtgn.required' => 'Nomor telepon Pengurus Barang Pengguna wajib diisi',
-            'noTelpKsbtgn.integer' => 'Nomor telepon Pengurus Barang Pengguna hanya bisa diisi angka',
+            'namaKsbtgn.required' => 'Nama Kepala Sub Bagian Tata Guna Tanah wajib diisi',
+            'namaKsbtgn.max' => 'Nama Kepala Sub Bagian Tata Guna Tanah hanya bisa diisi 255 abjad',
+            'nipKsbtgn.required' => 'NIP Kepala Sub Bagian Tata Guna Tanah wajib diisi',
+            'nipKsbtgn.integer' => 'NIP Kepala Sub Bagian Tata Guna Tanah hanya bisa diisi angka',
+            'noTelpKsbtgn.required' => 'Nomor telepon Kepala Sub Bagian Tata Guna Tanah wajib diisi',
+            'noTelpKsbtgn.integer' => 'Nomor telepon Kepala Sub Bagian Tata Guna Tanah hanya bisa diisi angka',
         ];
     }
 }

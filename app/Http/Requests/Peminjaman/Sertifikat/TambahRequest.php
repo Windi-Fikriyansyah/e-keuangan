@@ -13,6 +13,7 @@ class TambahRequest extends FormRequest
 
     public function rules(): array
     {
+        $this->redirect = 'peminjaman/sertifikat/create';
         return [
             'nomorSurat' => 'nullable|max:255|unique:pinjamanSertifikat,nomorSurat',
             'tanggalPinjam' => 'required|date',
@@ -42,8 +43,8 @@ class TambahRequest extends FormRequest
             'luas.numeric' => 'Luas harus berupa angka',
             'peruntukan.required' => 'Peruntukan wajib diisi',
             'peruntukan.max' => 'Peruntukan hanya bisa diisi 255 karakter',
-            'nipKsbtgn.regex' => 'NIP Ksbtgn hanya bisa diisi angka dan tanda hubung (-)',
-            'noTelpKsbtgn.regex' => 'Nomor telepon Ksbtgn hanya bisa diisi angka dan tanda hubung (-)',
+            'nipKsbtgn.regex' => 'NIP Kepala Sub Bagian Tata Guna Tanah hanya bisa diisi angka dan tanda hubung (-)',
+            'noTelpKsbtgn.regex' => 'Nomor telepon Kepala Sub Bagian Tata Guna Tanah hanya bisa diisi angka dan tanda hubung (-)',
 
         ];
     }
