@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Peminjaman\BPKB;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class EditRequest extends FormRequest
 {
@@ -16,6 +18,12 @@ class EditRequest extends FormRequest
 
     public function rules(): array
     {
+        $dataBpkb = DB::table('pinjamanBpkb')
+            ->where(['id' => $this->id])
+            ->first();
+
+        $this->redirect = 'peminjaman/bpkb/edit/' . Crypt::encrypt($dataBpkb->nomorSurat) . '/' . Crypt::encrypt($dataBpkb->kodeSkpd);
+
         return [
             'nomorSurat' => 'required|max:255|unique:pinjamanBpkb,nomorSurat,' . $this->id,
             'tanggalPinjam' => 'required|date',

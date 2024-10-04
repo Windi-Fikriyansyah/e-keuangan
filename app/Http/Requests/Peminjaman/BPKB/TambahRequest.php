@@ -16,6 +16,8 @@ class TambahRequest extends FormRequest
 
     public function rules(): array
     {
+        $this->redirect = 'peminjaman/bpkb/create';
+
         return [
             'nomorSurat' => 'nullable|max:255|unique:pinjamanBpkb,nomorSurat',
             'tanggalPinjam' => 'required|date',
