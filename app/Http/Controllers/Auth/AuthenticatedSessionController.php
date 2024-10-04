@@ -25,11 +25,18 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        // $request->authenticate();
 
-        $request->session()->regenerate();
+        // $request->session()->regenerate();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        // return redirect()->intended(RouteServiceProvider::HOME);
+
+        if (Auth::Attempt($request->validated())) {
+            $request->session()->regenerate();
+            return redirect()->intended(RouteServiceProvider::HOME);
+        } else {
+            return redirect()->route('login')->with('error', 'Username atau password Anda salah');
+        }
     }
 
     /**
