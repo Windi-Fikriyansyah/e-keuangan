@@ -3,6 +3,8 @@
 namespace App\Http\Requests\KelolaData\Sertifikat;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class EditRequest extends FormRequest
 {
@@ -21,11 +23,17 @@ class EditRequest extends FormRequest
      */
     public function rules(): array
     {
+        $dataSertifikat = DB::table('masterSertifikat')
+            ->where(['id' => $this->id])
+            ->first();
+
+        $this->redirect = 'kelola_data/sertifikat/edit/' . Crypt::encrypt($dataSertifikat->nomorRegister) . '/' . Crypt::encrypt($dataSertifikat->kodeSkpd);
+
         return [
             'kodeSkpd' => 'required',
             'nomorRegister' => 'nullable|max:255|unique:masterSertifikat,nomorRegister,' . $this->id,
             'nib' => 'required|max:255|unique:masterSertifikat,nib,' . $this->id,
-            'nomorSertifikat' => 'required|max:255|unique:masterSertifikat,nomorSertifikat,'. $this->id,
+            'nomorSertifikat' => 'required|max:255|unique:masterSertifikat,nomorSertifikat,' . $this->id,
             'tanggalSertifikat' => 'required',
             'luas' => 'required|max:255',
             'hak' => 'required|max:255',
