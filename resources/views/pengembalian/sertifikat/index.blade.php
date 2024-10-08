@@ -40,73 +40,94 @@
         </div>
     </div>
 
-    <div class="modal fade" id="verifModal" tabindex="-1" role="dialog" aria-labelledby="verifModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
+
+
+    <div class="modal fade" id="verifModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+        <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="verifModalLabel">Pengembalian Sertifikat</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#verifModal').modal('hide');">
-                <span aria-hidden="true">&times;</span>
-              </button>
+                <h5 class="modal-title" id="verifModalLabel">Verifikasi Peminjaman Sertifikat</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <i data-feather="x"></i>
+                </button>
             </div>
             <div class="modal-body">
-              <table class="table table-bordered">
-                <tr>
-                    <th>kode Skpd</th>
-                    <td id="kodeSkpd"></td>
-                  </tr>
-                <tr>
-                <tr>
-                    <th>Nomor Surat</th>
-                    <td id="nomorSurat"></td>
-                  </tr>
-                <tr>
-                  <th>Tanggal Pinjam</th>
-                  <td id="tanggalPinjam"></td>
-                </tr>
-                <tr>
-                  <th>Nomor Register</th>
-                  <td id="nomorRegister"></td>
-                </tr>
-                <tr>
-                  <th>Nomor Sertifikat</th>
-                  <td id="nomorSertifikat"></td>
-                </tr>
-                <tr>
-                  <th>NIB</th>
-                  <td id="NIB"></td>
-                </tr>
-                <tr>
-                  <th>Tanggal</th>
-                  <td id="tanggal"></td>
-                </tr>
-                <tr>
-                  <th>Pemegang Hak</th>
-                  <td id="pemegangHak"></td>
-                </tr>
-                <tr>
-                  <th>Luas</th>
-                  <td id="luas"></td>
-                </tr>
-                <tr>
-                  <th>Peruntukan</th>
-                  <td id="peruntukan"></td>
-                </tr>
-                <tr>
-                  <th>Nama Kepala Sub Bagian Tata Guna Tanah</th>
-                  <td id="namaKsbtgn"></td>
-                </tr>
-                <tr>
-                  <th>NIP Kepala Sub Bagian Tata Guna Tanah</th>
-                  <td id="nipKsbtgn"></td>
-                </tr>
-                <tr>
-                  <th>No. Telp Kepala Sub Bagian Tata Guna Tanah</th>
-                  <td id="noTelpKsbtgn"></td>
-                </tr>
-              </table>
-            </div>
-            <div class="modal-footer">
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">Tanggal Verifikasi</label>
+                    <div class="col-sm-4">
+                        <input class="form-control" id="tanggalPengembalian" name="tanggalPengembalian" type="date">
+                    </div>
+                    <label class="col-sm-2 col-form-label">Tanggal Bast</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="tanggalBast"
+                            name="tanggalBast" type="text" readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">Nomor Surat</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="nomorSurat" name="nomorSurat" type="text"
+                            readonly>
+                    </div>
+                    <label class="col-sm-2 col-form-label">Tanggal Pinjam</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="tanggalPinjam" name="tanggalPinjam" type="text"
+                            readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">Nomor Register</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="nomorRegister" name="nomorRegister" type="text"
+                            readonly>
+                    </div>
+                    <label class="col-sm-2 col-form-label">Nomor Sertifikat</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="nomorSertifikat" name="nomorSertifikat" type="text"
+                            readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">NIB</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="NIB" name="NIB" type="text"
+                            readonly>
+                    </div>
+                    <label class="col-sm-2 col-form-label">Nama KSBTGT</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="namaKsbtgn" name="namaKsbtgn" type="text"
+                            readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">Luas</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="luas" name="luas" type="text" readonly>
+                    </div>
+                    <label class="col-sm-2 col-form-label">Nip KSBTGT</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="nipKsbtgn" name="nipKsbtgn" type="text" readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">kode SKPD</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="kodeSkpd" name="kodeSkpd" type="text"
+                            readonly>
+                    </div>
+                    <label class="col-sm-2 col-form-label">No Telp KSBTGT</label>
+                    <div class="col-sm-4">
+                        <input class="form-control readonlyInput" id="noTelpKsbtgn" name="noTelpKsbtgn" type="text"
+                            readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">Peruntukan</label>
+                    <div class="col-sm-10">
+                        <textarea class="form-control readonlyInput" id="peruntukan" name="peruntukan" type="text" readonly></textarea>
+                    </div>
+                </div>
                 <div class="row mb-3">
                     <div class="col-md-12 text-center">
                         <button type="button" class="btn btn-success ms-1" id="VerifPenyelia">
@@ -117,15 +138,21 @@
                             <i class="bx bx-check d-block d-sm-none"></i>
                             <span class="d-none d-sm-block">Batal Verifikasi</span>
                         </button>
-                        <button type="button" class="btn btn-warning" onclick="$('#verifModal').modal('hide');">Kembali</button>
+                    </div>
+
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-12">
+                        <iframe style="width: 100%;height:100vh" id="filePengajuan"></iframe>
                     </div>
                 </div>
-
             </div>
 
-          </div>
         </div>
-      </div>
+    </div>
+</div>
+
+
 
 
 @endsection
@@ -189,19 +216,23 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(data) {
-                    $('#kodeSkpd').text(data.kodeSkpd);
-                    $('#nomorSurat').text(data.nomorSurat);
-                    $('#tanggalPinjam').text(data.tanggalPinjam);
-                    $('#nomorRegister').text(data.nomorRegister);
-                    $('#nomorSertifikat').text(data.nomorSertifikat);
-                    $('#NIB').text(data.NIB);
-                    $('#tanggal').text(data.tanggal);
-                    $('#pemegangHak').text(data.pemegangHak);
-                    $('#luas').text(data.luas);
-                    $('#peruntukan').text(data.peruntukan);
-                    $('#namaKsbtgn').text(data.namaKsbtgn);
-                    $('#nipKsbtgn').text(data.nipKsbtgn);
-                    $('#noTelpKsbtgn').text(data.noTelpKsbtgn);
+                    $('#tanggalPengembalian').val(data.tanggalPengembalian);
+                    $('#tanggalBast').val(data.tanggalBast);
+                    $('#nomorSurat').val(data.nomorSurat);
+                    $('#tanggalPinjam').val(data.tanggalPinjam);
+                    $('#nomorRegister').val(data.nomorRegister);
+                    $('#nomorSertifikat').val(data.nomorSertifikat);
+                    $('#NIB').val(data.NIB);
+                    $('#pemegangHak').val(data.pemegangHak);
+                    $('#tanggal').val(data.tanggal);
+                    $('#pemegangHak').val(data.pemegangHak);
+                    $('#luas').val(data.luas);
+                    $('#peruntukan').val(data.peruntukan);
+                    $('#namaKsbtgn').val(data.namaKsbtgn);
+                    $('#nipKsbtgn').val(data.nipKsbtgn);
+                    $('#kodeSkpd').val(data.kodeSkpd);
+                    $('#noTelpKsbtgn').val(data.noTelpKsbtgn);
+
 
                     if (data.statusPengembalian == 1 && data.statusPinjamLagi == 1) {
                         $('#VerifPenyelia').addClass('d-none');
@@ -214,6 +245,12 @@
                         $('#BatalkanVerif').addClass('d-none');
                     }
 
+                    const filePath = `storage/images/Peminjaman/Sertifikat/${data.kodeSkpd}/${data.file}`;
+                    if (data.file) {
+                        $('#filePengajuan').attr('src', `{{ asset('${filePath}') }}`);
+                    } else {
+                        $('#filePengajuan').attr('src', '');
+                    }
 
                     $('#verifModal').modal('show');
                 },
@@ -224,10 +261,27 @@
         }
 
         $('#VerifPenyelia').on('click', function() {
-            var nomorSurat = $('#nomorSurat').text();
-            var kodeSkpd = $('#kodeSkpd').text();
-            var nomorRegister = $('#nomorRegister').text();
-
+            var nomorSurat = $('#nomorSurat').val();
+            var kodeSkpd = $('#kodeSkpd').val();
+            var nomorRegister = $('#nomorRegister').val();
+            var tanggalPengembalian = $('#tanggalPengembalian').val();
+            var tanggalBast = $('#tanggalBast').val();
+            if (!tanggalPengembalian) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silahkan pilih tanggal verifikasi!",
+                        icon: "warning"
+                    });
+                    return;  // Hentikan eksekusi jika tanggal belum dipilih
+                }
+                if (tanggalPengembalian < tanggalBast) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Tanggal verifikasi tidak boleh lebih kecil dari tanggal Bast!",
+                        icon: "warning"
+                    });
+                    return;
+                }
             $.ajax({
                 url: '{{ route("pengembalian.sertifikat.pengembalian") }}',
                 type: 'POST',
@@ -235,6 +289,7 @@
                     nomorSurat: nomorSurat,
                     kodeSkpd: kodeSkpd,
                     nomorRegister: nomorRegister,
+                    tanggalPengembalian: tanggalPengembalian,
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(data) {
@@ -259,9 +314,9 @@
         });
 
         $('#BatalkanVerif').on('click', function() {
-            var nomorSurat = $('#nomorSurat').text();
-            var kodeSkpd = $('#kodeSkpd').text();
-            var nomorRegister = $('#nomorRegister').text();
+            var nomorSurat = $('#nomorSurat').val();
+            var kodeSkpd = $('#kodeSkpd').val();
+            var nomorRegister = $('#nomorRegister').val();
             $.ajax({
                 url: '{{ route("pengembalian.sertifikat.batalkan") }}',
                 type: 'POST',

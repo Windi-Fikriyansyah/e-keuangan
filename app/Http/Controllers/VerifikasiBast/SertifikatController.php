@@ -20,7 +20,7 @@ class SertifikatController extends Controller
     {
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-        ->select('a.nomorSurat', 'a.nomorRegister','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSertifikat', 'a.statusPengajuan', 'a.NIB', 'a.file', 'a.kodeSkpd', 'b.namaSkpd')
+        ->select('a.nomorSurat','a.statusBast','a.nomorBast', 'a.nomorRegister','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSertifikat', 'a.statusPengajuan', 'a.NIB', 'a.file', 'a.kodeSkpd','a.statusPengembalian', 'b.namaSkpd')
         ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd')
         ->where('a.statusVerifPenyelia', 1);
 
@@ -53,11 +53,21 @@ class SertifikatController extends Controller
 
     return DataTables::of($pinjamanSertifikat)
         ->addColumn('aksi', function ($row) {
+            $btn = '';
 
+            // Add Hapus button
+            if ($row->statusBast == '1' && $row->statusPengembalian != '1') {
+                $btn .= '<a onclick="hapus(\'' . $row->nomorBast . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+            }
+
+            // Add Cetak button
+            $btn .= '<a onclick="cetak(\'' . $row->nomorBast . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+
+            // Add Verif button
             if ($row->statusBast == '1') {
-                $btn = '<a onclick="verif(\'' . $row->nomorSurat . '\')" class="btn btn-md btn-success"><span class="fa-fw select-all fas"></span></a>';
+                $btn .= '<a onclick="verif(\'' . $row->nomorSurat . '\')" class="btn btn-md btn-success"><span class="fa-fw select-all fas"></span></a>';
             } else {
-                $btn = '<a onclick="verif(\'' . $row->nomorSurat . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
+                $btn .= '<a onclick="verif(\'' . $row->nomorSurat . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
             }
             return $btn;
         })
@@ -74,7 +84,7 @@ class SertifikatController extends Controller
         $nomorSurat = $request->input('nomorSurat');
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn', 'a.noTelpKsbtgn')
+            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.kodeSkpd','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn','a.tanggalBast','a.tanggalVerifPenyelia','a.file', 'a.noTelpKsbtgn')
             ->where('a.nomorSurat', $nomorSurat)
             ->first();
 
@@ -105,20 +115,27 @@ class SertifikatController extends Controller
     public function verifikasi_bast(Request $request)
     {
 
-        $nomorUrutBast = $this->generateNomorUrut();
-        $nomorBast = '000.2.3.2/' . $nomorUrutBast . '/BAST/BPKAD-Aset';
         $validated = $request->validate([
             'nomorSurat' => 'required|string',
-
+            'tanggalBast' => 'required|date',
         ]);
+        $nomor = collect(DB::select("SELECT case when max(nomor+1) is null then 1 else max(nomor+1) end as nomor from (
+            select nomorUrutBast nomor, 'Urut BAST BPKB' ket from pinjamanBpkb
+            union all
+            select nomorUrutBast nomor, 'Urut BAST Sertifikat' ket from pinjamanSertifikat
+            )
+            z"))
+            ->first();
+
+        $nomorBast = '000.2.3.2/' . $nomor->nomor . '/BAST/BPKAD-Aset';
 
         DB::table('pinjamanSertifikat')
             ->where('nomorSurat', $validated['nomorSurat'])
             ->update([
                 'statusBast' => 1,
                 'nomorBast' => $nomorBast,
-                'nomorUrutBast' => $nomorUrutBast,
-                'tanggalBast' => now()->setTimezone('Asia/Jakarta')
+                'nomorUrutBast' => $nomor->nomor,
+                'tanggalBast' => $validated['tanggalBast']
             ]);
 
         return response()->json(['success' => true]);
@@ -135,6 +152,58 @@ class SertifikatController extends Controller
         ->update(['statusBast' => 0]);
 
         return response()->json(['success' => true]);
+    }
+
+    public function hapus(Request $request)
+    {
+        $nomorBast = $request->nomorBast;
+        $kodeSkpd = $request->kodeSkpd;
+
+        // CEK BAST SUDAH PENGEMBALIAN
+        $pinjamanSertifikat = DB::table('pinjamanSertifikat')
+            ->where([
+                'nomorBast' => $nomorBast,
+                'kodeSkpd' => $kodeSkpd,
+            ])
+            ->first();
+
+        if ($pinjamanSertifikat->statusPengembalian == '1') {
+            return response()->json([
+                'message' => 'Hapus BAST tidak dapat dilakukan, BAST telah dikembalikan!'
+            ], 500);
+        }
+
+        DB::beginTransaction();
+        try {
+            DB::table('pinjamanSertifikat')
+                ->where([
+                    'nomorBast' => $nomorBast,
+                    'kodeSkpd' => $kodeSkpd,
+                ])
+                ->lockForUpdate()
+                ->first();
+
+            DB::table('pinjamanSertifikat')
+                ->where([
+                    'nomorBast' => $nomorBast,
+                    'kodeSkpd' => $kodeSkpd,
+                ])
+                ->update([
+                    'nomorBast' => '',
+                    'tanggalBast' => '',
+                    'statusBast' => '',
+                    'nomorUrutBast' => ''
+                ]);
+
+            DB::commit();
+            return response()->json([
+                'message' => 'BAST berhasil dihapus'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'BAST tidak berhasil dihapus'
+            ], 500);
+        }
     }
 
 }

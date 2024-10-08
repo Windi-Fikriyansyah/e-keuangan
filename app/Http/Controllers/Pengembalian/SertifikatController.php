@@ -74,7 +74,7 @@ class SertifikatController extends Controller
         $nomorSurat = $request->input('nomorSurat');
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.statusPinjamLagi','a.statusPengembalian','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn','a.kodeSkpd', 'a.noTelpKsbtgn')
+            ->select('a.tanggalPinjam','a.tanggalBast','a.tanggalPengembalian','a.file','a.statusVerifikasiOperator','a.statusPinjamLagi','a.statusPengembalian','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn','a.kodeSkpd', 'a.noTelpKsbtgn')
             ->where('a.nomorSurat', $nomorSurat)
             ->first();
 
@@ -109,6 +109,7 @@ class SertifikatController extends Controller
             'nomorSurat' => 'required|string',
             'kodeSkpd' => 'required|string',
             'nomorRegister' => 'required|string',
+            'tanggalPengembalian' => 'required|date',
 
         ]);
 
@@ -117,7 +118,7 @@ class SertifikatController extends Controller
                 ->where('nomorSurat', $validated['nomorSurat'])
                 ->update([
                     'statusPengembalian' => 1,
-                    'tanggalPengembalian' => now()->setTimezone('Asia/Jakarta'),
+                    'tanggalPengembalian' => $validated['tanggalPengembalian'],
                     'statusPinjamLagi' => '0'
                 ]);
 
