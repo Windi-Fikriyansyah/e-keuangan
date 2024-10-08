@@ -111,7 +111,7 @@ class UserController extends Controller
                 ->with('message', 'User berhasil ditambahkan!');
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->route('user.create')->withInput()->with('message', 'Data gagal disimpan');
+            return redirect()->route('user.create')->withInput()->with('message', 'Data gagal disimpan' . $e->getMessage());
         }
     }
 
