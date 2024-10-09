@@ -299,7 +299,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('verifikasi_bast', [BASTSertifikatController::class, 'verifikasi_bast'])->name('verifikasi_bast');
                 Route::post('batalkan', [BASTSertifikatController::class, 'batalkan'])->name('batalkan');
                 Route::post('hapus', [BASTSertifikatController::class, 'hapus'])->name('hapus');
-
+                Route::get('cetak', [BASTSertifikatController::class, 'cetakBast'])->name('cetak');
             });
     });
 

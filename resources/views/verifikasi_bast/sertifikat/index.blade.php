@@ -40,7 +40,65 @@
         </div>
     </div>
 
-
+    <div class="modal fade text-left" id="modalCetak" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cetak Form Bast Sertifikat</h5>
+                    <button type="button" class="close rounded-pill" data-bs-dismiss="modal" aria-label="Close">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Nomor Bast</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="nomorBast1" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Nomor Surat</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="nomorSurat1" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Nomor Register</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="nomorRegister1" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Pihak Kedua</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="namaKsbtgn1" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Pihak Pertama</label>
+                        <div class="col-sm-8">
+                            <select class="form-select select_option" id="tandaTangan" data-placeholder="Silahkan Pilih">
+                                <option value="" selected>Silahkan Pilih</option>
+                                @foreach ($daftarTandaTangan as $item)
+                                    <option value="{{ $item->nip }}">{{ $item->nip }} | {{ $item->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="flex: 1;align-items:center;justify-content:center">
+                    <button type="button" class="btn btn-dark ms-1 cetak" data-tipe="layar">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Layar</span>
+                    </button>
+                    <button type="button" class="btn btn-danger ms-1 cetak" data-tipe="pdf">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <div class="modal fade" id="verifModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle"
@@ -353,6 +411,78 @@
                 }
             });
         });
+
+        function cetak(nomorBast,namaKsbtgn, nomorSurat, nomorRegister,) {
+            $('#nomorBast1').val(nomorBast);
+            $('#nomorSurat1').val(nomorSurat);
+            $('#nomorRegister1').val(nomorRegister);
+            $('#namaKsbtgn1').val(namaKsbtgn);
+            $('#modalCetak').modal('show');
+        }
+
+        $('.cetak').on('click', function() {
+            let nomorBast = $('#nomorBast1').val();
+                let nomorSurat = $('#nomorSurat1').val();
+                let nomorRegister = $('#nomorRegister1').val();
+                let namaKsbtgn = $('#namaKsbtgn1').val();
+                let tandaTangan = $('#tandaTangan').val();
+                let tipe = $(this).data('tipe');
+
+
+                if (!nomorBast) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Nomor Bast tidak boleh kosong",
+                        icon: "warning"
+                    });
+                    return;
+                }
+                if (!nomorSurat) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Nomor surat tidak boleh kosong",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!nomorRegister) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Nomor register tidak boleh kosong",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!tandaTangan) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silahkan pilih Pihak Pertama",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!namaKsbtgn) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silahkan pilih Pihak Kedua",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                let url = new URL("{{ route('bast.sertifikat.cetak') }}");
+                let searchParams = url.searchParams;
+                searchParams.append("nomorBast", nomorBast);
+                searchParams.append("nomorSurat", nomorSurat);
+                searchParams.append("nomorRegister", nomorRegister);
+                searchParams.append("namaKsbtgn", namaKsbtgn);
+                searchParams.append("tandaTangan", tandaTangan);
+                searchParams.append("tipe", tipe);
+                window.open(url.toString(), "_blank");
+            });
 
 
         function hapus(nomorBast, kodeSkpd) {

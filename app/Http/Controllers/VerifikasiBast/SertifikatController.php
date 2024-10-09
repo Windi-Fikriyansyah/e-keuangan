@@ -13,14 +13,18 @@ class SertifikatController extends Controller
 {
     public function index()
     {
-        return view('verifikasi_bast.sertifikat.index');
+
+        $daftarTandaTangan = DB::table('masterTtd')
+        ->where(['kodeSkpd' => Auth::user()->kd_skpd])
+        ->get();
+        return view('verifikasi_bast.sertifikat.index', compact('daftarTandaTangan'));
     }
 
     public function load(Request $request)
     {
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-        ->select('a.nomorSurat','a.statusBast','a.nomorBast', 'a.nomorRegister','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSertifikat', 'a.statusPengajuan', 'a.NIB', 'a.file', 'a.kodeSkpd','a.statusPengembalian', 'b.namaSkpd')
+        ->select('a.nomorSurat','a.statusBast','a.nomorBast','namaKsbtgn', 'a.nomorRegister','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast','a.statusPengembalian', 'a.nomorSertifikat', 'a.statusPengajuan', 'a.NIB', 'a.file', 'a.kodeSkpd','a.statusPengembalian', 'b.namaSkpd')
         ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd')
         ->where('a.statusVerifPenyelia', 1);
 
@@ -61,7 +65,7 @@ class SertifikatController extends Controller
             }
 
             // Add Cetak button
-            $btn .= '<a onclick="cetak(\'' . $row->nomorBast . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+            $btn .= '<a onclick="cetak(\'' . $row->nomorBast . '\',\'' . $row->namaKsbtgn . '\',\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
 
             // Add Verif button
             if ($row->statusBast == '1') {
@@ -152,6 +156,48 @@ class SertifikatController extends Controller
         ->update(['statusBast' => 0]);
 
         return response()->json(['success' => true]);
+    }
+
+    public function cetakBast(Request $request)
+    {
+        $nomorBast = $request->nomorBast;
+        $nomorSurat = $request->nomorSurat;
+        $nomorRegister = $request->nomorRegister;
+        $tandaTangan = $request->tandaTangan;
+        $tipe = $request->tipe;
+        $kodeSkpd = Auth::user()->kd_skpd;
+
+        $data = [
+            'dataSkpd' => DB::table('masterSkpd')
+                ->select('namaSkpd')
+                ->where(['kodeSkpd' => $kodeSkpd])
+                ->first(),
+            'dataPeminjaman' => DB::table('pinjamanSertifikat')
+                ->where([
+                    'nomorBast' => $nomorBast,
+                    'nomorSurat' => $nomorSurat,
+                    'nomorRegister' => $nomorRegister,
+                    'kodeSkpd' => $kodeSkpd
+                ])
+                ->first(),
+            'tandaTangan' => DB::table('masterTtd')
+                ->where(['nip' => $tandaTangan])
+                ->first(),
+            'tipe' => $tipe
+        ];
+
+        $view = view('verifikasi_bast.sertifikat.cetak')->with($data);
+
+        if ($tipe == 'layar') {
+            return $view;
+        } else if ($tipe == 'pdf') {
+            $pdf = PDF::loadHtml($view)
+                ->setPaper('legal')
+                ->setOrientation('portrait')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+            return $pdf->stream('FormBastSertifikat.pdf');
+        }
     }
 
     public function hapus(Request $request)
