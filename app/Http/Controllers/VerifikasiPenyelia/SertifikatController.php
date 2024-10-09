@@ -75,7 +75,7 @@ class SertifikatController extends Controller
         $nomorSurat = $request->input('nomorSurat');
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn', 'a.noTelpKsbtgn')
+            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.kodeSkpd','a.statusVerifAdmin','a.statusVerifPenyelia','a.statusBast', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn','a.tanggalVerifPenyelia','a.tanggalVerifAdmin','a.file', 'a.noTelpKsbtgn')
             ->where('a.nomorSurat', $nomorSurat)
             ->first();
 
@@ -91,6 +91,7 @@ class SertifikatController extends Controller
     {
         $validated = $request->validate([
             'nomorSurat' => 'required|string',
+            'tanggalVerifPenyelia' => 'required|date',
         ]);
 
         DB::table('pinjamanSertifikat')
@@ -98,7 +99,7 @@ class SertifikatController extends Controller
             ->update([
                 'statusVerifPenyelia' => 1,
                 'userVerifPenyelia' => Auth::user()->name,
-                'tanggalVerifPenyelia' => now()->setTimezone('Asia/Jakarta')
+                'tanggalVerifPenyelia' => $validated['tanggalVerifPenyelia']
             ]);
 
         return response()->json(['success' => true]);

@@ -212,7 +212,9 @@
                         </div>
                     </div>
                     <div class="mb-3 text-end">
+                        @if ($dataPinjam->statusPengajuan == '0')
                         <button class="btn btn-primary" type="submit">Simpan</button>
+                        @endif
                         <a href="{{ route('peminjaman.sertifikat.index') }}" class="btn btn-warning">Kembali</a>
                     </div>
                 </form>

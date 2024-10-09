@@ -55,11 +55,7 @@ class SertifikatController extends Controller
 
         return DataTables::of($users)
         ->addColumn('aksi', function ($row) {
-            if ($row->statusVerifikasiOperator == '1') {
-                $btn = '';
-            } else {
-                    $btn = '<a href="' . route("peminjaman.sertifikat.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
-                }
+            $btn = '<a href="' . route("peminjaman.sertifikat.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
 
             if ($row->statusPengajuan == '0') {
                 $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
