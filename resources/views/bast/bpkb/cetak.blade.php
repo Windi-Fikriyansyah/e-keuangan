@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Cetak Form Peminjaman BPKB</title>
+    <title>Cetak Form Penyerahan BAST BPKB</title>
 </head>
 
 <body>
@@ -19,7 +19,7 @@
             <td align="left" style="font-size:18px" width="93%">&nbsp;</td>
         </tr>
         <tr>
-            <td align="center" style="font-size:18px" width="93%"><strong>PEMERINTAH
+            <td align="center" style="font-size:18px;padding:-100px" width="93%"><strong>PEMERINTAH
                     KABUPATEN KUBU RAYA</strong></td>
         </tr>
         <tr>
@@ -35,85 +35,126 @@
     <hr>
     <br>
 
-    <table style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%">
+    <table
+        style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%;text-align:center">
         <tr>
-            <td style="text-align: right">Sungai Raya,
-                {{ \Carbon\Carbon::parse($dataPeminjaman->tanggalPinjam)->locale('id')->isoFormat('d MMMM YYYY') }}</td>
+            <td>
+                <b><u>BERITA ACARA SERAH TERIMA BPKB</u></b>
+            </td>
+        </tr>
+        <tr>
+            <td>Nomor : {{ $dataPeminjaman->nomorBast }}</td>
         </tr>
     </table>
 
-    <table style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%">
-        <tr>
-            <td style="width: 100px">Nomor</td>
-            <td>:</td>
-            <td>{{ $dataPeminjaman->nomorSurat }}</td>
-        </tr>
-        <tr>
-            <td style="width: 100px">Sifat</td>
-            <td>:</td>
-            <td>Biasa</td>
-        </tr>
-        <tr>
-            <td style="width: 100px">Lampiran</td>
-            <td>:</td>
-            <td>-</td>
-        </tr>
-        <tr>
-            <td style="width: 100px">Hal</td>
-            <td>:</td>
-            <td>Peminjaman BPKB</td>
-        </tr>
-    </table>
-
-    <br><br>
-    <table style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%">
-        <tr>
-            <td style="width: 5%">Yth.</td>
-            <td>Sekretaris Daerah Kabupaten Kubu Raya</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Selaku Pengelola Barang</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>u.p. Kepala BPKAD Kab. Kubu Raya</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>di Sungai Raya</td>
-        </tr>
-    </table>
+    <br>
 
     <table style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%">
         <tr>
-            <td colspan="2">
-                <p style="text-indent: 60px">Berdasarkan Pasal 15 Peraturan Bupati Kubu Raya Nomor 102 Tahun 2021
-                    tentang Tata Cara Pengamanan
-                    Pedoman
-                    Pengelolaan Barang Milik Daerah, bahwa BPKB dapat dipinjam oleh Pengguna Barang untuk tujuan antara
-                    lain:
-                </p>
-            </td>
-        </tr>
-        <tr>
-            <td>1.</td>
-            <td>Perubahan data Buku Pemilik Kendaraan Bermotor dan Surat Tanda Nomor Kendaraan Bermotor; dan/atau
-            </td>
-        </tr>
-        <tr>
-            <td>2.</td>
-            <td>Perpanjangan Surat Tanda Nomor Kendaraan dan penggantian plat nomor kendaraan dinas.
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <p>Oleh karena itu bersama ini Kami mengajukan permohonan peminjaman BPKB untuk keperluan seperti yang
-                    tersebut pada nomor 1 atau 2 diatas, selama 7 (tujuh) hari terhitung setelah ditandatanganinya BAST
-                    penyerahan BPKB dengan data sebagai berikut:</p>
+            <td>
+                Pada hari ini {{ \Carbon\Carbon::parse($tanggalTtd)->locale('id')->dayName }} tanggal
+                {{ \Carbon\Carbon::parse($tanggalTtd)->locale('id')->isoformat('D') }} bulan
+                {{ \Carbon\Carbon::parse($tanggalTtd)->locale('id')->isoformat('MMMM') }} tahun
+                {{ \Carbon\Carbon::parse($tanggalTtd)->locale('id')->isoformat('Y') }}, yang
+                bertanda tangan di bawah ini :
             </td>
         </tr>
     </table>
+
+    <br>
+
+    <table style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%">
+        <tr>
+            <td style="width: 2%">1.</td>
+            <td style="width: 10%">Nama</td>
+            <td style="width: 1%">:</td>
+            <td>
+                {{ $tandaTangan->nama }}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 2%"></td>
+            <td style="width: 10%">NIP</td>
+            <td>:</td>
+            <td>
+                {{ $tandaTangan->nip }}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 2%"></td>
+            <td style="width: 10%">Jabatan</td>
+            <td>:</td>
+            <td>
+                {{ $tandaTangan->jabatan }}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 2%"></td>
+            <td style="width: 10%">Alamat</td>
+            <td>:</td>
+            <td>
+                {{ $tandaTangan->alamat }}
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="3">Yang selanjutnya disebut PIHAK PERTAMA</td>
+        </tr>
+
+        <tr>
+            <td colspan="4" style="padding-top: 10px"></td>
+        </tr>
+
+        <tr>
+            <td style="width: 2%">2.</td>
+            <td style="width: 10%">Nama</td>
+            <td>:</td>
+            <td>
+                {{ $dataPeminjaman->namaPbp }}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 2%"></td>
+            <td style="width: 10%">NIP</td>
+            <td>:</td>
+            <td>
+                {{ $dataPeminjaman->nipPbp }}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 2%"></td>
+            <td style="width: 10%">Jabatan</td>
+            <td>:</td>
+            <td>Pengurus Barang Pengguna</td>
+        </tr>
+        <tr>
+            <td style="width: 2%"></td>
+            <td style="width: 10%">Alamat</td>
+            <td>:</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="3">Yang selanjutnya disebut PIHAK KEDUA</td>
+        </tr>
+    </table>
+
+    <br>
+
+    <table style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%">
+        <tr>
+            <td>PIHAK PERTAMA telah menyerahkan kepada PIHAK KEDUA Buku Pemilik Kendaraan Bermotor (BPKB) untuk
+                keperluan {{ $dataPeminjaman->keperluan }} selama 7 (tujuh) hari berdasarkan Surat dari Pengguna Barang
+                Nomor:
+                {{ $dataPeminjaman->nomorBast }} tanggal
+                {{ \Carbon\Carbon::parse($dataPeminjaman->tanggalBast)->locale('id')->isoFormat('D MMMM Y') }} hal
+                Peminjaman BPKB, dengan
+                data sebagai berikut:
+            </td>
+        </tr>
+    </table>
+
+    <br>
 
     <table style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%"
         border="1">
@@ -142,51 +183,59 @@
     <table
         style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%;text-align:justify">
         <tr>
-            <td colspan="3">Data Pengurus Barang Pengguna :</td>
+            <td>Semua dokumen tersebut telah diterima dalam keadaan baik dan lengkap.</td>
         </tr>
         <tr>
-            <td style="width: 200px">1. Nama</td>
-            <td style="width:10px">:</td>
-            <td>{{ $dataPeminjaman->namaPbp }}</td>
-        </tr>
-        <tr>
-            <td>2. NIP</td>
-            <td>:</td>
-            <td>{{ $dataPeminjaman->nipPbp }}</td>
-        </tr>
-        <tr>
-            <td>3. Nomor HP/WA</td>
-            <td>:</td>
-            <td>{{ $dataPeminjaman->nomorTelpPbp }}</td>
-        </tr>
-        <tr>
-            <td colspan="3" style="padding-top:10px;text-indent:60px">Demikian Surat Peminjaman BPKB ini, atas
-                perhatian dan
-                kerjasamanya diucapkan terima
-                kasih. </td>
+            <td style="padding-top:10px">Demikian Berita Acara Serah Terima BPKB ini dibuat dalam rangkap 2 (dua) untuk
+                dipergunakan sebagaimana
+                mestinya.</td>
         </tr>
     </table>
 
     <br><br>
     <table class="table" style="width: 100%;font-size: 16px;font-family: 'Open Sans' sans-serif">
         <tr>
-            <td style="width: 50%"></td>
+            <td style="width: 50%;text-align:center">
+                PIHAK KEDUA
+            </td>
             <td style="margin: 2px 0px;text-align: center">
-                Kepala Perangkat Daerah
+                PIHAK PERTAMA
             </td>
         </tr>
         <tr>
-            <td style="width: 50%"></td>
             <td style="padding-bottom: 50px;text-align: center">
-                Selaku Pengguna Barang,
+                Yang Menerima,
+            </td>
+            <td style="padding-bottom: 50px;text-align: center">
+                Yang Menyerahkan,
             </td>
         </tr>
         <tr>
-            <td style="width: 50%"></td>
+            <td style="width: 50%;text-align: center">
+                <b><u>{{ $dataPeminjaman->namaPbp }}</u></b> <br>
+                NIP. {{ $dataPeminjaman->nipPbp }}
+            </td>
             <td style="text-align: center">
-                <strong><u>{{ $tandaTangan->nama }}</u></strong> <br>
-                {{ $tandaTangan->pangkat }} <br>
+                <b><u>{{ $tandaTangan->nama }}</u></b> <br>
                 NIP. {{ $tandaTangan->nip }}
+            </td>
+        </tr>
+
+        <tr>
+            <td style="text-align: center;padding-top:20px" colspan="2">
+                Mengetahui,
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-bottom: 50px;text-align: center" colspan="2">
+                Kepala Bidang Pengelolaan Aset Daerah <br>
+                BPKAD Kabupaten Kubu Raya,
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center" colspan="2">
+                <b><u>{{ $tandaTangan2->nama }}</u></b> <br>
+                NIP. {{ $tandaTangan2->nip }}
             </td>
         </tr>
     </table>

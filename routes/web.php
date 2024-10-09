@@ -209,6 +209,7 @@ Route::middleware('auth')->group(function () {
             ->group(function () {
                 Route::get('', [LaporanSertifikatController::class, 'index'])->name('index');
                 Route::post('balikNama', [LaporanSertifikatController::class, 'balikNama'])->name('balikNama');
+                Route::post('Pengembalian', [LaporanSertifikatController::class, 'Pengembalian'])->name('Pengembalian');
                 Route::post('hak', [LaporanSertifikatController::class, 'hak'])->name('hak');
                 Route::post('asalUsul', [LaporanSertifikatController::class, 'asalUsul'])->name('asalUsul');
                 Route::post('tandaTangan', [LaporanSertifikatController::class, 'tandaTangan'])->name('tandaTangan');
@@ -287,6 +288,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('load', [BASTBPKBController::class, 'load'])->name('load');
                 Route::post('simpan', [BASTBPKBController::class, 'simpan'])->name('simpan');
                 Route::post('hapus', [BASTBPKBController::class, 'hapus'])->name('hapus');
+                Route::get('cetak', [BASTBPKBController::class, 'cetak'])->name('cetak');
             });
 
         // SERTIFIKAT
@@ -298,7 +300,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('verifikasi_bast', [BASTSertifikatController::class, 'verifikasi_bast'])->name('verifikasi_bast');
                 Route::post('batalkan', [BASTSertifikatController::class, 'batalkan'])->name('batalkan');
                 Route::post('hapus', [BASTSertifikatController::class, 'hapus'])->name('hapus');
-
+                Route::get('cetak', [BASTSertifikatController::class, 'cetakBast'])->name('cetak');
             });
     });
 

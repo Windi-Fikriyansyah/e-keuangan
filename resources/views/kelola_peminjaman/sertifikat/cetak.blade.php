@@ -88,31 +88,11 @@
     <table style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%">
         <tr>
             <td colspan="2">
-                <p style="text-indent: 60px">Berdasarkan Pasal 15 Peraturan Bupati Kubu Raya Nomor 102 Tahun 2021
-                    tentang Tata Cara Pengamanan
-                    Pedoman
-                    Pengelolaan Barang Milik Daerah, bahwa Sertifikat dapat dipinjam oleh Pengguna Barang untuk tujuan antara
-                    lain:
+                <p style="text-indent: 60px">Berdasarkan Pasal 6 Peraturan Bupati Kubu Raya Nomor 102 Tahun 2021 tentang Tata Cara Pengamanan Pedoman Pengelolaan Barang Milik Daerah, bahwa bukti kepemilikan tanah hanya dapat dipinjam untuk tujuan proses balik nama sertipikat menjadi hak pakai atas nama Pemerintah Daerah atau alih media dari Sertipikat Hak Pakai Analog ke Sertipikat Hak Pakai Elektronik. Oleh karena itu bersama ini Kami mengajukan permohonan peminjaman Sertipikat Hak Pakai/Milik/Guna Bangunan untuk keperluan............, selama 30 (tiga puluh) hari terhitung setelah ditandatanganinya BAST penyerahan SHP/SHM/SHGB dengan data sebagai berikut:
                 </p>
             </td>
         </tr>
-        <tr>
-            <td>1.</td>
-            <td>Perubahan data Buku Pemilik Kendaraan Bermotor dan Surat Tanda Nomor Kendaraan Bermotor; dan/atau
-            </td>
-        </tr>
-        <tr>
-            <td>2.</td>
-            <td>Perpanjangan Surat Tanda Nomor Kendaraan dan penggantian plat nomor kendaraan dinas.
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <p>Oleh karena itu bersama ini Kami mengajukan permohonan peminjaman BPKB untuk keperluan seperti yang
-                    tersebut pada nomor 1 atau 2 diatas, selama 7 (tujuh) hari terhitung setelah ditandatanganinya BAST
-                    penyerahan BPKB dengan data sebagai berikut:</p>
-            </td>
-        </tr>
+
     </table>
 
     <table style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%"
@@ -121,18 +101,24 @@
             <tr>
                 <th>No.</th>
                 <th>No. Register</th>
-                <th>Nomor NIB</th>
-                <th>Luas</th>
+                <th>Peruntukan</th>
+                <th>Pemegang Hak</th>
                 <th>Nomor Sertifikat</th>
+                <th>NIB</th>
+                <th>Luas (M2)</th>
+                <th>Tanggal Terbit / Diperiksa</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td style="text-align: center">1</td>
                 <td>{{ $dataPeminjaman->nomorRegister }}</td>
-                <td>{{ $dataPeminjaman->NIB }}</td>
-                <td>{{ $dataPeminjaman->luas }} m2</td>
+                <td>{{ $dataPeminjaman->peruntukan }}</td>
+                <td>{{ $dataPeminjaman->pemegangHak }}</td>
                 <td>{{ $dataPeminjaman->nomorSertifikat }}</td>
+                <td>{{ $dataPeminjaman->NIB }}</td>
+                <td>{{ $dataPeminjaman->luas }}</td>
+                <td>{{ $dataPeminjaman->tanggal }}</td>
             </tr>
         </tbody>
     </table>
@@ -142,7 +128,7 @@
     <table
         style="border-collapse: collapse;font-family: 'Open Sans' sans-serif; font-size:16px;width:100%;text-align:justify">
         <tr>
-            <td colspan="3">Data Pengurus Barang Pengguna :</td>
+            <td colspan="3">Data Kepala Sub Bagian Tata Guna Tanah :</td>
         </tr>
         <tr>
             <td style="width: 200px">1. Nama</td>
@@ -160,10 +146,9 @@
             <td>{{ $dataPeminjaman->noTelpKsbtgn }}</td>
         </tr>
         <tr>
-            <td colspan="3" style="padding-top:10px;text-indent:60px">Demikian Surat Peminjaman BPKB ini, atas
-                perhatian dan
-                kerjasamanya diucapkan terima
-                kasih. </td>
+            <td colspan="3" style="padding-top:10px;text-indent:60px">Demikian Surat Peminjaman Sertifikat ini, atas
+                perhatian dan kerjasamanya diucapkan terimakasih.
+            </td>
         </tr>
     </table>
 
@@ -172,13 +157,13 @@
         <tr>
             <td style="width: 50%"></td>
             <td style="margin: 2px 0px;text-align: center">
-                Kepala Perangkat Daerah
+                Asisten Pemerintahan dan Kesejahteraan Rakyat
             </td>
         </tr>
         <tr>
             <td style="width: 50%"></td>
             <td style="padding-bottom: 50px;text-align: center">
-                Selaku Pengguna Barang,
+                Setda Kabupaten Kubu Raya,
             </td>
         </tr>
         <tr>
