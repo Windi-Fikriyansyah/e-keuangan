@@ -288,6 +288,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('load', [BASTBPKBController::class, 'load'])->name('load');
                 Route::post('simpan', [BASTBPKBController::class, 'simpan'])->name('simpan');
                 Route::post('hapus', [BASTBPKBController::class, 'hapus'])->name('hapus');
+                Route::get('cetak', [BASTBPKBController::class, 'cetak'])->name('cetak');
             });
 
         // SERTIFIKAT
