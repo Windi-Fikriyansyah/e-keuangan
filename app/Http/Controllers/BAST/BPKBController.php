@@ -4,15 +4,25 @@ namespace App\Http\Controllers\BAST;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use PDF;
 
 class BPKBController extends Controller
 {
     public function index()
     {
-        return view('bast.bpkb.index');
+        $daftarTandaTangan = DB::table('masterTtd')
+            ->where(['kodeSkpd' => Auth::user()->kd_skpd])
+            ->get();
+
+        $daftarTandaTanganKepala = DB::table('masterTtd')
+            ->where(['kode' => 'PPKD'])
+            ->get();
+
+        return view('bast.bpkb.index', compact('daftarTandaTangan', 'daftarTandaTanganKepala'));
     }
 
     public function load(Request $request)
@@ -181,6 +191,53 @@ class BPKBController extends Controller
             return response()->json([
                 'message' => 'BAST tidak berhasil dihapus'
             ], 500);
+        }
+    }
+
+    public function cetak(Request $request)
+    {
+        $nomorBast = $request->nomorBast;
+        $tandaTangan = $request->tandaTangan;
+        $tandaTangan2 = $request->tandaTangan2;
+        $tipe = $request->tipe;
+        $tanggalTtd = $request->tanggalTtd;
+        $kodeSkpd = Auth::user()->kd_skpd;
+
+        $data = [
+            'dataSkpd' => DB::table('masterSkpd')
+                ->select('namaSkpd')
+                ->where(['kodeSkpd' => $kodeSkpd])
+                ->first(),
+            'dataPeminjaman' => DB::table('pinjamanBpkb')
+                ->where([
+                    'nomorBast' => $nomorBast,
+                    'kodeSkpd' => $kodeSkpd
+                ])
+                ->first(),
+            'tandaTangan' => DB::table('masterTtd')
+                ->where(['nip' => $tandaTangan])
+                ->first(),
+            'tandaTangan2' => DB::table('masterTtd')
+                ->where([
+                    'nip' => $tandaTangan2,
+                    'kode' => 'PPKD'
+                ])
+                ->first(),
+            'tipe' => $tipe,
+            'tanggalTtd' => $tanggalTtd,
+        ];
+
+        $view = view('bast.bpkb.cetak')->with($data);
+
+        if ($tipe == 'layar') {
+            return $view;
+        } else if ($tipe == 'pdf') {
+            $pdf = PDF::loadHtml($view)
+                ->setPaper('legal')
+                ->setOrientation('portrait')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+            return $pdf->stream('FormPenyerahanBPKB.pdf');
         }
     }
 }

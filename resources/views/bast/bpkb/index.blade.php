@@ -143,6 +143,73 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="modalCetak" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cetak Form Penyerahan BAST</h5>
+                    <button type="button" class="close rounded-pill" data-bs-dismiss="modal" aria-label="Close">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Nomor Bast</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="nomorBastCetak" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Kode SKPD</label>
+                        <div class="col-sm-8">
+                            <input class="form-control readonlyInput" id="kodeSkpdCetak" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Tanggal TTD</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" id="tanggalTtdCetak" type="date">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Tanda Tangan I</label>
+                        <div class="col-sm-8">
+                            <select class="form-select select_option" id="tandaTangan" data-placeholder="Silahkan Pilih">
+                                <option value="" selected>Silahkan Pilih</option>
+                                @foreach ($daftarTandaTangan as $item)
+                                    <option value="{{ $item->nip }}">{{ $item->nip }} | {{ $item->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Tanda Tangan II</label>
+                        <div class="col-sm-8">
+                            <select class="form-select select_option" id="tandaTangan2"
+                                data-placeholder="Silahkan Pilih">
+                                <option value="" selected>Silahkan Pilih</option>
+                                @foreach ($daftarTandaTanganKepala as $item)
+                                    <option value="{{ $item->nip }}">{{ $item->nip }} | {{ $item->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="flex: 1;align-items:center;justify-content:center">
+                    <button type="button" class="btn btn-dark ms-1 cetak" data-tipe="layar">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Layar</span>
+                    </button>
+                    <button type="button" class="btn btn-danger ms-1 cetak" data-tipe="pdf">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @push('js')
     <style>
@@ -330,6 +397,71 @@
                     }
                 });
             });
+
+            $('.cetak').on('click', function() {
+                let nomorBast = $('#nomorBastCetak').val();
+                let kodeSkpd = $('#kodeSkpdCetak').val();
+                let tanggalTtd = $('#tanggalTtdCetak').val();
+                let tandaTangan = $('#tandaTangan').val();
+                let tandaTangan2 = $('#tandaTangan2').val();
+                let tipe = $(this).data('tipe');
+
+                if (!nomorBast) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Nomor BAST tidak boleh kosong",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!kodeSkpd) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Kode SKPD tidak boleh kosong",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!tanggalTtd) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silahkan pilih tanggal TTD",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!tandaTangan) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silahkan pilih tanda tangan I",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!tandaTangan2) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silahkan pilih tanda tangan II",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                let url = new URL("{{ route('bast.bpkb.cetak') }}");
+                let searchParams = url.searchParams;
+                searchParams.append("nomorBast", nomorBast);
+                searchParams.append("kodeSkpd", kodeSkpd);
+                searchParams.append("nomorRegister", nomorRegister);
+                searchParams.append("tanggalTtd", tanggalTtd);
+                searchParams.append("tandaTangan", tandaTangan);
+                searchParams.append("tandaTangan2", tandaTangan2);
+                searchParams.append("tipe", tipe);
+                window.open(url.toString(), "_blank");
+            });
         });
 
         function hapus(nomorBast, kodeSkpd) {
@@ -385,6 +517,12 @@
                     });
                 }
             });
+        }
+
+        function cetak(nomorBast, kodeSkpd) {
+            $('#nomorBastCetak').val(nomorBast);
+            $('#kodeSkpdCetak').val(kodeSkpd);
+            $('#modalCetak').modal('show');
         }
     </script>
 @endpush
