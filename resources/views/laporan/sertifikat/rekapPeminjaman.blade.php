@@ -61,6 +61,7 @@
                 <th>Asal Usul</th>
                 <th>Keterangan</th>
                 <th>Balik Nama</th>
+                <th>Pengembalian</th>
                 <th>Nama SKPD</th>
                 {{-- <th>Tanggal Penyerahan</th>
                 <th>Tanggal Pengembalian</th> --}}
@@ -78,7 +79,8 @@
                     <td>{{ $item->penggunaan }}</td>
                     <td>{{ $item->asalUsul }}</td>
                     <td>{{ $item->keterangan }}</td>
-                    <td>{{ $item->balikNama }}</td>
+                    <td>{{ $item->balikNama == 0 ? 'Belum' : 'Sudah' }}</td>
+                    <td>{{ $item->statusPengembalian == 0 ? 'Belum' : 'Sudah' }}</td>
                     <td>{{ $item->namaSkpd }}</td>
                     {{-- <td>{{ $item->tanggalPinjam }}</td>
                     <td>{{ $item->tanggalPeminjaman }}</td> --}}

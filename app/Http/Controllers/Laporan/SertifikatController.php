@@ -44,6 +44,28 @@ class SertifikatController extends Controller
         return response()->json($daftarbalikNama);
     }
 
+    public function Pengembalian(Request $request)
+{
+    $query = DB::table('pinjamanSertifikat')
+        ->select('statusPengembalian')
+        ->when($request->kodeSkpd, function ($query, $kodeSkpd) {
+            return $query->where('kodeSkpd', $kodeSkpd);
+        })
+        ->groupBy('statusPengembalian');
+
+    $daftarPengembalian = $query->get()
+        ->map(function ($item) {
+            return [
+                'statusPengembalian' => $item->statusPengembalian
+            ];
+        })
+        ->push(['statusPengembalian' => 'Keseluruhan'])
+        ->unique('statusPengembalian')
+        ->values();
+
+    return response()->json($daftarPengembalian);
+}
+
     public function hak(Request $request)
     {
 
@@ -173,39 +195,52 @@ class SertifikatController extends Controller
     }
 
     public function cetakRekapPeminjaman(Request $request)
-    {
-        $pilihan = $request->pilihan;
-        $kd_skpd = $request->kd_skpd;
-        $balikNama = $request->balikNama;
-        $Hak = $request->Hak;
-        $asalUsul = $request->asalUsul;
-        $ttd = $request->ttd;
-        $tanggalTtd = $request->tanggalTtd;
-        $jenis_print = $request->jenis_print;
-        $tanggal_awal = $request->tanggal_awal;
-        $tanggal_akhir = $request->tanggal_akhir;
-        $data = [
-            'dataSkpd' => DB::table('masterSkpd')
-                ->select('namaSkpd')
-                ->where(function ($query) use ($kd_skpd) {
-                    if ($kd_skpd != 'null') {
-                        $query->where('kodeSkpd', $kd_skpd);
-                    } else {
-                        $query->where('kodeSkpd', '5.02.0.00.0.00.02.0000');
-                    }
-                })
-                ->first(),
-            'dataSertifikat' => DB::table('masterSertifikat as a')
+{
+    $pilihan = $request->pilihan;
+    $kd_skpd = $request->kd_skpd;
+    $balikNama = $request->balikNama;
+    $statusPengembalian = $request->statusPengembalian;
+    $Hak = $request->Hak;
+    $asalUsul = $request->asalUsul;
+    $ttd = $request->ttd;
+    $tanggalTtd = $request->tanggalTtd;
+    $jenis_print = $request->jenis_print;
+    $tanggal_awal = $request->tanggal_awal;
+    $tanggal_akhir = $request->tanggal_akhir;
+
+    // Log untuk debugging
+    \Log::info('Tanggal awal: ' . $tanggal_awal);
+    \Log::info('Tanggal akhir: ' . $tanggal_akhir);
+
+    $data = [
+        'dataSkpd' => DB::table('masterSkpd')
+            ->select('namaSkpd')
+            ->where(function ($query) use ($kd_skpd) {
+                if ($kd_skpd != 'null') {
+                    $query->where('kodeSkpd', $kd_skpd);
+                } else {
+                    $query->where('kodeSkpd', '5.02.0.00.0.00.02.0000');
+                }
+            })
+            ->first(),
+        'dataSertifikat' => DB::table('masterSertifikat as a')
             ->selectRaw("a.*,
-                (select TOP 1 namaKsbtgn
-                 from pinjamanSertifikat b
-                 where a.nomorRegister = b.nomorRegister
-                   and a.kodeSkpd = b.kodeSkpd
-                   and b.tanggalPinjam is not null
-                 order by b.id) AS namaPemakai,
-                (select namaSkpd from masterSkpd
-                 where a.kodeSkpd = kodeSkpd) as namaSkpd")
-            ->where(function ($query) use ($kd_skpd, $Hak, $asalUsul, $balikNama) {
+                b.namaKsbtgn AS namaPemakai,
+                b.tanggalPinjam,
+                b.tanggalPengembalian,
+                b.statusPengembalian,
+                (select namaSkpd from masterSkpd where a.kodeSkpd = kodeSkpd) as namaSkpd")
+            ->leftJoin('pinjamanSertifikat as b', function ($join) use ($tanggal_awal, $tanggal_akhir) {
+                $join->on('a.nomorRegister', '=', 'b.nomorRegister')
+                     ->on('a.kodeSkpd', '=', 'b.kodeSkpd');
+            })
+            ->where(function ($query) use ($tanggal_awal, $tanggal_akhir) {
+                // Jika tanggal awal dan tanggal akhir ada, gunakan filter whereBetween
+                if ($tanggal_awal && $tanggal_akhir) {
+                    $query->whereBetween(DB::raw("CONVERT(DATE, b.tanggalPinjam)"), [$tanggal_awal, $tanggal_akhir]);
+                }
+            })
+            ->where(function ($query) use ($kd_skpd, $Hak, $asalUsul, $balikNama, $statusPengembalian) {
                 if ($kd_skpd != 'null') {
                     $query->where('a.kodeSkpd', $kd_skpd);
                 }
@@ -218,35 +253,33 @@ class SertifikatController extends Controller
                 if ($balikNama != 'Keseluruhan') {
                     $query->where('a.balikNama', $balikNama);
                 }
-            })
-            ->leftJoin('pinjamanSertifikat as b', function ($join) use ($tanggal_awal, $tanggal_akhir) {
-                $join->on('a.nomorRegister', '=', 'b.nomorRegister')
-                     ->on('a.kodeSkpd', '=', 'b.kodeSkpd');
-                // Kondisi tanggal harus dalam join untuk mengakses 'b.tanggalPinjam'
-                if ($tanggal_awal && $tanggal_akhir) {
-                    $join->whereBetween('b.tanggalPinjam', [$tanggal_awal, $tanggal_akhir]);
+                if ($statusPengembalian != 'Keseluruhan') {
+                    $query->where('b.statusPengembalian', $statusPengembalian);
                 }
             })
+            ->orderBy('a.nomorRegister')
             ->get(),
-            'tandaTangan' => DB::table('masterTtd')
-                ->where(['nip' => $ttd])
-                ->first(),
-            'tipe' => $jenis_print,
-            'tanggalTtd' => $tanggalTtd,
-            'pilihan' => $pilihan
-        ];
+        'tandaTangan' => DB::table('masterTtd')
+            ->where(['nip' => $ttd])
+            ->first(),
+        'tipe' => $jenis_print,
+        'tanggalTtd' => $tanggalTtd,
+        'pilihan' => $pilihan
+    ];
 
-        $view = view('laporan.sertifikat.rekapPeminjaman')->with($data);
+    $view = view('laporan.sertifikat.rekapPeminjaman')->with($data);
 
-        if ($jenis_print == 'layar') {
-            return $view;
-        } else if ($jenis_print == 'pdf') {
-            $pdf = PDF::loadHtml($view)
-                ->setPaper('legal')
-                ->setOrientation('landscape')
-                ->setOption('margin-left', 15)
-                ->setOption('margin-right', 15);
-            return $pdf->stream('LaporanRekapPeminjaman.pdf');
-        }
+    if ($jenis_print == 'layar') {
+        return $view;
+    } else if ($jenis_print == 'pdf') {
+        $pdf = PDF::loadHtml($view)
+            ->setPaper('legal')
+            ->setOrientation('landscape')
+            ->setOption('margin-left', 15)
+            ->setOption('margin-right', 15);
+        return $pdf->stream('LaporanRekapPeminjaman.pdf');
     }
+}
+
+
 }

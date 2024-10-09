@@ -209,6 +209,7 @@ Route::middleware('auth')->group(function () {
             ->group(function () {
                 Route::get('', [LaporanSertifikatController::class, 'index'])->name('index');
                 Route::post('balikNama', [LaporanSertifikatController::class, 'balikNama'])->name('balikNama');
+                Route::post('Pengembalian', [LaporanSertifikatController::class, 'Pengembalian'])->name('Pengembalian');
                 Route::post('hak', [LaporanSertifikatController::class, 'hak'])->name('hak');
                 Route::post('asalUsul', [LaporanSertifikatController::class, 'asalUsul'])->name('asalUsul');
                 Route::post('tandaTangan', [LaporanSertifikatController::class, 'tandaTangan'])->name('tandaTangan');
