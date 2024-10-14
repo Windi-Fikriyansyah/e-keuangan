@@ -116,6 +116,10 @@
                                     name="nomorRegisterPengajuan" type="text" readonly>
                                 <input class="form-control readonlyInput" id="statusPengajuan" name="statusPengajuan"
                                     type="text" hidden>
+                                    <input class="form-control readonlyInput" id="statusTolak" name="statusTolak"
+                                    type="text" hidden>
+                                    <input class="form-control readonlyInput" id="statusVerifikasiOperator" name="statusVerifikasiOperator"
+                                    type="text" hidden>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -215,6 +219,7 @@
                 let nomorSuratPengajuan = $("#nomorSuratPengajuan").val();
                 let nomorRegisterPengajuan = $("#nomorRegisterPengajuan").val();
                 let statusPengajuan = $("#statusPengajuan").val();
+                let statusTolak = $("#statusTolak").val();
                 let filePengajuan = $("#filePengajuan").val();
 
                 if (!nomorSuratPengajuan) {
@@ -295,18 +300,35 @@
             }
         }
 
-        function pengajuan(nomorSurat, nomorRegister, kodeSkpd, file, statusPengajuan) {
+        function pengajuan(nomorSurat, nomorRegister, kodeSkpd, file, statusPengajuan, statusTolak, statusVerifikasiOperator) {
             $('#nomorSuratPengajuan').val(nomorSurat);
             $('#nomorRegisterPengajuan').val(nomorRegister);
             $('#statusPengajuan').val(statusPengajuan);
+            $('#statusTolak').val(statusTolak);
+            $('#statusVerifikasiOperator').val(statusVerifikasiOperator);
 
             $('#AjukanPengajuan').prop('hidden', true);
             $('#BatalkanPengajuan').prop('hidden', true)
 
             const formatFile = `storage/images/Peminjaman/Sertifikat/${kodeSkpd}/${file}`;
 
-            statusPengajuan == '0' ? $('#AjukanPengajuan').prop('hidden', false) : $('#BatalkanPengajuan').prop('hidden',
-                false);
+            if (statusPengajuan === '0') {
+                $('#AjukanPengajuan').prop('hidden', false);
+            } else {
+                $('#BatalkanPengajuan').prop('hidden', false);
+            }
+
+            // Tampilkan tombol berdasarkan status tolak
+            if (statusTolak === '1') {
+                $('#AjukanPengajuan').prop('hidden', true);
+                $('#BatalkanPengajuan').prop('hidden', true);
+            }
+
+            if (statusVerifikasiOperator === '1') {
+                $('#AjukanPengajuan').prop('hidden', true);
+                $('#BatalkanPengajuan').prop('hidden', true);
+            }
+
 
             console.log(file)
             console.log(formatFile)

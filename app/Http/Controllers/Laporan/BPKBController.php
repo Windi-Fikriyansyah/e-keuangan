@@ -68,6 +68,28 @@ class BPKBController extends Controller
         return response()->json($daftarJenis);
     }
 
+    public function Pengembalian(Request $request)
+    {
+        $query = DB::table('pinjamanBpkb')
+            ->select('statusPengembalian')
+            ->when($request->kodeSkpd, function ($query, $kodeSkpd) {
+                return $query->where('kodeSkpd', $kodeSkpd);
+            })
+            ->groupBy('statusPengembalian');
+
+        $daftarPengembalian = $query->get()
+            ->map(function ($item) {
+                return [
+                    'statusPengembalian' => $item->statusPengembalian
+                ];
+            })
+            ->push(['statusPengembalian' => 'Keseluruhan'])
+            ->unique('statusPengembalian')
+            ->values();
+
+        return response()->json($daftarPengembalian);
+    }
+
     public function merk(Request $request)
     {
 
@@ -177,6 +199,7 @@ class BPKBController extends Controller
         $pilihan = $request->pilihan;
         $kd_skpd = $request->kd_skpd;
         $jenis = $request->jenis;
+        $statusPengembalian = $request->statusPengembalian;
         $merk = $request->merk;
         $ttd = $request->ttd;
         $tanggalTtd = $request->tanggalTtd;
@@ -193,20 +216,52 @@ class BPKBController extends Controller
                     }
                 })
                 ->first(),
+            // 'dataBpkb' => DB::table('masterBpkb as a')
+            //     ->selectRaw("a.*, (select TOP 1 namaPbp from pinjamanBpkb b where a.nomorRegister=b.nomorRegister and a.kodeSkpd=b.kodeSkpd order by id) AS namaPemakai,(select b.statusPengembalian namaSkpd from masterSkpd where a.kodeSkpd=kodeSkpd) as namaSkpd")
+            //     ->where(function ($query) use ($kd_skpd, $jenis, $merk, $statusPengembalian) {
+            //         if ($kd_skpd != 'null') {
+            //             $query->where('a.kodeSkpd', $kd_skpd);
+            //         }
+            //         if ($jenis != 'Keseluruhan') {
+            //             $query->where('a.jenis', $jenis);
+            //         }
+            //         if ($merk != 'Keseluruhan') {
+            //             $query->where('a.merk', $merk);
+            //         }
+            //         if ($statusPengembalian != 'Keseluruhan') {
+            //             $query->where('b.statusPengembalian', $statusPengembalian);
+            //         }
+            //     })
+            //     ->get(),
             'dataBpkb' => DB::table('masterBpkb as a')
-                ->selectRaw("a.*, (select TOP 1 namaPbp from pinjamanBpkb b where a.nomorRegister=b.nomorRegister and a.kodeSkpd=b.kodeSkpd order by id) AS namaPemakai,(select namaSkpd from masterSkpd where a.kodeSkpd=kodeSkpd) as namaSkpd")
-                ->where(function ($query) use ($kd_skpd, $jenis, $merk) {
-                    if ($kd_skpd != 'null') {
-                        $query->where('a.kodeSkpd', $kd_skpd);
-                    }
-                    if ($jenis != 'Keseluruhan') {
-                        $query->where('a.jenis', $jenis);
-                    }
-                    if ($merk != 'Keseluruhan') {
-                        $query->where('a.merk', $merk);
-                    }
-                })
-                ->get(),
+            ->selectRaw("a.*,
+                        (SELECT TOP 1 b.namaPbp FROM pinjamanBpkb b
+                        WHERE a.nomorRegister = b.nomorRegister
+                        AND a.kodeSkpd = b.kodeSkpd
+                        ORDER BY b.id) AS namaPemakai,
+                        (SELECT c.namaSkpd FROM masterSkpd c
+                        WHERE a.kodeSkpd = c.kodeSkpd) AS namaSkpd,
+                        b.statusPengembalian")
+            ->leftJoin('pinjamanBpkb as b', function($join) {
+                $join->on('a.nomorRegister', '=', 'b.nomorRegister')
+                    ->on('a.kodeSkpd', '=', 'b.kodeSkpd');
+            })
+            ->where(function ($query) use ($kd_skpd, $jenis, $merk, $statusPengembalian) {
+                if ($kd_skpd != 'null') {
+                    $query->where('a.kodeSkpd', $kd_skpd);
+                }
+                if ($jenis != 'Keseluruhan') {
+                    $query->where('a.jenis', $jenis);
+                }
+                if ($merk != 'Keseluruhan') {
+                    $query->where('a.merk', $merk);
+                }
+                if ($statusPengembalian != 'Keseluruhan') {
+                    $query->where('b.statusPengembalian', $statusPengembalian);
+                }
+            })
+            ->get(),
+
             'tandaTangan' => DB::table('masterTtd')
                 ->where(['nip' => $ttd])
                 ->first(),

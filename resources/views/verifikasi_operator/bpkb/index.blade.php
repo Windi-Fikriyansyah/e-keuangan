@@ -127,6 +127,10 @@
                                 <i class="bx bx-check d-block d-sm-none"></i>
                                 <span class="d-none d-sm-block">Verifikasi</span>
                             </button>
+                            <button type="button" class="btn btn-danger ms-1" id="TolakVerif">
+                                <i class="bx bx-check d-block d-sm-none"></i>
+                                <span class="d-none d-sm-block">Tolak Peminjaman</span>
+                            </button>
                             <button type="button" class="btn btn-danger ms-1" id="batalVerifikasi" hidden>
                                 <i class="bx bx-check d-block d-sm-none"></i>
                                 <span class="d-none d-sm-block">Batal Verifikasi</span>
@@ -169,11 +173,13 @@
                     }
                 },
                 createdRow: function(row, data, index) {
-                    if (data.statusVerifikasiOperator == "1" && data.statusVerifAdmin != "1") {
+                    if (data.statusVerifikasiOperator == "1" && data.statusVerifAdmin != "1" && data.statusTolak !== "1") {
                         $(row).css("background-color", "#90EE90");
                     } else if (data.statusVerifikasiOperator == "1" && data.statusVerifAdmin ==
                         "1") {
                         $(row).css("background-color", "#ADD8E6");
+                    } else if (data.statusTolak == "1") {
+                        $(row).css("background-color", "#ff0e0e");
                     }
                 },
                 pageLength: 10,
@@ -229,11 +235,19 @@
                 $('#setujuVerifikasi').prop('hidden', true);
                 $('#batalVerifikasi').prop('hidden', true);
 
-                if (selectedData.statusVerifikasiOperator != '1') {
+
+                if(selectedData.statusTolak == 1){
+                    $('#setujuVerifikasi').prop('hidden', true);
+                    $('#batalVerifikasi').prop('hidden', true);
+                    $('#TolakVerif').prop('hidden', true);
+                    }
+                else if (selectedData.statusVerifikasiOperator != '1') {
                     $('#setujuVerifikasi').prop('hidden', false);
+                    $('#TolakVerif').prop('hidden', false);
                 } else if (selectedData.statusVerifikasiOperator == '1' && selectedData.statusVerifAdmin !=
                     '1') {
                     $('#batalVerifikasi').prop('hidden', false);
+                    $('#TolakVerif').prop('hidden', true);
                 }
 
                 const formatFile =
@@ -329,6 +343,41 @@
                     }
                 });
             });
+
+
+            $('#TolakVerif').on('click', function() {
+            var nomorSurat = $('#nomorSurat').val();
+            var kodeSkpd = $('#kodeSkpd').val();
+            var nomorRegister = $('#nomorRegister').val();
+            $.ajax({
+                url: '{{ route("verifikasi_operator.bpkb.tolak") }}',
+                type: 'POST',
+                data: {
+                    nomorSurat: nomorSurat,
+                    kodeSkpd: kodeSkpd,
+                    nomorRegister: nomorRegister,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(data) {
+                    $('#setujuVerifikasi').prop('hidden', true);
+                    $('#batalVerifikasi').prop('hidden', true);
+                    $('#TolakVerif').prop('hidden', true);
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peminjaman Ditolak!',
+                        text: 'Nomor Surat ' + nomorSurat + ' Peminjaman Telah Ditolak',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
 
             $('#batalVerifikasi').on('click', function() {
                 if (!selectedData) {

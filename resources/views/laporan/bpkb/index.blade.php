@@ -179,6 +179,14 @@
                     </div>
                     <div class="mb-3 row">
                         <div class="col-md-12">
+                            <label class="form-label">Pengembalian</label>
+                            <select class="form-control" style=" width: 100%;" id="PengembalianPeminjaman">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-md-12">
                             <label class="form-label">Merk</label>
                             <select class="form-control" style=" width: 100%;" id="merkrekapPeminjaman">
                                 <option value="" disabled selected>Silahkan Pilih</option>
@@ -597,6 +605,50 @@
                 }
             });
 
+    $('#PengembalianPeminjaman').select2({
+    theme: "bootstrap-5",
+    width: "100%",
+    placeholder: "Silahkan Pilih...",
+    ajax: {
+        url: "{{ route('laporan.bpkb.Pengembalian') }}",
+        dataType: 'json',
+        type: "POST",
+        data: function(params) {
+            let query = {
+                q: $.trim(params.term)
+            }
+            let kodeSkpd = $('#kd_skpdrekapPeminjaman').val();
+
+            if (kodeSkpd) query.kodeSkpd = kodeSkpd;
+            return query;
+        },
+        processResults: function(data) {
+            return {
+                results: data.map((item) => {
+                    let text;
+                    if (item.statusPengembalian === 'Keseluruhan') {
+                        text = "Keseluruhan";
+                    } else if (item.statusPengembalian == 0) {
+                        text = "Belum";
+                    } else if (item.statusPengembalian == 1) {
+                        text = "Sudah";
+                    } else {
+                        text = item.statusPengembalian;
+                    }
+                    return {
+                        text: text,
+                        id: item.statusPengembalian,
+                    };
+                }),
+                pagination: {
+                    more: false,
+                },
+            };
+        },
+        cache: true
+    }
+});
+
             $('#kd_skpdrekapPeminjaman').on('select2:select', function() {
                 $('#jenisrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
                 $('#merkrekapPeminjaman').val(null).trigger('change').trigger('select2:select');
@@ -657,6 +709,7 @@
 
                 let kd_skpd = $('#kd_skpdrekapPeminjaman').val();
                 let jenis = $('#jenisrekapPeminjaman').val();
+                let statusPengembalian = $('#PengembalianPeminjaman').val();
                 let merk = $('#merkrekapPeminjaman').val();
                 let ttd = $('#ttdrekapPeminjaman').val();
                 let tanggalTtd = $('#tanggalTtdrekapPeminjaman').val();
@@ -666,6 +719,15 @@
                     Swal.fire({
                         title: "Peringatan!",
                         text: "Silahkan Pilih SKPD!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!statusPengembalian) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silahkan Pilih Pengembalian!",
                         icon: "warning"
                     });
                     return;
@@ -720,6 +782,7 @@
                 searchParams.append("pilihan", pilihan);
                 searchParams.append("kd_skpd", kd_skpd);
                 searchParams.append("jenis", jenis);
+                searchParams.append("statusPengembalian", statusPengembalian);
                 searchParams.append("merk", merk);
                 searchParams.append("ttd", ttd);
                 searchParams.append("tanggalTtd", tanggalTtd);

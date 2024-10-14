@@ -128,6 +128,10 @@
                                 <i class="bx bx-check d-block d-sm-none"></i>
                                 <span class="d-none d-sm-block">Verifikasi</span>
                             </button>
+                            <button type="button" class="btn btn-danger ms-1" id="TolakVerif">
+                                <i class="bx bx-check d-block d-sm-none"></i>
+                                <span class="d-none d-sm-block">Tolak Peminjaman</span>
+                            </button>
                             <button type="button" class="btn btn-danger ms-1 d-none" id="BatalkanVerif">
                                 <i class="bx bx-check d-block d-sm-none"></i>
                                 <span class="d-none d-sm-block">Batal Verifikasi</span>
@@ -169,6 +173,13 @@
                     type: "POST",
                     data: function(data) {
                         data.search = data.search.value;
+                    }
+                },
+                createdRow: function(row, data, index) {
+                    if (data.statusTolak == "1") {
+                        $(row).css("background-color", "#ff0e0e");
+                    } else {
+                        $(row).css("background-color", "");
                     }
                 },
                 pageLength: 10,
@@ -224,14 +235,22 @@
                     $('#kodeSkpd').val(data.kodeSkpd);
                     $('#noTelpKsbtgn').val(data.noTelpKsbtgn);
 
-                    if (data.statusVerifAdmin == 1) {
+                    if(data.statusTolak == 1){
                         $('#VerifOperator').addClass('d-none');
                         $('#BatalkanVerif').addClass('d-none');
+                        $('#TolakVerif').addClass('d-none');
+                    }
+                    else if (data.statusVerifAdmin == 1) {
+                        $('#VerifOperator').addClass('d-none');
+                        $('#BatalkanVerif').addClass('d-none');
+                        $('#TolakVerif').addClass('d-none');
                     } else if (data.statusVerifikasiOperator == 1) {
                         $('#VerifOperator').addClass('d-none');
+                        $('#TolakVerif').addClass('d-none');
                         $('#BatalkanVerif').removeClass('d-none');
                     } else {
                         $('#VerifOperator').removeClass('d-none');
+                        $('#TolakVerif').removeClass('d-none');
                         $('#BatalkanVerif').addClass('d-none');
                     }
 
@@ -288,6 +307,40 @@
                         icon: 'success',
                         title: 'Verifikasi berhasil!',
                         text: 'Nomor Surat ' + nomorSurat + ' telah diverifikasi.',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
+
+        $('#TolakVerif').on('click', function() {
+            var nomorSurat = $('#nomorSurat').val();
+            var kodeSkpd = $('#kodeSkpd').val();
+            var nomorRegister = $('#nomorRegister').val();
+            $.ajax({
+                url: '{{ route("verifikasi_operator.sertifikat.tolak") }}',
+                type: 'POST',
+                data: {
+                    nomorSurat: nomorSurat,
+                    kodeSkpd: kodeSkpd,
+                    nomorRegister: nomorRegister,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(data) {
+                    $('#BatalkanVerif').addClass('d-none');
+                    $('#VerifOperator').addClass('d-none');
+                    $('#TolakVerif').addClass('d-none');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peminjaman Ditolak!',
+                        text: 'Nomor Surat ' + nomorSurat + ' Peminjaman Telah Ditolak',
                         confirmButtonText: 'OK'
                     }).then((result) => {
                         if (result.isConfirmed) {

@@ -85,6 +85,13 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Tanggal TTD</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" id="tanggalTtdCetak" type="date">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer" style="flex: 1;align-items:center;justify-content:center">
                     <button type="button" class="btn btn-dark ms-1 cetak" data-tipe="layar">
@@ -426,6 +433,7 @@
                 let nomorRegister = $('#nomorRegister1').val();
                 let namaKsbtgn = $('#namaKsbtgn1').val();
                 let tandaTangan = $('#tandaTangan').val();
+                let tanggalTtdCetak = $('#tanggalTtdCetak').val();
                 let tipe = $(this).data('tipe');
 
 
@@ -480,6 +488,7 @@
                 searchParams.append("nomorRegister", nomorRegister);
                 searchParams.append("namaKsbtgn", namaKsbtgn);
                 searchParams.append("tandaTangan", tandaTangan);
+                searchParams.append("tanggalTtdCetak", tanggalTtdCetak);
                 searchParams.append("tipe", tipe);
                 window.open(url.toString(), "_blank");
             });

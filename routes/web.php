@@ -198,6 +198,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('', [LaporanBPKBController::class, 'index'])->name('index');
                 Route::post('tahun', [LaporanBPKBController::class, 'tahun'])->name('tahun');
                 Route::post('jenis', [LaporanBPKBController::class, 'jenis'])->name('jenis');
+                Route::post('Pengembalian', [LaporanBPKBController::class, 'Pengembalian'])->name('Pengembalian');
                 Route::post('merk', [LaporanBPKBController::class, 'merk'])->name('merk');
                 Route::post('tandaTangan', [LaporanBPKBController::class, 'tandaTangan'])->name('tandaTangan');
                 Route::get('cetakRekapBpkb', [LaporanBPKBController::class, 'cetakRekapBpkb'])->name('cetakRekapBpkb');
@@ -226,6 +227,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('', [VerifikasiOperatorBPKBController::class, 'index'])->name('index');
                 Route::post('load', [VerifikasiOperatorBPKBController::class, 'load'])->name('load');
                 Route::post('verifikasi', [VerifikasiOperatorBPKBController::class, 'verifikasi'])->name('verifikasi');
+                Route::post('tolak', [VerifikasiOperatorBPKBController::class, 'tolak'])->name('tolak');
             });
 
         // SERTIFIKAT
@@ -236,6 +238,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('verif', [VerifikasiOperatorSertifikatController::class, 'verif'])->name('verif');
                 Route::post('verifikasi_operator', [VerifikasiOperatorSertifikatController::class, 'verifikasi_operator'])->name('verifikasi_operator');
                 Route::post('batalkan', [VerifikasiOperatorSertifikatController::class, 'batalkan'])->name('batalkan');
+                Route::post('tolak', [VerifikasiOperatorSertifikatController::class, 'tolak'])->name('tolak');
             });
     });
 
@@ -246,6 +249,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('', [VerifikasiAdminBPKBController::class, 'index'])->name('index');
                 Route::post('load', [VerifikasiAdminBPKBController::class, 'load'])->name('load');
                 Route::post('verifikasi', [VerifikasiAdminBPKBController::class, 'verifikasi'])->name('verifikasi');
+                Route::post('tolak', [VerifikasiAdminBPKBController::class, 'tolak'])->name('tolak');
             });
 
         // SERTIFIKAT
@@ -256,6 +260,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('verif', [VerifikasiAdminSertifikatController::class, 'verif'])->name('verif');
                 Route::post('verifikasi_admin', [VerifikasiAdminSertifikatController::class, 'verifikasi_admin'])->name('verifikasi_admin');
                 Route::post('batalkan', [VerifikasiAdminSertifikatController::class, 'batalkan'])->name('batalkan');
+                Route::post('tolak', [VerifikasiAdminSertifikatController::class, 'tolak'])->name('tolak');
             });
     });
 
@@ -266,6 +271,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('', [VerifikasiPenyeliaBPKBController::class, 'index'])->name('index');
                 Route::post('load', [VerifikasiPenyeliaBPKBController::class, 'load'])->name('load');
                 Route::post('verifikasi', [VerifikasiPenyeliaBPKBController::class, 'verifikasi'])->name('verifikasi');
+                Route::post('tolak', [VerifikasiPenyeliaBPKBController::class, 'tolak'])->name('tolak');
             });
 
         // SERTIFIKAT
@@ -276,6 +282,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('verif', [VerifikasiPenyeliaSertifikatController::class, 'verif'])->name('verif');
                 Route::post('verifikasi_penyelia', [VerifikasiPenyeliaSertifikatController::class, 'verifikasi_penyelia'])->name('verifikasi_penyelia');
                 Route::post('batalkan', [VerifikasiPenyeliaSertifikatController::class, 'batalkan'])->name('batalkan');
+                Route::post('tolak', [VerifikasiPenyeliaSertifikatController::class, 'tolak'])->name('tolak');
             });
     });
 

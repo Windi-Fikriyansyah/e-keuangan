@@ -21,7 +21,7 @@ class SertifikatController extends Controller
     {
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-        ->select('a.nomorSurat', 'a.nomorRegister','a.statusVerifikasiOperator','a.statusVerifAdmin', 'a.nomorSertifikat', 'a.statusPengajuan', 'a.NIB', 'a.file', 'a.kodeSkpd', 'b.namaSkpd')
+        ->select('a.nomorSurat','a.statusTolak', 'a.nomorRegister','a.statusVerifikasiOperator','a.statusVerifAdmin', 'a.nomorSertifikat', 'a.statusPengajuan', 'a.NIB', 'a.file', 'a.kodeSkpd', 'b.namaSkpd')
         ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd')
         ->where('a.statusVerifikasiOperator', 1);
 
@@ -55,8 +55,11 @@ class SertifikatController extends Controller
     return DataTables::of($pinjamanSertifikat)
         ->addColumn('aksi', function ($row) {
 
-            if ($row->statusVerifAdmin == '1') {
+            if ($row->statusVerifAdmin == '1' && $row->statusTolak !== "1") {
                 $btn = '<a onclick="verif(\'' . $row->nomorSurat . '\')" class="btn btn-md btn-success"><span class="fa-fw select-all fas"></span></a>';
+            } else if($row->statusTolak == "1"){
+                $btn = '<a onclick="verif(\'' . $row->nomorSurat . '\')" class="btn btn-md btn-danger"><span class="fa-fw select-all fas"></span></a>';
+
             } else {
                 $btn = '<a onclick="verif(\'' . $row->nomorSurat . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
             }
@@ -75,7 +78,7 @@ class SertifikatController extends Controller
         $nomorSurat = $request->input('nomorSurat');
 
         $pinjamanSertifikat = DB::table('pinjamanSertifikat as a')
-            ->select('a.tanggalPinjam','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn','a.tanggalVerifAdmin','a.tanggalVerifikasiOperator','kodeSkpd','a.file', 'a.noTelpKsbtgn')
+            ->select('a.tanggalPinjam','a.statusTolak','a.statusVerifikasiOperator','a.statusVerifAdmin','a.statusVerifPenyelia', 'a.nomorSurat', 'a.nomorRegister', 'a.nomorSertifikat', 'a.NIB', 'a.tanggal', 'a.pemegangHak', 'a.luas', 'a.peruntukan', 'a.namaKsbtgn', 'a.nipKsbtgn','a.tanggalVerifAdmin','a.tanggalVerifikasiOperator','kodeSkpd','a.file', 'a.noTelpKsbtgn')
             ->where('a.nomorSurat', $nomorSurat)
             ->first();
 
@@ -117,5 +120,40 @@ class SertifikatController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function tolak(Request $request)
+{
+    $validated = $request->validate([
+        'nomorSurat' => 'required|string',
+        'nomorRegister' => 'required|string',
+        'kodeSkpd' => 'required|string',
+    ]);
+
+    try {
+        DB::transaction(function () use ($validated) {
+            DB::table('pinjamanSertifikat')
+                ->where('nomorSurat', $validated['nomorSurat'])
+                ->update([
+                    'statusVerifAdmin' => 0,
+                    'statusTolak' => 1,
+                    'statusPinjamLagi' => '0'
+                ]);
+
+            DB::table('masterSertifikat')
+                ->where([
+                    'nomorRegister' => $validated['nomorRegister'],
+                    'kodeSkpd' => $validated['kodeSkpd'],
+                ])
+                ->update([
+                    'statusPinjam' => 0,
+                ]);
+        });
+
+        return response()->json(['success' => true]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+}
+
 
 }

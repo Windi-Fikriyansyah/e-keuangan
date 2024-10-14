@@ -164,6 +164,7 @@ class SertifikatController extends Controller
         $nomorSurat = $request->nomorSurat;
         $nomorRegister = $request->nomorRegister;
         $tandaTangan = $request->tandaTangan;
+        $tanggalTtdCetak = $request->tanggalTtdCetak;
         $tipe = $request->tipe;
         $kodeSkpd = Auth::user()->kd_skpd;
 
@@ -183,7 +184,8 @@ class SertifikatController extends Controller
             'tandaTangan' => DB::table('masterTtd')
                 ->where(['nip' => $tandaTangan])
                 ->first(),
-            'tipe' => $tipe
+            'tipe' => $tipe,
+            'tanggalTtdCetak' => $tanggalTtdCetak
         ];
 
         $view = view('verifikasi_bast.sertifikat.cetak')->with($data);

@@ -124,4 +124,38 @@ class BPKBController extends Controller
             ], 500);
         }
     }
+
+    public function tolak(Request $request)
+{
+    $validated = $request->validate([
+        'nomorSurat' => 'required|string',
+        'nomorRegister' => 'required|string',
+        'kodeSkpd' => 'required|string',
+    ]);
+
+    try {
+        DB::transaction(function () use ($validated) {
+            DB::table('pinjamanBpkb')
+                ->where('nomorSurat', $validated['nomorSurat'])
+                ->update([
+                    'statusVerifAdmin' => 0,
+                    'statusTolak' => 1,
+                    'statusPinjamLagi' => '0'
+                ]);
+
+            DB::table('masterBpkb')
+                ->where([
+                    'nomorRegister' => $validated['nomorRegister'],
+                    'kodeSkpd' => $validated['kodeSkpd'],
+                ])
+                ->update([
+                    'statusPinjam' => 0,
+                ]);
+        });
+
+        return response()->json(['success' => true]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+}
 }

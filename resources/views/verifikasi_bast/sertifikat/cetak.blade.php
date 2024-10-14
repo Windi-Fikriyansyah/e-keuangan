@@ -69,8 +69,17 @@
     <h2 style="text-align: center;">BERITA ACARA SERAH TERIMA SERTIFIKAT</h2>
     <p style="text-align: center;">Nomor: {{ $dataPeminjaman->nomorBast }}</p>
 
-    <p>Pada hari ini .............. tanggal .............. Bulan .......... tahun Dua Ribu Dua Puluh ............ yang bertanda tangan di bawah ini:</p>
+    @php
+    use Carbon\Carbon;
 
+    // Pastikan format $tanggalTtdCetak dalam bentuk string Y-m-d atau gunakan Carbon object
+    $tanggal = Carbon::parse($tanggalTtdCetak);
+$hari = $tanggal->isoFormat('dddd'); // Mendapatkan hari dalam bahasa Indonesia
+$tanggalAngka = $tanggal->day; // Mendapatkan angka tanggal
+$bulan = $tanggal->isoFormat('MMMM'); // Mendapatkan nama bulan dalam bahasa Indonesia
+$tahun = $tanggal->isoFormat('Y'); // Mendapatkan tahun
+@endphp
+    <p>Pada hari ini {{ $hari }} tanggal {{ $tanggalAngka }} bulan {{ $bulan }} tahun {{ $tahun }} yang bertanda tangan di bawah ini:</p>
     <ol>
         <li>
             <table style="border-collapse: collapse; width: 100%;">

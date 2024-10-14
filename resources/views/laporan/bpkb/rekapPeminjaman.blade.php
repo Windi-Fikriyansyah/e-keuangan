@@ -64,6 +64,7 @@
                 <th>NO RANGKA</th>
                 <th>NO MESIN</th>
                 <th>NO BPKB</th>
+                <th>Pengembalian</th>
                 <th>TANGGAL PENYERAHAN</th>
                 <th>TANGGAL PENGEMBALIAN</th>
             </tr>
@@ -84,6 +85,7 @@
                     <td>{{ $item->nomorRangka }}</td>
                     <td>{{ $item->nomorMesin }}</td>
                     <td>{{ $item->nomorBpkb }}</td>
+                    <td>{{ $item->statusPengembalian == 0 ? 'Belum' : 'Sudah' }}</td>
                     <td></td>
                     <td></td>
                 </tr>

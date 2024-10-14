@@ -35,7 +35,7 @@ class SertifikatController extends Controller
         $orderBy = $request->order[0]['dir'] ?? 'desc';
 
         $query = DB::table('pinjamanSertifikat as a')
-            ->select('a.nomorSurat', 'a.nomorRegister','a.statusVerifikasiOperator', 'a.nomorSertifikat','a.statusPengajuan', 'a.NIB','a.file', 'a.kodeSkpd', 'b.namaSkpd')
+            ->select('a.nomorSurat','a.statusTolak', 'a.nomorRegister','a.statusVerifikasiOperator', 'a.nomorSertifikat','a.statusPengajuan', 'a.NIB','a.file', 'a.kodeSkpd', 'b.namaSkpd')
             ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd');
 
         $search = $request->search;
@@ -55,16 +55,26 @@ class SertifikatController extends Controller
 
         return DataTables::of($users)
         ->addColumn('aksi', function ($row) {
-            $btn = '<a href="' . route("peminjaman.sertifikat.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+            if ($row->statusTolak == '1'){
+                $btn = '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\', \'' . $row->statusTolak . '\', \'' . $row->statusVerifikasiOperator . '\')" class="btn btn-md btn-danger" title="Pengajuan Peminjaman Ditolak"><span class="fa-fw select-all fas"></span></a>';
+            }  else{
+                $btn = '<a href="' . route("peminjaman.sertifikat.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
 
-            if ($row->statusPengajuan == '0') {
-                $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
-            } else {
-                $btn .= '';
+                if ($row->statusPengajuan == '0') {
+                    $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                } else {
+                    $btn .= '';
+                }
+
+                $btn .= '<a onclick="cetak(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+
+                $btn .= '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\', \'' . $row->statusTolak . '\', \'' . $row->statusVerifikasiOperator . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
+
+
             }
-            $btn .= '<a onclick="cetak(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
-            $btn .= '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
+
             return $btn;
+
         })
             ->rawColumns(['aksi'])
             ->make(true);
