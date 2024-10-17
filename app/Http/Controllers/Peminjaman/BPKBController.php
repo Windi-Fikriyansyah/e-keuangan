@@ -59,7 +59,7 @@ class BPKBController extends Controller
         // $recordsFiltered = $recordsTotal = $query->count();
         // $users = $query->skip($skip)->take($pageLength)->get();
 
-        return DataTables::of($users)
+        return DataTables::of($query)
             ->addColumn('aksi', function ($row) {
                 if ($row->statusTolak == '1') {
                     $btn = '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\', \'' . $row->statusTolak . '\', \'' . $row->statusVerifikasiOperator . '\')" class="btn btn-md btn-danger" title="Pengajuan Peminjaman Ditolak"><span class="fa-fw select-all fas"></span></a>';
