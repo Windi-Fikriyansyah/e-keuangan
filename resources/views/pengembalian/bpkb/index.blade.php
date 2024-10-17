@@ -169,9 +169,9 @@
                 ajax: {
                     url: "{{ route('pengembalian.bpkb.load') }}",
                     type: "POST",
-                    data: function(data) {
-                        data.search = $('input[type="search"]').val();
-                    }
+                    // data: function(data) {
+                    //     data.search = $('input[type="search"]').val();
+                    // }
                 },
                 createdRow: function(row, data, index) {
                     if (data.statusPengembalian == "1" && data.statusPinjamLagi != "1") {

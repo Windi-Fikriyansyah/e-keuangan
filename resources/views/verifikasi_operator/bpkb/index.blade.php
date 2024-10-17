@@ -168,12 +168,13 @@
                 ajax: {
                     url: "{{ route('verifikasi_operator.bpkb.load') }}",
                     type: "POST",
-                    data: function(data) {
-                        data.search = $('input[type="search"]').val();
-                    }
+                    // data: function(data) {
+                    //     data.search = $('input[type="search"]').val();
+                    // }
                 },
                 createdRow: function(row, data, index) {
-                    if (data.statusVerifikasiOperator == "1" && data.statusVerifAdmin != "1" && data.statusTolak !== "1") {
+                    if (data.statusVerifikasiOperator == "1" && data.statusVerifAdmin != "1" && data
+                        .statusTolak !== "1") {
                         $(row).css("background-color", "#90EE90");
                     } else if (data.statusVerifikasiOperator == "1" && data.statusVerifAdmin ==
                         "1") {
@@ -236,12 +237,11 @@
                 $('#batalVerifikasi').prop('hidden', true);
 
 
-                if(selectedData.statusTolak == 1){
+                if (selectedData.statusTolak == 1) {
                     $('#setujuVerifikasi').prop('hidden', true);
                     $('#batalVerifikasi').prop('hidden', true);
                     $('#TolakVerif').prop('hidden', true);
-                    }
-                else if (selectedData.statusVerifikasiOperator != '1') {
+                } else if (selectedData.statusVerifikasiOperator != '1') {
                     $('#setujuVerifikasi').prop('hidden', false);
                     $('#TolakVerif').prop('hidden', false);
                 } else if (selectedData.statusVerifikasiOperator == '1' && selectedData.statusVerifAdmin !=
@@ -346,38 +346,39 @@
 
 
             $('#TolakVerif').on('click', function() {
-            var nomorSurat = $('#nomorSurat').val();
-            var kodeSkpd = $('#kodeSkpd').val();
-            var nomorRegister = $('#nomorRegister').val();
-            $.ajax({
-                url: '{{ route("verifikasi_operator.bpkb.tolak") }}',
-                type: 'POST',
-                data: {
-                    nomorSurat: nomorSurat,
-                    kodeSkpd: kodeSkpd,
-                    nomorRegister: nomorRegister,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(data) {
-                    $('#setujuVerifikasi').prop('hidden', true);
-                    $('#batalVerifikasi').prop('hidden', true);
-                    $('#TolakVerif').prop('hidden', true);
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Peminjaman Ditolak!',
-                        text: 'Nomor Surat ' + nomorSurat + ' Peminjaman Telah Ditolak',
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            location.reload();
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error('Terjadi kesalahan:', error);
-                }
+                var nomorSurat = $('#nomorSurat').val();
+                var kodeSkpd = $('#kodeSkpd').val();
+                var nomorRegister = $('#nomorRegister').val();
+                $.ajax({
+                    url: '{{ route('verifikasi_operator.bpkb.tolak') }}',
+                    type: 'POST',
+                    data: {
+                        nomorSurat: nomorSurat,
+                        kodeSkpd: kodeSkpd,
+                        nomorRegister: nomorRegister,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(data) {
+                        $('#setujuVerifikasi').prop('hidden', true);
+                        $('#batalVerifikasi').prop('hidden', true);
+                        $('#TolakVerif').prop('hidden', true);
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Peminjaman Ditolak!',
+                            text: 'Nomor Surat ' + nomorSurat +
+                                ' Peminjaman Telah Ditolak',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
             });
-        });
 
             $('#batalVerifikasi').on('click', function() {
                 if (!selectedData) {

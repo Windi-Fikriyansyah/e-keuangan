@@ -231,9 +231,9 @@
                 ajax: {
                     url: "{{ route('bast.bpkb.load') }}",
                     type: "POST",
-                    data: function(data) {
-                        data.search = $('input[type="search"]').val();
-                    }
+                    // data: function(data) {
+                    //     data.search = $('input[type="search"]').val();
+                    // }
                 },
                 pageLength: 10,
                 searching: true,
