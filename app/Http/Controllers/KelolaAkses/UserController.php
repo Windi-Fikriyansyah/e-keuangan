@@ -32,34 +32,35 @@ class UserController extends Controller
     public function load(Request $request)
     {
         // Page Length
-        $pageNumber = ($request->start / $request->length) + 1;
-        $pageLength = $request->length;
-        $skip       = ($pageNumber - 1) * $pageLength;
+        // $pageNumber = ($request->start / $request->length) + 1;
+        // $pageLength = $request->length;
+        // $skip       = ($pageNumber - 1) * $pageLength;
 
-        // Page Order
-        $orderColumnIndex = $request->order[0]['column'] ?? '0';
-        $orderBy = $request->order[0]['dir'] ?? 'desc';
+        // // Page Order
+        // $orderColumnIndex = $request->order[0]['column'] ?? '0';
+        // $orderBy = $request->order[0]['dir'] ?? 'desc';
 
         // get data from products table
-        $query = DB::table('users');
+        $query = DB::table('users')
+            ->get();
 
         // Search
-        $search = $request->search;
-        $query = $query->where(function ($query) use ($search) {
-            $query->orWhere('name', 'like', "%" . $search . "%");
-        });
+        // $search = $request->search;
+        // $query = $query->where(function ($query) use ($search) {
+        //     $query->orWhere('name', 'like', "%" . $search . "%");
+        // });
 
-        $orderByName = 'name';
-        switch ($orderColumnIndex) {
-            case '0':
-                $orderByName = 'name';
-                break;
-        }
-        $query = $query->orderBy($orderByName, $orderBy);
-        $recordsFiltered = $recordsTotal = $query->count();
-        $users = $query->skip($skip)->take($pageLength)->get();
+        // $orderByName = 'name';
+        // switch ($orderColumnIndex) {
+        //     case '0':
+        //         $orderByName = 'name';
+        //         break;
+        // }
+        // $query = $query->orderBy($orderByName, $orderBy);
+        // $recordsFiltered = $recordsTotal = $query->count();
+        // $users = $query->skip($skip)->take($pageLength)->get();
 
-        return Datatables::of($users)
+        return Datatables::of($query)
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route("user.edit", Crypt::encrypt($row->id)) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
                 $btn .= '<a onclick="hapus(\'' . $row->id . '\')" class="btn btn-md btn-danger"><span class="fa-fw select-all fas"></span></a>';
