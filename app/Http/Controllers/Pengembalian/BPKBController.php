@@ -17,13 +17,13 @@ class BPKBController extends Controller
     public function load(Request $request)
     {
         // Page Length
-        $pageNumber = ($request->start / $request->length) + 1;
-        $pageLength = $request->length;
-        $skip       = ($pageNumber - 1) * $pageLength;
+        // $pageNumber = ($request->start / $request->length) + 1;
+        // $pageLength = $request->length;
+        // $skip       = ($pageNumber - 1) * $pageLength;
 
-        // Page Order
-        $orderColumnIndex = $request->order[0]['column'] ?? '0';
-        $orderBy = $request->order[0]['dir'] ?? 'desc';
+        // // Page Order
+        // $orderColumnIndex = $request->order[0]['column'] ?? '0';
+        // $orderBy = $request->order[0]['dir'] ?? 'desc';
 
         // get data from products table
         $query = DB::table('pinjamanBpkb as a')
@@ -33,25 +33,26 @@ class BPKBController extends Controller
                 $join->on('a.nomorRegister', '=', 'c.nomorRegister');
                 $join->on('a.kodeSkpd', '=', 'c.kodeSkpd');
             })
-            ->where(['a.statusBast' => '1']);
+            ->where(['a.statusBast' => '1'])
+            ->get();
 
         // Search
-        $search = $request->search;
-        $query = $query->where(function ($query) use ($search) {
-            $query->orWhere('nomorSurat', 'like', "%" . $search . "%");
-        });
+        // $search = $request->search;
+        // $query = $query->where(function ($query) use ($search) {
+        //     $query->orWhere('nomorSurat', 'like', "%" . $search . "%");
+        // });
 
-        $orderByName = 'nomorSurat';
-        switch ($orderColumnIndex) {
-            case '0':
-                $orderByName = 'nomorSurat';
-                break;
-        }
-        $query = $query->orderBy($orderByName, $orderBy);
-        $recordsFiltered = $recordsTotal = $query->count();
-        $users = $query->skip($skip)->take($pageLength)->get();
+        // $orderByName = 'nomorSurat';
+        // switch ($orderColumnIndex) {
+        //     case '0':
+        //         $orderByName = 'nomorSurat';
+        //         break;
+        // }
+        // $query = $query->orderBy($orderByName, $orderBy);
+        // $recordsFiltered = $recordsTotal = $query->count();
+        // $users = $query->skip($skip)->take($pageLength)->get();
 
-        return DataTables::of($users)
+        return DataTables::of($query)
             ->addColumn('aksi', function ($row) {
                 $btn = '<a class="btn btn-md btn-primary kembali"><span class="fa-fw select-all fas"></span></a>';
 

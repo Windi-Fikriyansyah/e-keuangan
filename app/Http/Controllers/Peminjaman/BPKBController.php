@@ -29,49 +29,50 @@ class BPKBController extends Controller
     public function load(Request $request)
     {
         // Page Length
-        $pageNumber = ($request->start / $request->length) + 1;
-        $pageLength = $request->length;
-        $skip       = ($pageNumber - 1) * $pageLength;
+        // $pageNumber = ($request->start / $request->length) + 1;
+        // $pageLength = $request->length;
+        // $skip       = ($pageNumber - 1) * $pageLength;
 
-        // Page Order
-        $orderColumnIndex = $request->order[0]['column'] ?? '0';
-        $orderBy = $request->order[0]['dir'] ?? 'desc';
+        // // Page Order
+        // $orderColumnIndex = $request->order[0]['column'] ?? '0';
+        // $orderBy = $request->order[0]['dir'] ?? 'desc';
 
         // get data from products table
         $query = DB::table('pinjamanBpkb as a')
-            ->select('a.nomorSurat','a.statusTolak', 'a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd', 'a.file', 'a.statusPengajuan', 'statusVerifikasiOperator')
-            ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd');
+            ->select('a.nomorSurat', 'a.statusTolak', 'a.nomorRegister', 'a.nomorBpkb', 'a.nomorPolisi', 'a.kodeSkpd', 'b.namaSkpd', 'a.file', 'a.statusPengajuan', 'statusVerifikasiOperator')
+            ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd')
+            ->get();
 
         // Search
-        $search = $request->search;
-        $query = $query->where(function ($query) use ($search) {
-            $query->orWhere('nomorSurat', 'like', "%" . $search . "%");
-        });
+        // $search = $request->search;
+        // $query = $query->where(function ($query) use ($search) {
+        //     $query->orWhere('nomorSurat', 'like', "%" . $search . "%");
+        // });
 
-        $orderByName = 'nomorSurat';
-        switch ($orderColumnIndex) {
-            case '0':
-                $orderByName = 'nomorSurat';
-                break;
-        }
-        $query = $query->orderBy($orderByName, $orderBy);
-        $recordsFiltered = $recordsTotal = $query->count();
-        $users = $query->skip($skip)->take($pageLength)->get();
+        // $orderByName = 'nomorSurat';
+        // switch ($orderColumnIndex) {
+        //     case '0':
+        //         $orderByName = 'nomorSurat';
+        //         break;
+        // }
+        // $query = $query->orderBy($orderByName, $orderBy);
+        // $recordsFiltered = $recordsTotal = $query->count();
+        // $users = $query->skip($skip)->take($pageLength)->get();
 
         return DataTables::of($users)
             ->addColumn('aksi', function ($row) {
-                if ($row->statusTolak == '1'){
+                if ($row->statusTolak == '1') {
                     $btn = '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\', \'' . $row->statusTolak . '\', \'' . $row->statusVerifikasiOperator . '\')" class="btn btn-md btn-danger" title="Pengajuan Peminjaman Ditolak"><span class="fa-fw select-all fas"></span></a>';
-                } else{
-                $btn = '<a href="' . route("peminjaman.bpkb.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
-                if ($row->statusPengajuan == '0') {
-                    $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
                 } else {
-                    $btn .= '';
+                    $btn = '<a href="' . route("peminjaman.bpkb.edit", ['no_surat' => Crypt::encrypt($row->nomorSurat), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                    if ($row->statusPengajuan == '0') {
+                        $btn .= '<a onclick="hapus(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                    } else {
+                        $btn .= '';
+                    }
+                    $btn .= '<a onclick="cetak(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
+                    $btn .= '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\',\'' . $row->statusVerifikasiOperator . '\', \'' . $row->statusTolak . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
                 }
-                $btn .= '<a onclick="cetak(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-dark" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
-                $btn .= '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\',\'' . $row->statusVerifikasiOperator . '\', \'' . $row->statusTolak . '\')" class="btn btn-md btn-primary"><span class="fa-fw select-all fas"></span></a>';
-            }
                 return $btn;
             })
             ->rawColumns(['aksi'])

@@ -18,37 +18,38 @@ class BPKBController extends Controller
     public function load(Request $request)
     {
         // Page Length
-        $pageNumber = ($request->start / $request->length) + 1;
-        $pageLength = $request->length;
-        $skip       = ($pageNumber - 1) * $pageLength;
+        // $pageNumber = ($request->start / $request->length) + 1;
+        // $pageLength = $request->length;
+        // $skip       = ($pageNumber - 1) * $pageLength;
 
-        // Page Order
-        $orderColumnIndex = $request->order[0]['column'] ?? '0';
-        $orderBy = $request->order[0]['dir'] ?? 'desc';
+        // // Page Order
+        // $orderColumnIndex = $request->order[0]['column'] ?? '0';
+        // $orderBy = $request->order[0]['dir'] ?? 'desc';
 
         // get data from products table
         $query = DB::table('pinjamanBpkb as a')
             ->select('a.*', 'b.namaSkpd')
             ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd')
-            ->where('a.statusPengajuan', '1');
+            ->where('a.statusPengajuan', '1')
+            ->get();
 
         // Search
-        $search = $request->search;
-        $query = $query->where(function ($query) use ($search) {
-            $query->orWhere('nomorSurat', 'like', "%" . $search . "%");
-        });
+        // $search = $request->search;
+        // $query = $query->where(function ($query) use ($search) {
+        //     $query->orWhere('nomorSurat', 'like', "%" . $search . "%");
+        // });
 
-        $orderByName = 'nomorSurat';
-        switch ($orderColumnIndex) {
-            case '0':
-                $orderByName = 'nomorSurat';
-                break;
-        }
-        $query = $query->orderBy($orderByName, $orderBy);
-        $recordsFiltered = $recordsTotal = $query->count();
-        $users = $query->skip($skip)->take($pageLength)->get();
+        // $orderByName = 'nomorSurat';
+        // switch ($orderColumnIndex) {
+        //     case '0':
+        //         $orderByName = 'nomorSurat';
+        //         break;
+        // }
+        // $query = $query->orderBy($orderByName, $orderBy);
+        // $recordsFiltered = $recordsTotal = $query->count();
+        // $users = $query->skip($skip)->take($pageLength)->get();
 
-        return DataTables::of($users)
+        return DataTables::of($query)
             ->addColumn('aksi', function ($row) {
                 $btn = '<a class="btn btn-md btn-primary verifikasi"><span class="fa-fw select-all fas"></span></a>';
                 return $btn;
@@ -126,36 +127,36 @@ class BPKBController extends Controller
     }
 
     public function tolak(Request $request)
-{
-    $validated = $request->validate([
-        'nomorSurat' => 'required|string',
-        'nomorRegister' => 'required|string',
-        'kodeSkpd' => 'required|string',
-    ]);
+    {
+        $validated = $request->validate([
+            'nomorSurat' => 'required|string',
+            'nomorRegister' => 'required|string',
+            'kodeSkpd' => 'required|string',
+        ]);
 
-    try {
-        DB::transaction(function () use ($validated) {
-            DB::table('pinjamanBpkb')
-                ->where('nomorSurat', $validated['nomorSurat'])
-                ->update([
-                    'statusVerifikasiOperator' => 0,
-                    'statusTolak' => 1,
-                    'statusPinjamLagi' => '0'
-                ]);
+        try {
+            DB::transaction(function () use ($validated) {
+                DB::table('pinjamanBpkb')
+                    ->where('nomorSurat', $validated['nomorSurat'])
+                    ->update([
+                        'statusVerifikasiOperator' => 0,
+                        'statusTolak' => 1,
+                        'statusPinjamLagi' => '0'
+                    ]);
 
-            DB::table('masterBpkb')
-                ->where([
-                    'nomorRegister' => $validated['nomorRegister'],
-                    'kodeSkpd' => $validated['kodeSkpd'],
-                ])
-                ->update([
-                    'statusPinjam' => 0,
-                ]);
-        });
+                DB::table('masterBpkb')
+                    ->where([
+                        'nomorRegister' => $validated['nomorRegister'],
+                        'kodeSkpd' => $validated['kodeSkpd'],
+                    ])
+                    ->update([
+                        'statusPinjam' => 0,
+                    ]);
+            });
 
-        return response()->json(['success' => true]);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
-}
 }
