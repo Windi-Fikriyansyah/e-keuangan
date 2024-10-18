@@ -27,33 +27,33 @@ class SertifikatController extends Controller
 
     public function load(Request $request)
     {
-        $pageNumber = ($request->start / $request->length) + 1;
-        $pageLength = $request->length;
-        $skip       = ($pageNumber - 1) * $pageLength;
+        // $pageNumber = ($request->start / $request->length) + 1;
+        // $pageLength = $request->length;
+        // $skip       = ($pageNumber - 1) * $pageLength;
 
-        $orderColumnIndex = $request->order[0]['column'] ?? '0';
-        $orderBy = $request->order[0]['dir'] ?? 'desc';
+        // $orderColumnIndex = $request->order[0]['column'] ?? '0';
+        // $orderBy = $request->order[0]['dir'] ?? 'desc';
 
         $query = DB::table('pinjamanSertifikat as a')
             ->select('a.nomorSurat','a.statusTolak', 'a.nomorRegister','a.statusVerifikasiOperator', 'a.nomorSertifikat','a.statusPengajuan', 'a.NIB','a.file', 'a.kodeSkpd', 'b.namaSkpd')
             ->leftJoin('masterSkpd as b', 'a.kodeSkpd', '=', 'b.kodeSkpd');
 
-        $search = $request->search;
-        $query = $query->where(function ($query) use ($search) {
-            $query->orWhere('nomorSurat', 'like', "%" . $search . "%");
-        });
+        // $search = $request->search;
+        // $query = $query->where(function ($query) use ($search) {
+        //     $query->orWhere('nomorSurat', 'like', "%" . $search . "%");
+        // });
 
-        $orderByName = 'nomorSurat';
-        switch ($orderColumnIndex) {
-            case '0':
-                $orderByName = 'nomorSurat';
-                break;
-        }
-        $query = $query->orderBy($orderByName, $orderBy);
-        $recordsFiltered = $recordsTotal = $query->count();
-        $users = $query->skip($skip)->take($pageLength)->get();
+        // $orderByName = 'nomorSurat';
+        // switch ($orderColumnIndex) {
+        //     case '0':
+        //         $orderByName = 'nomorSurat';
+        //         break;
+        // }
+        // $query = $query->orderBy($orderByName, $orderBy);
+        // $recordsFiltered = $recordsTotal = $query->count();
+        // $users = $query->skip($skip)->take($pageLength)->get();
 
-        return DataTables::of($users)
+        return DataTables::of($query)
         ->addColumn('aksi', function ($row) {
             if ($row->statusTolak == '1'){
                 $btn = '<a onclick="pengajuan(\'' . $row->nomorSurat . '\',\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\',\'' . $row->file . '\',\'' . $row->statusPengajuan . '\', \'' . $row->statusTolak . '\', \'' . $row->statusVerifikasiOperator . '\')" class="btn btn-md btn-danger" title="Pengajuan Peminjaman Ditolak"><span class="fa-fw select-all fas"></span></a>';
