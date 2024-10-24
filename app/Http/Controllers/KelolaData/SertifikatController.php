@@ -47,7 +47,7 @@ class SertifikatController extends Controller
             if ($search) {
                 $data = $data->where(function ($query) use ($search) {
                     $query->where('nomorRegister', 'like', "%" . $search . "%")
-                          ->orWhere('nib', 'like', "%" . $search . "%")
+                          ->orWhere('kodeSkpd', 'like', "%" . $search . "%")
                           ->orWhere('nomorSertifikat', 'like', "%" . $search . "%");
                 });
             }

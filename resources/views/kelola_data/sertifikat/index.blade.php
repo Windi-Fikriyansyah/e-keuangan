@@ -27,10 +27,10 @@
                             <tr>
                                 <th>No</th>
                                 <th>Nomor Register</th>
-                                <th>NIB</th>
                                 <th>Nomor Sertifikat</th>
                                 <th>Tanggal</th>
                                 <th>Luas (m2)</th>
+                                <th>Kode Skpd</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -80,10 +80,6 @@
             name: 'nomorRegister'
         },
         {
-            data: 'nib',
-            name: 'nib'
-        },
-        {
             data: 'nomorSertifikat',
             name: 'nomorSertifikat'
         },
@@ -94,6 +90,10 @@
         {
             data: 'luas',
             name: 'luas'
+        },
+        {
+            data: 'kodeSkpd',
+            name: 'kodeSkpd'
         },
         {
             data: 'aksi',
