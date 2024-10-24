@@ -87,19 +87,22 @@ class BPKBController extends Controller
     public function loadBpkb(Request $request)
     {
         $term = trim($request->q);
-
+        $kodeSkpd = auth()->user()->kd_skpd;
         $formatted_tags = [];
 
         if (empty($term)) {
             $tags = DB::table('masterBpkb')
                 ->where(function ($query) {
                     $query->where('statusPinjam', '=', '0')->orWhereNull('statusPinjam');
-                })->limit(100)->get();
+                })
+                ->where('kodeSkpd', $kodeSkpd)
+                ->limit(100)->get();
         } else {
             $tags = DB::table('masterBpkb')
                 ->where(function ($query) {
                     $query->where('statusPinjam', '=', '0')->orWhereNull('statusPinjam');
                 })
+                ->where('kodeSkpd', $kodeSkpd)
                 ->where(function ($query) use ($term) {
                     $query->where('nomorRegister', 'like', "%$term%")
                         ->orWhere('nomorPolisi', 'like', "%$term%")
