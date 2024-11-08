@@ -221,15 +221,20 @@ class SertifikatController extends Controller
                 ->orderByDesc('nomorUrut')
                 ->first();
 
-            DB::table('pinjamanSertifikat')
-                ->where([
-                    'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
-                    'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
-                    'kodeSkpd' => $pinjamanSebelumnya->kodeSkpd,
-                ])
-                ->update([
-                    'statusPinjamLagi' => '1'
-                ]);
+                if($pinjamanSebelumnya){
+                    DB::table('pinjamanSertifikat')
+                    ->where([
+                        'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
+                        'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
+                        'kodeSkpd' => $pinjamanSebelumnya->kodeSkpd,
+                    ])
+                    ->update([
+                        'statusPinjamLagi' => '1'
+                    ]);
+                }
+            
+
+           
 
             DB::commit();
             return redirect()
@@ -337,6 +342,9 @@ class SertifikatController extends Controller
                 ->orderByDesc('nomorUrut')
                 ->first();
 
+
+
+            
             DB::table('pinjamanSertifikat')
                 ->where([
                     'nomorSurat' => $request->nomorSurat,
@@ -370,7 +378,9 @@ class SertifikatController extends Controller
                     ]);
             }
 
-            DB::table('pinjamanSertifikat')
+            
+            if($pinjamanSebelumnya){
+                DB::table('pinjamanSertifikat')
                 ->where([
                     'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
                     'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
@@ -379,6 +389,9 @@ class SertifikatController extends Controller
                 ->update([
                     'statusPinjamLagi' => '0'
                 ]);
+            }
+
+            
 
             DB::commit();
             return response()->json([

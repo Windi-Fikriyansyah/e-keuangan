@@ -217,15 +217,18 @@ class BPKBController extends Controller
                 ->orderByDesc('nomorUrut')
                 ->first();
 
-            DB::table('pinjamanBpkb')
-                ->where([
-                    'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
-                    'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
-                    'kodeSkpd' => $pinjamanSebelumnya->kodeSkpd,
-                ])
-                ->update([
-                    'statusPinjamLagi' => '1'
-                ]);
+                if($pinjamanSebelumnya){
+                    DB::table('pinjamanBpkb')
+                    ->where([
+                        'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
+                        'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
+                        'kodeSkpd' => $pinjamanSebelumnya->kodeSkpd,
+                    ])
+                    ->update([
+                        'statusPinjamLagi' => '1'
+                    ]);
+                }
+            
 
             DB::commit();
             return redirect()
@@ -365,7 +368,9 @@ class BPKBController extends Controller
                     ]);
             }
 
-            DB::table('pinjamanBpkb')
+
+            if($pinjamanSebelumnya){
+                DB::table('pinjamanBpkb')
                 ->where([
                     'nomorSurat' => $pinjamanSebelumnya->nomorSurat,
                     'nomorRegister' => $pinjamanSebelumnya->nomorRegister,
@@ -374,6 +379,9 @@ class BPKBController extends Controller
                 ->update([
                     'statusPinjamLagi' => '0'
                 ]);
+            }
+
+            
 
             DB::commit();
             return response()->json([

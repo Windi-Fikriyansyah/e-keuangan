@@ -117,7 +117,7 @@
                         <div class="col-sm-4">
                             <input class="form-control @error('nomorSertifikat') is-invalid @enderror readonlyInput" readonly
                                 type="text" placeholder="Tidak perlu diisi, otomatis" name="nomorSertifikat"
-                                value="{{ $dataSertifikat->pemegangHak }}">
+                                value="{{ $dataSertifikat->nomorSertifikat }}">
                             @error('nomorSertifikat')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
