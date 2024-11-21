@@ -84,8 +84,8 @@ Route::middleware('auth')->group(function () {
                 Route::get('edit/{no_register}/{kd_skpd}', [BPKBController::class, 'edit'])->name('edit');
                 Route::post('update/{id}', [BPKBController::class, 'update'])->name('update');
                 Route::post('delete', [BPKBController::class, 'destroy'])->name('delete');
-                Route::get('/get-files/{id}', [BPKBController::class, 'getFiles']);
                 Route::post('/update-file', [BPKBController::class, 'updateFile'])->name('update-file');
+                Route::get('/get-files/{id}', [BPKBController::class, 'getFiles'])->name('get-files');
 
             });
 
@@ -108,10 +108,9 @@ Route::middleware('auth')->group(function () {
             Route::post('store', [SertifikatController::class, 'store'])->name('sertifikat.store');
             Route::get('edit/{no_register}/{kd_skpd}', [SertifikatController::class, 'edit'])->name('sertifikat.edit');
             Route::post('update/{id}', [SertifikatController::class, 'update'])->name('sertifikat.update');
-            Route::delete('/{id}', [SertifikatController::class, 'destroy'])->name('sertifikat.destroy');
-            Route::post('delete', [SertifikatController::class, 'delete'])->name('delete');
-            Route::get('/file/{id}/{nomorRegister}', [SertifikatController::class, 'lihatFile'])->name('sertifikat.file.show');
-            Route::post('/file/update', [SertifikatController::class, 'updateFile'])->name('sertifikat.file.update');
+            Route::post('delete', [SertifikatController::class, 'destroy'])->name('sertifikat.delete');
+            Route::get('/get-files/{id}', [SertifikatController::class, 'getFiles'])->name('sertifikat.get-files');
+            Route::post('/update-file', [SertifikatController::class, 'updateFile'])->name('sertifikat.updatefile');
 
         });
 

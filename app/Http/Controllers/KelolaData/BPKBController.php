@@ -192,6 +192,7 @@ class BPKBController extends Controller
         try {
             // Ambil data file dari database (misalnya berdasarkan ID atau kriteria lainnya)
             // Pastikan model dan kolomnya sesuai dengan struktur database kamu
+           
             $file = DB::table('masterBpkb')->where('id', $request->id) // Atau sesuaikan dengan kriteria lainnya
                 ->first();
 

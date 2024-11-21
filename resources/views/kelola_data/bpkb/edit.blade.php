@@ -378,7 +378,7 @@
         });
 
         $.ajax({
-            url: '/kelola_data/bpkb/update-file',
+            url: "{{ route('kelola_data.bpkb.update-file') }}", 
             type: 'POST',
             data: formData,
             processData: false,
@@ -445,13 +445,13 @@
 
         // Fetch file data
         $.ajax({
-            url: `/kelola_data/bpkb/get-files/${bpkbId}`,
+            url: `{{ route('kelola_data.bpkb.get-files', ['id' => '__bpkbId__']) }}`.replace('__bpkbId__', bpkbId),
             type: 'GET',
             success: function(response) {
                 Swal.close();
 
                 // Set iframe sources
-                const baseUrl = '{{ asset("storage/uploads/bpkb") }}';
+                const baseUrl = '{{ asset("/storage/uploads/bpkb") }}';
                 document.getElementById('iframeSuratPenunjukan').src =
                     `${baseUrl}/file_surat_penunjukan/${response.filesuratpenunjukan}`;
                 document.getElementById('iframeBA').src =
