@@ -26,10 +26,9 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Nomor Register</th>
+                                <th>Nomor Arsip Dokumen</th>
                                 <th>Nomor Sertifikat</th>
                                 <th>Tanggal</th>
-                                <th>Luas (m2)</th>
                                 <th>Kode Skpd</th>
                                 <th>Aksi</th>
                             </tr>
@@ -88,10 +87,6 @@
             name: 'tanggalSertifikat'
         },
         {
-            data: 'luas',
-            name: 'luas'
-        },
-        {
             data: 'kodeSkpd',
             name: 'kodeSkpd'
         },
@@ -127,7 +122,7 @@
                             response.message,
                             'success'
                         );
-                        $('#sertifikat').DataTable().ajax.reload();
+                        $('#sertifikat').DataTable().ajax.reload(); // Refresh the data table
                     } else {
                         Swal.fire(
                             'Failed!',
@@ -147,6 +142,7 @@
         }
     });
 }
+
     </script>
 
 @endpush

@@ -29,7 +29,7 @@
         @endif
         <div class="card">
             <div class="card-body">
-                <form method="POST"action="{{ route('kelola_data.bpkb.store') }}">
+                <form method="POST" action="{{ route('kelola_data.bpkb.store') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">SKPD</label>
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nomor Register</label>
+                        <label class="col-sm-2 col-form-label">Nomor Arsip Dokumen</label>
                         <div class="col-sm-4">
                             <input class="form-control @error('nomorRegister') is-invalid @enderror" type="text"
                                 placeholder="Tidak perlu diisi, otomatis" name="nomorRegister"
@@ -195,6 +195,28 @@
                             @enderror
                         </div>
                     </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Nibbar</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('Nibbar') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan Nibbar" name="Nibbar"
+                                value="{{ old('Nibbar') }}">
+                            @error('Nibbar')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <label class="col-sm-2 col-form-label">Nama Penerima Kendaraan</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('namapenerimakendaraan') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan Nama Penerima Kendaraan" name="namapenerimakendaraan"
+                                value="{{ old('namapenerimakendaraan') }}">
+                            @error('namapenerimakendaraan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Alamat</label>
                         <div class="col-sm-10">
@@ -214,6 +236,39 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">File Surat Penunjukan</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('filesuratpenunjukan') is-invalid @enderror" type="file"
+                                placeholder="Isi dengan File Surat Penunjukan" name="filesuratpenunjukan"
+                                value="{{ old('filesuratpenunjukan') }}">
+                            @error('filesuratpenunjukan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <label class="col-sm-2 col-form-label">File BA</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('fileba') is-invalid @enderror" type="file"
+                                placeholder="Isi dengan " name="fileba"
+                                value="{{ old('fileba') }}">
+                            @error('fileba')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">File Pakta Integritas</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('filepaktaintegritas') is-invalid @enderror" type="file"
+                                placeholder="Isi dengan File Surat Penunjukan" name="filepaktaintegritas"
+                                value="{{ old('filepaktaintegritas') }}">
+                            @error('filepaktaintegritas')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                     </div>
                     <div class="mb-3 text-end">
                         <button class="btn btn-primary" type="submit">Simpan</button>

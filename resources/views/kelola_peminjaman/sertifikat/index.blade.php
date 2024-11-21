@@ -28,7 +28,7 @@
                         <thead>
                             <tr>
                                 <th>Nomor Surat</th>
-                                <th>Nomor Register</th>
+                                <th>Nomor Arsip Dokumen</th>
                                 <th>Nomor Sertifikat</th>
                                 <th>NIB</th>
                                 <th>Aksi</th>
@@ -60,7 +60,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-4 col-form-label">Nomor Register</label>
+                        <label class="col-sm-4 col-form-label">Nomor Arsip Dokumen</label>
                         <div class="col-sm-8">
                             <input class="form-control readonlyInput" id="nomorRegister" type="text" readonly>
                         </div>
@@ -111,7 +111,7 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-sm-4 col-form-label">Nomor Register</label>
+                            <label class="col-sm-4 col-form-label">Nomor Arsip Dokumen</label>
                             <div class="col-sm-8">
                                 <input class="form-control readonlyInput" id="nomorRegisterPengajuan"
                                     name="nomorRegisterPengajuan" type="text" readonly>

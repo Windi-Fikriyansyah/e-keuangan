@@ -32,17 +32,35 @@
                 <form method="POST"action="{{ route('peminjaman.bpkb.store') }}" id="formBpkb">
                     @csrf
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nomor Register</label>
+                        <label class="col-sm-2 col-form-label">Jenis Kendaraan</label>
                         <div class="col-sm-10">
-                            <select class="form-select @error('nomorRegister') is-invalid @enderror select_option"
-                                name="nomorRegister" id="nomorRegister" data-placeholder="Silahkan Pilih" autofocus>
+                            <select class="form-select select_option" id="jenis" data-placeholder="Silahkan Pilih" autofocus>
                                 <option value="" selected>Silahkan Pilih</option>
+                                @foreach($jenis as $j)
+                                    <option value="{{ $j->jenis }}">{{ $j->jenis }}</option>
+                                @endforeach
                             </select>
-                            @error('nomorRegister')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
                     </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Merek</label>
+                        <div class="col-sm-10">
+                            <select class="form-select select_option"  id="merk" data-placeholder="Silahkan Pilih" disabled>
+                                <option value="" selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Nomor Arsip Dokumen</label>
+                        <div class="col-sm-10">
+                            <select class="form-select select_option" name="nomorRegister" id="nomorRegister" data-placeholder="Silahkan Pilih" >
+                                <option value="" selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Nomor Surat</label>
                         <div class="col-sm-4">
@@ -283,112 +301,117 @@
         }
     </style>
     <script>
-        $(document).ready(function() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        $(document).ready(function () {
+    // Setup CSRF token for AJAX requests
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    // When jenis is changed
+    $('#jenis').on('change', function () {
+        let jenisId = $(this).val();
+        let merkId = $('#merk').val(); // Get merk value
+        if (jenisId) {
+            // Enable merk selection and load merk options based on jenis
+            $('#merk').prop('disabled', false).html('<option value="">Silahkan Pilih</option>');
+            $.ajax({
+                url: '{{ route("peminjaman.bpkb.merks") }}', // Adjust with your route
+                type: 'GET',
+                data: { jenis_id: jenisId },
+                success: function (data) {
+                    $('#merk').empty().append('<option value="">Silahkan Pilih</option>'); // Clear previous options
+                    data.forEach(function (merk) {
+                        $('#merk').append(`<option value="${merk.merk}">${merk.merk}</option>`);
+                    });
                 }
             });
+            loadNomorRegister(jenisId, merkId);
+        } else {
+            // Reset merk and nomorRegister if jenis is empty
+            $('#merk').prop('disabled', true).html('<option value="">Silahkan Pilih</option>');
+            loadNomorRegister(); // Load nomorRegister without filter when jenis is empty
+        }
+    });
 
-            reset();
+    // When merk is changed
+    $('#merk').on('change', function () {
+        let jenisId = $('#jenis').val();
+        let merkId = $(this).val();
 
-            $('#nomorRegister').select2({
-                theme: "bootstrap-5",
-                width: "100%",
-                placeholder: "Silahkan Pilih...",
-                minimumInputLength: 0,
-                ajax: {
-                    url: "{{ route('peminjaman.bpkb.load_bpkb') }}",
-                    dataType: 'json',
-                    type: "POST",
-                    data: function(params) {
-                        return {
-                            q: $.trim(params.term)
-                        };
-                    },
-                    processResults: function(data) {
-                        console.log(data)
-                        return {
-                            results: data.map((bpkb) => {
-                                return {
-                                    text: bpkb.nomorRegister + ' | ' + bpkb.nomorPolisi +
-                                        ' | ' + bpkb.nomorBpkb + ' | ' + bpkb.kodeSkpd,
-                                    id: bpkb.nomorRegister,
-                                    nomorBpkb: bpkb.nomorBpkb,
-                                    nomorPolisi: bpkb.nomorPolisi,
-                                    namaPemilik: bpkb.namaPemilik,
-                                    jenis: bpkb.jenis,
-                                    merk: bpkb.merk,
-                                    tipe: bpkb.tipe,
-                                    model: bpkb.model,
-                                    tahunPembuatan: bpkb.tahunPembuatan,
-                                    tahunPerakitan: bpkb.tahunPerakitan,
-                                    isiSilinder: bpkb.isiSilinder,
-                                    warna: bpkb.warna,
-                                    alamat: bpkb.alamat,
-                                    nomorRangka: bpkb.nomorRangka,
-                                    nomorMesin: bpkb.nomorMesin,
-                                    keterangan: bpkb.keterangan,
-                                    nomorPolisiLama: bpkb.nomorPolisiLama,
-                                    nomorBpkbLama: bpkb.nomorBpkbLama,
-                                };
-                            }),
-                            pagination: {
-                                more: data.current_page < data.last_page,
-                            },
-                        };
-                    },
-                    cache: true
-                }
-            }).on("select2:select", function(e) {
-                var selected = e.params.data;
-                console.log(selected)
-                if (typeof selected !== "undefined") {
-                    $("[name='nomorBpkb']").val(selected.nomorBpkb);
-                    $("[name='nomorPolisi']").val(selected.nomorPolisi);
-                    $("[name='namaPemilik']").val(selected.namaPemilik);
-                    $("[name='jenis']").val(selected.jenis);
-                    $("[name='merk']").val(selected.merk);
-                    $("[name='tipe']").val(selected.tipe);
-                    $("[name='model']").val(selected.model);
-                    $("[name='tahunPembuatan']").val(selected.tahunPembuatan);
-                    $("[name='tahunPerakitan']").val(selected.tahunPerakitan);
-                    $("[name='isiSilinder']").val(selected.isiSilinder);
-                    $("[name='warna']").val(selected.warna);
-                    $("[name='alamat']").val(selected.alamat);
-                    $("[name='nomorRangka']").val(selected.nomorRangka);
-                    $("[name='nomorMesin']").val(selected.nomorMesin);
-                    $("[name='keterangan']").val(selected.keterangan);
-                    $("[name='nomorPolisiLama']").val(selected.nomorPolisiLama);
-                    $("[name='nomorBpkbLama']").val(selected.nomorBpkbLama);
-                }
-            }).on("select2:unselecting", function(e) {
-                $("form").each(function() {
-                    this.reset()
-                });
-                ("#allocationsDiv").hide();
-                $("[name='creditor_id']").val("");
-            }).val("{{ old('nomorRegister') }}").trigger('change');
+        // Always load nomorRegister with or without jenis or merk selected
+        loadNomorRegister(jenisId, merkId);
+    });
 
-            function reset() {
-                $("[name='nomorBpkb']").val(null);
-                $("[name='nomorPolisi']").val(null);
-                $("[name='namaPemilik']").val(null);
-                $("[name='jenis']").val(null);
-                $("[name='merk']").val(null);
-                $("[name='tipe']").val(null);
-                $("[name='model']").val(null);
-                $("[name='tahunPembuatan']").val(null);
-                $("[name='tahunPerakitan']").val(null);
-                $("[name='isiSilinder']").val(null);
-                $("[name='warna']").val(null);
-                $("[name='alamat']").val(null);
-                $("[name='nomorRangka']").val(null);
-                $("[name='nomorMesin']").val(null);
-                $("[name='keterangan']").val(null);
-                $("[name='nomorPolisiLama']").val(null);
-                $("[name='nomorBpkbLama']").val(null);
+    // Function to load nomorRegister data
+    function loadNomorRegister(jenisId = '', merkId = '') {
+        $('#nomorRegister').prop('disabled', false).html('<option value="">Silahkan Pilih</option>');
+
+        $('#nomorRegister').select2({
+            theme: "bootstrap-5",
+            width: "100%",
+            placeholder: "Silahkan Pilih...",
+            minimumInputLength: 0,
+            ajax: {
+                url: "{{ route('peminjaman.bpkb.load_bpkb') }}",
+                dataType: 'json',
+                type: "POST",
+                data: function (params) {
+                    return {
+                        q: $.trim(params.term),
+                        jenis_id: jenisId,  // Pass jenisId (empty if not selected)
+                        merk_id: merkId     // Pass merkId (empty if not selected)
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.map((bpkb) => {
+                            return {
+                                text: `${bpkb.nomorPolisi} | ${bpkb.nomorBpkb}`,
+                                id: bpkb.nomorRegister,
+                                ...bpkb,
+                            };
+                        }),
+                        pagination: {
+                            more: data.current_page < data.last_page,
+                        },
+                    };
+                },
+                cache: true
             }
-        });
+        }).on("select2:select", function (e) {
+            var selected = e.params.data;
+            if (selected) {
+                // Populate fields with selected data
+                $("[name='nomorBpkb']").val(selected.nomorBpkb);
+                $("[name='nomorPolisi']").val(selected.nomorPolisi);
+                $("[name='namaPemilik']").val(selected.namaPemilik);
+                $("[name='jenis']").val(selected.jenis);
+                $("[name='merk']").val(selected.merk);
+                $("[name='tipe']").val(selected.tipe);
+                $("[name='model']").val(selected.model);
+                $("[name='tahunPembuatan']").val(selected.tahunPembuatan);
+                $("[name='tahunPerakitan']").val(selected.tahunPerakitan);
+                $("[name='isiSilinder']").val(selected.isiSilinder);
+                $("[name='warna']").val(selected.warna);
+                $("[name='alamat']").val(selected.alamat);
+                $("[name='nomorRangka']").val(selected.nomorRangka);
+                $("[name='nomorMesin']").val(selected.nomorMesin);
+                $("[name='keterangan']").val(selected.keterangan);
+                $("[name='nomorPolisiLama']").val(selected.nomorPolisiLama);
+                $("[name='nomorBpkbLama']").val(selected.nomorBpkbLama);
+            }
+        }).on("select2:unselecting", function () {
+            // Reset form on unselect
+            $("form")[0].reset();
+            $("[name='nomorRegister']").val(null).trigger('change');
+        }).val("{{ old('nomorRegister') }}").trigger('change');
+    }
+
+    // Initially load nomorRegister when no jenis or merk is selected
+    loadNomorRegister();
+});
     </script>
+
 @endpush

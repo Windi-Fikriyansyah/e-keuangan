@@ -38,6 +38,8 @@ class TambahRequest extends FormRequest
             'balikNama' => 'required|max:255',
             'penggunaan' => 'required|max:255',
             'keterangan' => 'required|max:3000',
+            'Nibbar' => 'required|max:3000',
+            'file' => 'required|mimes:pdf|max:2048',
         ];
     }
 
@@ -68,6 +70,7 @@ class TambahRequest extends FormRequest
             'penggunaan.max' => 'Penggunaan hanya bisa diisi 255 abjad',
             'keterangan.required' => 'Keterangan wajib diisi',
             'keterangan.max' => 'Keterangan hanya bisa diisi 3000 abjad',
+            'Nibbar.max' => 'Nibbar hanya bisa diisi 3000 abjad',
         ];
     }
 }

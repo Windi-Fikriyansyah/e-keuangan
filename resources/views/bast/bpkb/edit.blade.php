@@ -32,7 +32,7 @@
                 <form method="POST"action="{{ route('peminjaman.bpkb.update', $dataPinjam->id) }}">
                     @csrf
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nomor Register</label>
+                        <label class="col-sm-2 col-form-label">Nomor Arsip Dokumen</label>
                         <div class="col-sm-10">
                             <input class="form-control @error('nomorRegister') is-invalid @enderror readonlyInput"
                                 type="text" placeholder="Tidak perlu diisi, otomatis" name="nomorRegister"

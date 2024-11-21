@@ -26,7 +26,7 @@
                         <thead>
                             <tr>
                                 <th>Nomor Surat</th>
-                                <th>Nomor Register</th>
+                                <th>Nomor Arsip Dokumen</th>
                                 <th>Nomor Sertifikat</th>
                                 <th>SKPD</th>
                                 <th>Aksi</th>
@@ -71,7 +71,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nomor Register</label>
+                        <label class="col-sm-2 col-form-label">Nomor Arsip Dokumen</label>
                         <div class="col-sm-4">
                             <input class="form-control readonlyInput" id="nomorRegister" name="nomorRegister" type="text"
                                 readonly>

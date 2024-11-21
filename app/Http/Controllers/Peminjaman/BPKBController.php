@@ -79,66 +79,97 @@ class BPKBController extends Controller
             ->make(true);
     }
 
+    public function getMerks(Request $request)
+    {
+        $merks = DB::table('masterBpkb')
+        ->select('merk') // Pastikan hanya mengambil kolom yang diperlukan
+        ->distinct()
+        ->where('jenis', $request->jenis_id)
+        ->get();
+
+    return response()->json($merks);
+    }
+
+    public function getNomorRegisters(Request $request)
+    {
+        $nomorRegisters = DB::table('masterBpkb')
+        ->select('nomor_register') // Pastikan hanya mengambil kolom yang diperlukan
+        ->distinct()
+        ->where('jenis', $request->jenis_id)
+        ->where('merk', $request->merk_id)
+        ->get();
+
+    return response()->json($nomorRegisters);
+    }
+
     public function create()
     {
-        return view('kelola_peminjaman.bpkb.create');
+        $jenis = DB::table('masterBpkb')->select('jenis')->distinct()->get();
+        return view('kelola_peminjaman.bpkb.create', compact('jenis'));
     }
 
     public function loadBpkb(Request $request)
-    {
-        $term = trim($request->q);
-        $kodeSkpd = auth()->user()->kd_skpd;
-        $formatted_tags = [];
+{
+    $term = trim($request->q);
+    $jenis_id = $request->jenis_id; // Get the jenis_id from the request
+    $merk_id = $request->merk_id; // Get the merk_id from the request
+    $kodeSkpd = auth()->user()->kd_skpd;
+    $formatted_tags = [];
 
-        if (empty($term)) {
-            $tags = DB::table('masterBpkb')
-                ->where(function ($query) {
-                    $query->where('statusPinjam', '=', '0')->orWhereNull('statusPinjam');
-                })
-                ->where('kodeSkpd', $kodeSkpd)
-                ->limit(100)->get();
-        } else {
-            $tags = DB::table('masterBpkb')
-                ->where(function ($query) {
-                    $query->where('statusPinjam', '=', '0')->orWhereNull('statusPinjam');
-                })
-                ->where('kodeSkpd', $kodeSkpd)
-                ->where(function ($query) use ($term) {
-                    $query->where('nomorRegister', 'like', "%$term%")
-                        ->orWhere('nomorPolisi', 'like', "%$term%")
-                        ->orWhere('nomorBpkb', 'like', "%$term%")
-                        ->orWhere('kodeSkpd', 'like', "%$term%");
-                })
-                ->limit(5)
-                ->get();
-        }
+    $query = DB::table('masterBpkb')
+        ->where(function ($query) {
+            $query->where('statusPinjam', '=', '0')->orWhereNull('statusPinjam');
+        })
+        ->where('kodeSkpd', $kodeSkpd);
 
-        foreach ($tags as $tag) {
-            $formatted_tags[] = [
-                'nomorRegister' => $tag->nomorRegister,
-                'nomorPolisi' => $tag->nomorPolisi,
-                'nomorBpkb' => $tag->nomorBpkb,
-                'kodeSkpd' => $tag->kodeSkpd,
-                'namaPemilik' => $tag->namaPemilik,
-                'jenis' => $tag->jenis,
-                'merk' => $tag->merk,
-                'tipe' => $tag->tipe,
-                'model' => $tag->model,
-                'tahunPembuatan' => $tag->tahunPembuatan,
-                'tahunPerakitan' => $tag->tahunPerakitan,
-                'isiSilinder' => $tag->isiSilinder,
-                'warna' => $tag->warna,
-                'alamat' => $tag->alamat,
-                'nomorRangka' => $tag->nomorRangka,
-                'nomorMesin' => $tag->nomorMesin,
-                'keterangan' => $tag->keterangan,
-                'nomorPolisiLama' => $tag->nomorPolisiLama,
-                'nomorBpkbLama' => $tag->nomorBpkbLama,
-            ];
-        }
-
-        return \Response::json($formatted_tags);
+    // If jenis_id or merk_id is provided, add them to the query
+    if ($jenis_id) {
+        $query->where('jenis', $jenis_id);
     }
+
+    if ($merk_id) {
+        $query->where('merk', $merk_id);
+    }
+
+    // Search by term if provided
+    if (!empty($term)) {
+        $query->where(function ($query) use ($term) {
+            $query->where('nomorRegister', 'like', "%$term%")
+                ->orWhere('nomorPolisi', 'like', "%$term%")
+                ->orWhere('nomorBpkb', 'like', "%$term%")
+                ->orWhere('kodeSkpd', 'like', "%$term%");
+        });
+    }
+
+
+    $tags = $query->get();
+    foreach ($tags as $tag) {
+        $formatted_tags[] = [
+            'nomorRegister' => $tag->nomorRegister,
+            'nomorPolisi' => $tag->nomorPolisi,
+            'nomorBpkb' => $tag->nomorBpkb,
+            'kodeSkpd' => $tag->kodeSkpd,
+            'namaPemilik' => $tag->namaPemilik,
+            'jenis' => $tag->jenis,
+            'merk' => $tag->merk,
+            'tipe' => $tag->tipe,
+            'model' => $tag->model,
+            'tahunPembuatan' => $tag->tahunPembuatan,
+            'tahunPerakitan' => $tag->tahunPerakitan,
+            'isiSilinder' => $tag->isiSilinder,
+            'warna' => $tag->warna,
+            'alamat' => $tag->alamat,
+            'nomorRangka' => $tag->nomorRangka,
+            'nomorMesin' => $tag->nomorMesin,
+            'keterangan' => $tag->keterangan,
+            'nomorPolisiLama' => $tag->nomorPolisiLama,
+            'nomorBpkbLama' => $tag->nomorBpkbLama,
+        ];
+    }
+
+    return \Response::json($formatted_tags);
+}
+
 
     public function store(TambahRequest $request)
     {
@@ -228,7 +259,7 @@ class BPKBController extends Controller
                         'statusPinjamLagi' => '1'
                     ]);
                 }
-            
+
 
             DB::commit();
             return redirect()
@@ -381,7 +412,7 @@ class BPKBController extends Controller
                 ]);
             }
 
-            
+
 
             DB::commit();
             return response()->json([

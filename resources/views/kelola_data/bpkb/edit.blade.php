@@ -28,6 +28,12 @@
             </div>
         @endif
         <div class="card">
+
+            <div class="card-header d-flex justify-content-end">
+                <button type="button" class="btn btn-success" onclick="handleViewFiles('{{ $dataBpkb->id }}', '{{ $dataBpkb->nomorBpkb }}')">
+                    <i class="fas fa-file-alt me-1"></i>Lihat File
+                </button>
+            </div>
             <div class="card-body">
                 <form method="POST"action="{{ route('kelola_data.bpkb.update', $dataBpkb->id) }}">
                     @csrf
@@ -50,7 +56,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nomor Register</label>
+                        <label class="col-sm-2 col-form-label">Nomor Arsip Dokumen</label>
                         <div class="col-sm-4">
                             <input class="form-control @error('nomorRegister') is-invalid @enderror" type="text"
                                 placeholder="Isi dengan nomor register" name="nomorRegister"
@@ -198,6 +204,26 @@
                         </div>
                     </div>
                     <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Nibbar</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('Nibbar') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan Nibbar" name="Nibbar"
+                                value="{{ $dataBpkb->Nibbar }}">
+                            @error('Nibbar')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <label class="col-sm-2 col-form-label">Nama Penerima Kendaraan</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('namapenerimakendaraan') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan Nama Penerima Kendaraan" name="namapenerimakendaraan"
+                                value="{{ $dataBpkb->namapenerimakendaraan }}">
+                            @error('namapenerimakendaraan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Alamat</label>
                         <div class="col-sm-10">
                             <textarea class="form-control @error('alamat') is-invalid @enderror" type="text" placeholder="Isi dengan alamat"
@@ -227,6 +253,103 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="fileViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Lihat File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs nav-justified mb-3" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabSuratPenunjukan">
+                                <i class="fas fa-file-pdf me-1"></i>Surat Penunjukan
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabBA">
+                                <i class="fas fa-file-pdf me-1"></i>File BA
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#filepaktaintegritas">
+                                <i class="fas fa-file-pdf me-1"></i>File Pakta Integritas
+                            </button>
+                        </li>
+                    </ul>
+                    @if ($dataBpkb->statusBpkb == '0' && $dataBpkb->statusPinjam == '0')
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tabSuratPenunjukan">
+                            <div class="d-flex justify-content-end mb-2">
+                                <button class="btn btn-sm btn-success" onclick="handleFileEdit('suratPenunjukan')">
+                                    <i class="fas fa-edit me-1"></i>Edit File
+                                </button>
+                            </div>
+                            <iframe id="iframeSuratPenunjukan" class="w-100" style="height: 500px;" frameborder="0"></iframe>
+                        </div>
+                        <div class="tab-pane fade" id="tabBA">
+                            <div class="d-flex justify-content-end mb-2">
+                                <button class="btn btn-sm btn-success" onclick="handleFileEdit('ba')">
+                                    <i class="fas fa-edit me-1"></i>Edit File
+                                </button>
+                            </div>
+                            <iframe id="iframeBA" class="w-100" style="height: 500px;" frameborder="0"></iframe>
+                        </div>
+                        <div class="tab-pane fade" id="filepaktaintegritas">
+                            <div class="d-flex justify-content-end mb-2">
+                                <button class="btn btn-sm btn-success" onclick="handleFileEdit('paktaIntegritas')">
+                                    <i class="fas fa-edit me-1"></i>Edit File
+                                </button>
+                            </div>
+                            <iframe id="iframepaktaintegritas" class="w-100" style="height: 500px;" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                    @endif
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tabSuratPenunjukan">
+                            <iframe id="iframeSuratPenunjukan" class="w-100" style="height: 500px;" frameborder="0"></iframe>
+                        </div>
+                        <div class="tab-pane fade" id="tabBA">
+                            <iframe id="iframeBA" class="w-100" style="height: 500px;" frameborder="0"></iframe>
+                        </div>
+                        <div class="tab-pane fade" id="filepaktaintegritas">
+                            <iframe id="iframepaktaintegritas" class="w-100" style="height: 500px;" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="fileEditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="fileEditForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <input type="hidden" id="fileType" name="fileType">
+                        <input type="hidden" id="bpkbId" name="bpkbId">
+                        <input type="hidden" id="nomorBpkb" name="nomorBpkb">
+                        <div class="mb-3">
+                            <label class="form-label" id="fileEditLabel"></label>
+                            <input type="file" class="form-control" name="file" accept="application/pdf" required>
+                            <div class="form-text">Format file: PDF, Maksimal 2MB</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 @push('js')
     <script>
@@ -237,5 +360,118 @@
                 }
             });
         });
+
+         // Handle file edit form submission
+    $('#fileEditForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        formData.append('bpkbId', currentBpkbId);
+        formData.append('nomorBpkb', currentNomorBpkb);
+
+        Swal.fire({
+            title: 'Menyimpan...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        $.ajax({
+            url: '/kelola_data/bpkb/update-file',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: 'File berhasil diperbarui',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    $('#fileEditModal').modal('hide');
+                    handleViewFiles(currentBpkbId, currentNomorBpkb);
+                });
+            },
+            error: function(xhr) {
+                let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMessage,
+                    confirmButtonText: 'Tutup'
+                });
+            }
+        });
+    });
+
+        function handleFileEdit(fileType) {
+    const fileLabels = {
+        'suratPenunjukan': 'File Surat Penunjukan',
+        'ba': 'File Berita Acara',
+        'paktaIntegritas': 'File Pakta Integritas'
+    };
+
+    $('#fileType').val(fileType);
+    $('#fileEditLabel').text(fileLabels[fileType]);
+    $('#bpkbId').val(currentBpkbId);
+    $('#nomorBpkb').val(currentNomorBpkb);
+
+    $('#fileViewModal').modal('hide');
+    $('#fileEditModal').modal('show');
+
+    // Handle modal closing
+    $('#fileEditModal').on('hidden.bs.modal', function () {
+        $('#fileViewModal').modal('show');
+    });
+}
+
+        function handleViewFiles(bpkbId, nomorBpkb) {
+        // Show loading state
+        currentBpkbId = bpkbId;
+        currentNomorBpkb = nomorBpkb;
+        Swal.fire({
+            title: 'Memuat File...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Fetch file data
+        $.ajax({
+            url: `/kelola_data/bpkb/get-files/${bpkbId}`,
+            type: 'GET',
+            success: function(response) {
+                Swal.close();
+
+                // Set iframe sources
+                const baseUrl = '{{ asset("storage/uploads/bpkb") }}';
+                document.getElementById('iframeSuratPenunjukan').src =
+                    `${baseUrl}/file_surat_penunjukan/${response.filesuratpenunjukan}`;
+                document.getElementById('iframeBA').src =
+                    `${baseUrl}/file_ba/${response.fileba}`;
+                document.getElementById('iframepaktaintegritas').src =
+                    `${baseUrl}/file_pakta_integritas/${response.filepaktaintegritas}`;
+
+                // Show modal
+                new bootstrap.Modal(document.getElementById('fileViewModal')).show();
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Gagal memuat file. Silakan coba lagi.',
+                    confirmButtonText: 'Tutup'
+                });
+                console.error('Error loading files:', xhr);
+            }
+        });
+}
     </script>
 @endpush

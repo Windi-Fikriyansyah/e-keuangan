@@ -27,7 +27,7 @@
                     <table class="table align-middle mb-0" id="bpkb" style="width: 100%">
                         <thead>
                             <tr>
-                                <th>Nomor Register</th>
+                                <th>Nomor Arsip Dokumen</th>
                                 <th>Nomor BPKB</th>
                                 <th>Nomor Polisi</th>
                                 <th>SKPD</th>

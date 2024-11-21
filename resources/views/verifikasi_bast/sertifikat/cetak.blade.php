@@ -137,7 +137,7 @@ $tahun = $tanggal->isoFormat('Y'); // Mendapatkan tahun
     <table>
         <tr>
             <th>No.</th>
-            <th>No. Register</th>
+            <th>No. Arsip Dokumen</th>
             <th>Peruntukan</th>
             <th>Pemegang Hak</th>
             <th>Nomor Sertifikat</th>

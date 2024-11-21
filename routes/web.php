@@ -83,7 +83,10 @@ Route::middleware('auth')->group(function () {
                 Route::post('store', [BPKBController::class, 'store'])->name('store');
                 Route::get('edit/{no_register}/{kd_skpd}', [BPKBController::class, 'edit'])->name('edit');
                 Route::post('update/{id}', [BPKBController::class, 'update'])->name('update');
-                Route::post('delete', [BPKBController::class, 'delete'])->name('delete');
+                Route::post('delete', [BPKBController::class, 'destroy'])->name('delete');
+                Route::get('/get-files/{id}', [BPKBController::class, 'getFiles']);
+                Route::post('/update-file', [BPKBController::class, 'updateFile'])->name('update-file');
+
             });
 
         // SERTIFIKAT
@@ -106,6 +109,10 @@ Route::middleware('auth')->group(function () {
             Route::get('edit/{no_register}/{kd_skpd}', [SertifikatController::class, 'edit'])->name('sertifikat.edit');
             Route::post('update/{id}', [SertifikatController::class, 'update'])->name('sertifikat.update');
             Route::delete('/{id}', [SertifikatController::class, 'destroy'])->name('sertifikat.destroy');
+            Route::post('delete', [SertifikatController::class, 'delete'])->name('delete');
+            Route::get('/file/{id}/{nomorRegister}', [SertifikatController::class, 'lihatFile'])->name('sertifikat.file.show');
+            Route::post('/file/update', [SertifikatController::class, 'updateFile'])->name('sertifikat.file.update');
+
         });
 
         Route::group(['prefix' => 'master_ttd'], function () {
@@ -145,6 +152,9 @@ Route::middleware('auth')->group(function () {
                 Route::post('load_bpkb', [PeminjamanBPKBController::class, 'loadBpkb'])->name('load_bpkb');
                 Route::get('cetak', [PeminjamanBPKBController::class, 'cetakPeminjaman'])->name('cetak');
                 Route::post('pengajuan', [PeminjamanBPKBController::class, 'pengajuanPeminjaman'])->name('pengajuan');
+                Route::get('/getmerk', [PeminjamanBPKBController::class, 'getMerks'])->name('merks');
+                Route::get('/getnomorregisters', [PeminjamanBPKBController::class, 'getNomorRegisters'])->name('nomor-registers');
+
             });
 
         // SERTIFIKAT

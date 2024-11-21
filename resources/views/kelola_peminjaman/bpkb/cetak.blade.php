@@ -120,7 +120,7 @@
         <thead>
             <tr>
                 <th>No.</th>
-                <th>No. Register</th>
+                <th>No. Arsip Dokumen</th>
                 <th>Nomor Polisi</th>
                 <th>Nomor Rangka</th>
                 <th>Nomor BPKB</th>

@@ -43,6 +43,11 @@ class TambahRequest extends FormRequest
             'keterangan' => 'required|max:3000',
             'nomorPolisiLama' => 'nullable|max:255|unique:masterBpkb,nomorPolisiLama',
             'nomorBpkbLama' => 'nullable|max:255|unique:masterBpkb,nomorBpkbLama',
+            'Nibbar' => 'required|max:255',
+            'namapenerimakendaraan' => 'required|max:255',
+            'filesuratpenunjukan' => 'required|mimes:pdf|max:2048',
+            'fileba' => 'required|mimes:pdf|max:2048',
+            'filepaktaintegritas' => 'required|mimes:pdf|max:2048',
         ];
     }
 
@@ -88,6 +93,13 @@ class TambahRequest extends FormRequest
             'nomorPolisiLama.max' => 'Nomor Polisi Lama hanya bisa diisi 255 abjad',
             'nomorBpkbLama.required' => 'Nomor BPKB Lama wajib diisi',
             'nomorBpkbLama.max' => 'Nomor BPKB Lama hanya bisa diisi 255 abjad',
+            'Nibbar.required' => 'Nibbar wajib diisi',
+            'Nibbar.max' => 'Nibbar hanya bisa diisi 255 abjad',
+            'namapenerimakendaraan.required' => 'nama penerima kendaraan wajib diisi',
+            'namapenerimakendaraan.max' => 'nama penerima kendaraan hanya bisa diisi 255 abjad',
+            'filesuratpenunjukan.required' => 'file surat penunjukan wajib diisi',
+            'fileba.required' => 'file ba wajib diisi',
+            'filepaktaintegritas.required' => 'file pakta integritas wajib diisi',
         ];
     }
 }

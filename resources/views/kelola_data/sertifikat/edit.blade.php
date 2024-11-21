@@ -4,6 +4,7 @@
     <div class="page-heading">
         <h3>Edit Sertifikat</h3>
     </div>
+
     <div class="page-content">
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -27,9 +28,16 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
+
         <div class="card">
+            <div class="card-header">
+                <a type="button" onclick="LihatFile({{ $dataSertifikat->id }}, '{{ $dataSertifikat->nomorRegister }}')" class="btn btn-success width-md waves-effect waves-light load" style="float: right;">Lihat File</a>
+
+            </div>
             <div class="card-body">
-                <form method="POST"action="{{ route('kelola_data.sertifikat.update', $dataSertifikat->id) }}">
+
+                <form method="POST" action="{{ route('kelola_data.sertifikat.update', $dataSertifikat->id) }}">
+
                     @csrf
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">SKPD</label>
@@ -50,7 +58,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nomor Register</label>
+                        <label class="col-sm-2 col-form-label">Nomor Arsip Dokumen</label>
                         <div class="col-sm-4">
                             <input class="form-control @error('nomorRegister') is-invalid @enderror" type="text"
                                 placeholder="Tidak perlu diisi, otomatis" name="nomorRegister"
@@ -183,6 +191,15 @@
                             @enderror
                         </div>
 
+                        <label class="col-sm-2 col-form-label">Nibbar</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('Nibbar') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan Nibbar" name="Nibbar" value="{{ old('Nibbar', $dataSertifikat->Nibbar) }}">
+                            @error('Nibbar')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                     </div>
 
                     <div class="mb-3 text-end">
@@ -195,6 +212,39 @@
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" id="LihatFile" tabindex="-1" aria-labelledby="LihatFileLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-title1"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tempat untuk menampilkan file PDF -->
+                    @if ($dataSertifikat->statusSertifikat == '0' && $dataSertifikat->statusPinjam == '0')
+                    <form id="edit-file-form" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" id="edit-id" name="id">
+                        <input type="hidden" id="edit-nomorRegister" name="nomorRegister">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Pilih File Baru</label>
+                            <input type="file" class="form-control" id="file" name="file" accept="application/pdf">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update File</button>
+                    </form>
+                    @endif
+                    <div id="file-display">
+                        <!-- File PDF akan dimuat di sini -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 @endsection
 @push('js')
     <script>
@@ -205,5 +255,82 @@
                 }
             });
         });
+
+
+        function LihatFile(id, nomorRegister) {
+        // URL dinamis menggunakan route Laravel
+        var url = "{{ route('kelola_data.sertifikat.file.show', ['id' => ':id', 'nomorRegister' => ':nomorRegister']) }}";
+        url = url.replace(':id', id).replace(':nomorRegister', nomorRegister);
+
+        // Menggunakan AJAX untuk mengambil data file berdasarkan id dan nomorRegister
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                if (response.file) {
+                    // Menampilkan file PDF di dalam modal menggunakan <embed> atau <iframe>
+                    $('#modal-title1').text('Lihat File Sertifikat');
+                    $('#file-display').html('<embed src="{{ asset("storage/uploads/sertifikat/") }}/' + response.file + '" width="100%" height="500px" type="application/pdf">');
+                        $('#edit-id').val(id); // Set id untuk form edit
+                        $('#edit-nomorRegister').val(nomorRegister); // Set nomor register untuk form edit
+                        $('#LihatFile').modal('show');
+                } else {
+                    alert('File tidak ditemukan!');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log(xhr.responseText); // Menampilkan pesan error di konsol
+                alert('Terjadi kesalahan saat mengambil data file. Cek konsol untuk detail error.');
+            }
+        });
+    }
+
+    $('#edit-file-form').on('submit', function(event) {
+        event.preventDefault(); // Mencegah form submit default
+
+        var formData = new FormData(this); // Mengambil data form
+
+        $.ajax({
+            url: "{{ route('kelola_data.sertifikat.file.update') }}", // URL untuk mengupdate file
+            type: 'POST',
+            data: formData,
+            contentType: false, // Agar file dapat diupload
+            processData: false, // Jangan proses data
+            success: function(response) {
+            if (response.success) {
+                // SweetAlert success
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'File berhasil diperbarui!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(function() {
+                    $('#LihatFile').modal('hide'); // Close modal after success
+                });
+            } else {
+                // SweetAlert error
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: 'Terjadi kesalahan saat memperbarui file!',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log(xhr.responseText); // Log error message in console
+            // SweetAlert error for AJAX failure
+            Swal.fire({
+                title: 'Error!',
+                text: 'Terjadi kesalahan saat mengirim form. Cek konsol untuk detail error.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+        });
+    });
+
+
+
     </script>
 @endpush

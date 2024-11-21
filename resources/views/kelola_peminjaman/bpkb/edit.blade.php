@@ -32,7 +32,29 @@
                 <form method="POST"action="{{ route('peminjaman.bpkb.update', $dataPinjam->id) }}">
                     @csrf
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nomor Register</label>
+                        <label class="col-sm-2 col-form-label">Jenis Kendaraan</label>
+                        <div class="col-sm-10">
+                            <input class="form-control @error('jenis') is-invalid @enderror readonlyInput"
+                                type="text" placeholder="Tidak perlu diisi, otomatis"
+                                value="{{ $dataBpkb->jenis }}" readonly>
+                            @error('jenis')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Merek</label>
+                        <div class="col-sm-10">
+                            <input class="form-control @error('merk') is-invalid @enderror readonlyInput"
+                                type="text" placeholder="Tidak perlu diisi, otomatis"
+                                value="{{ $dataBpkb->merk }}" readonly>
+                            @error('merk')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Nomor Arsip Dokumen</label>
                         <div class="col-sm-10">
                             <input class="form-control @error('nomorRegister') is-invalid @enderror readonlyInput"
                                 type="text" placeholder="Tidak perlu diisi, otomatis" name="nomorRegister"

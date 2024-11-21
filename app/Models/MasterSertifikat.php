@@ -14,13 +14,25 @@ class MasterSertifikat extends Model
         'nomorRegister',
         'nib',
         'nomorSertifikat',
-        'tanggal',
+        'tanggalSertifikat',
         'luas',
+        'hak',
         'pemegangHak',
+        'asalUsul',
+        'alamat',
+        'sertifikatAsli',
+        'balikNama',
+        'penggunaan',
+        'keterangan',
         'createdDate',
         'createdUsername',
         'updatedDate',
-        'updatedUsername'
+        'updatedUsername',
+        'kodeSkpd',
+        'statusPinjam',
+        'statusSertifikat',
+        'Nibbar',
+        'file',
     ];
 
 

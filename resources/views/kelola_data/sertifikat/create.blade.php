@@ -29,7 +29,7 @@
         @endif
         <div class="card">
             <div class="card-body">
-                <form method="POST"action="{{ route('kelola_data.sertifikat.store') }}">
+                <form method="POST" action="{{ route('kelola_data.sertifikat.store') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">SKPD</label>
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nomor Register</label>
+                        <label class="col-sm-2 col-form-label">Nomor Arsip Dokumen</label>
                         <div class="col-sm-4">
                             <input class="form-control @error('nomorRegister') is-invalid @enderror" type="text"
                                 placeholder="Tidak perlu diisi, otomatis" name="nomorRegister"
@@ -67,6 +67,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Nomor Sertifkat</label>
@@ -183,6 +184,29 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        <label class="col-sm-2 col-form-label">Nibbar</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('Nibbar') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan Nibbar" name="Nibbar" value="{{ old('Nibbar') }}">
+                            @error('Nibbar')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">File</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('file') is-invalid @enderror" type="file" name="file"
+                                value="{{ old('file') }}">
+                            @error('file')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+
 
                     </div>
 

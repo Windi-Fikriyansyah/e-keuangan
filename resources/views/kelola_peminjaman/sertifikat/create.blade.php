@@ -32,7 +32,7 @@
                 <form method="POST"action="{{ route('peminjaman.sertifikat.store') }}" id="formSertifikat" enctype="multipart/form-data">
                     @csrf
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Nomor Register</label>
+                        <label class="col-sm-2 col-form-label">Nomor Arsip Dokumen</label>
                         <div class="col-sm-10">
                             <select class="form-select @error('nomorRegister') is-invalid @enderror select_option"
                                 name="nomorRegister" id="nomorRegister" data-placeholder="Silahkan Pilih" autofocus>
