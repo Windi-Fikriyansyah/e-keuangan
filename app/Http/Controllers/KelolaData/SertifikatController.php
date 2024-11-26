@@ -215,7 +215,7 @@ class SertifikatController extends Controller
         }
     }
 
-   
+
 
 public function getFiles(Request $request)
     {
@@ -239,45 +239,45 @@ public function getFiles(Request $request)
         }
     }
 
-    public function updateFile(Request $request)
-{
+//     public function updateFile(Request $request)
+// {
 
-    $request->validate([
-        'file' => 'required|mimes:pdf|max:2048',
-        'fileType' => 'required|in:file',
-        'bpkbId' => 'required|exists:masterSertifikat,id',
-        'nomorRegister' => 'required'
-    ]);
+//     $request->validate([
+//         'file' => 'required|mimes:pdf|max:2048',
+//         'fileType' => 'required|in:file',
+//         'bpkbId' => 'required|exists:masterSertifikat,id',
+//         'nomorRegister' => 'required'
+//     ]);
 
-    $bpkb = MasterSertifikat::findOrFail($request->bpkbId);
+//     $bpkb = MasterSertifikat::findOrFail($request->bpkbId);
 
-    $fileFieldMap = [
-        'file' => 'file',
-    ];
+//     $fileFieldMap = [
+//         'file' => 'file',
+//     ];
 
-    $field = $fileFieldMap[$request->fileType];
-    $path = "uploads/sertifikat";
+//     $field = $fileFieldMap[$request->fileType];
+//     $path = "uploads/sertifikat";
 
-    // Delete old file if exists
-    if ($bpkb->$field) {
-        Storage::delete("public/$path/" . $bpkb->$field);
-    }
+//     // Delete old file if exists
+//     if ($bpkb->$field) {
+//         Storage::delete("public/$path/" . $bpkb->$field);
+//     }
 
-    // Store new file
-    $fileName = $request->nomorRegister . '.pdf';
-    $request->file('file')->storeAs("public/$path", $fileName);
+//     // Store new file
+//     $fileName = $request->nomorRegister . '.pdf';
+//     $request->file('file')->storeAs("public/$path", $fileName);
 
-    $bpkb->update([$field => $fileName]);
+//     $bpkb->update([$field => $fileName]);
 
-    return response()->json(['message' => 'File berhasil diperbarui']);
-}
+//     return response()->json(['message' => 'File berhasil diperbarui']);
+// }
 
 
 public function destroy(Request $request)
 {
     DB::beginTransaction(); // Mulai transaksi
     try {
-       
+
         $item = DB::table('masterSertifikat')
             ->where([
                 'nomorRegister' => $request->nomorRegister,
@@ -330,27 +330,27 @@ public function destroy(Request $request)
 }
 
 
-public function getFiles(Request $request)
-    {
-        try {
-            // Ambil data file dari database (misalnya berdasarkan ID atau kriteria lainnya)
-            // Pastikan model dan kolomnya sesuai dengan struktur database kamu
-            $file = DB::table('masterSertifikat')->where('id', $request->id) // Atau sesuaikan dengan kriteria lainnya
-                ->first();
+// public function getFiles(Request $request)
+//     {
+//         try {
+//             // Ambil data file dari database (misalnya berdasarkan ID atau kriteria lainnya)
+//             // Pastikan model dan kolomnya sesuai dengan struktur database kamu
+//             $file = DB::table('masterSertifikat')->where('id', $request->id) // Atau sesuaikan dengan kriteria lainnya
+//                 ->first();
 
-            if (!$file) {
-                return response()->json(['message' => 'File not found'], 404);
-            }
+//             if (!$file) {
+//                 return response()->json(['message' => 'File not found'], 404);
+//             }
 
-            // Return data file dalam bentuk JSON
-            return response()->json([
-                'file' => $file->file,
-            ]);
-        } catch (\Exception $e) {
-            // Tangani kesalahan jika terjadi
-            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
-        }
-    }
+//             // Return data file dalam bentuk JSON
+//             return response()->json([
+//                 'file' => $file->file,
+//             ]);
+//         } catch (\Exception $e) {
+//             // Tangani kesalahan jika terjadi
+//             return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+//         }
+//     }
 
     public function updateFile(Request $request)
 {

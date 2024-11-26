@@ -218,11 +218,10 @@
 
     <div class="modal fade" id="fileViewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Lihat File</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="refreshPage()"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="nav nav-tabs nav-justified mb-3" role="tablist">
@@ -251,10 +250,12 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
 
-
-            <div class="modal fade" id="fileEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="fileEditModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -279,7 +280,6 @@
                         </button>
                     </div>
                 </form>
->>>>>>> b960a167d4f9225686ce836929bb13148e3b79ab
             </div>
         </div>
     </div>
@@ -366,6 +366,7 @@
                 }).then(() => {
                     $('#fileEditModal').modal('hide');
                     handleViewFiles(currentBpkbId, currentNomorBpkb);
+
                 });
             },
             error: function(xhr) {
@@ -382,6 +383,8 @@
                 });
             }
         });
+    });
+
 
         function handleFileEdit(fileType) {
     const fileLabels = {
@@ -466,8 +469,6 @@ function handleViewFiles(bpkbId, nomorRegister) {
             console.error('Error loading files:', xhr);
         }
 
-
->>>>>>> b960a167d4f9225686ce836929bb13148e3b79ab
     });
 
 }
