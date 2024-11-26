@@ -61,7 +61,7 @@ class SertifikatController extends Controller
                 $btn = '<a href="' . route("kelola_data.sertifikat.edit", ['no_register' => Crypt::encrypt($row->nomorRegister), 'kd_skpd' => Crypt::encrypt($row->kodeSkpd)]) . '" class="btn btn-md btn-warning" style="margin-right:4px"><span class="fa-fw select-all fas"></span></a>';
 
                 if ($row->statusSertifikat == '0' && $row->statusPinjam == '0') {
-                    $btn .= '<a onclick="hapus(\'' . $row->id . '\')" class="btn btn-md btn-danger"><span class="fa-fw select-all fas"></span></a>';
+                    $btn .= '<a onclick="hapus(\'' . $row->nomorRegister . '\',\'' . $row->kodeSkpd . '\')" class="btn btn-md btn-danger"><span class="fa-fw select-all fas"></span></a>';
                 }
                 return $btn;
             })
@@ -215,41 +215,117 @@ class SertifikatController extends Controller
         }
     }
 
-    public function destroy(Request $request, $id)
+   
+
+public function getFiles(Request $request)
+    {
+        try {
+            // Ambil data file dari database (misalnya berdasarkan ID atau kriteria lainnya)
+            // Pastikan model dan kolomnya sesuai dengan struktur database kamu
+            $file = DB::table('masterSertifikat')->where('id', $request->id) // Atau sesuaikan dengan kriteria lainnya
+                ->first();
+
+            if (!$file) {
+                return response()->json(['message' => 'File not found'], 404);
+            }
+
+            // Return data file dalam bentuk JSON
+            return response()->json([
+                'file' => $file->file,
+            ]);
+        } catch (\Exception $e) {
+            // Tangani kesalahan jika terjadi
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function updateFile(Request $request)
 {
+
+    $request->validate([
+        'file' => 'required|mimes:pdf|max:2048',
+        'fileType' => 'required|in:file',
+        'bpkbId' => 'required|exists:masterSertifikat,id',
+        'nomorRegister' => 'required'
+    ]);
+
+    $bpkb = MasterSertifikat::findOrFail($request->bpkbId);
+
+    $fileFieldMap = [
+        'file' => 'file',
+    ];
+
+    $field = $fileFieldMap[$request->fileType];
+    $path = "uploads/sertifikat";
+
+    // Delete old file if exists
+    if ($bpkb->$field) {
+        Storage::delete("public/$path/" . $bpkb->$field);
+    }
+
+    // Store new file
+    $fileName = $request->nomorRegister . '.pdf';
+    $request->file('file')->storeAs("public/$path", $fileName);
+
+    $bpkb->update([$field => $fileName]);
+
+    return response()->json(['message' => 'File berhasil diperbarui']);
+}
+
+
+public function destroy(Request $request)
+{
+    DB::beginTransaction(); // Mulai transaksi
     try {
-        // Find the item to delete
-        $item = MasterSertifikat::findOrFail($id);
+       
+        $item = DB::table('masterSertifikat')
+            ->where([
+                'nomorRegister' => $request->nomorRegister,
+                'kodeSkpd' => $request->kodeSkpd
+            ])
+            ->lockForUpdate()
+            ->first();
 
-        // Get the file path using the 'id' from the request
-        $filePath = 'public/uploads/sertifikat/' . $item->file;
+        if (!$item) {
+            throw new \Exception('Data tidak ditemukan.');
+        }
 
-        // Start a database transaction to ensure atomicity
-        DB::beginTransaction();
+        // Tentukan path file yang akan dihapus
+        $filePaths = [
+            'public/uploads/sertifikat/' . $item->file,
+        ];
 
-        // Check if the file exists and delete it
-        if (Storage::exists($filePath)) {
-            $deleted = Storage::delete($filePath);
-            if (!$deleted) {
-                // If file deletion fails, throw an exception
-                throw new \Exception('Failed to delete file.');
+        // Hapus semua file yang ada
+        foreach ($filePaths as $filePath) {
+            if (Storage::exists($filePath)) {
+                if (!Storage::delete($filePath)) {
+                    throw new \Exception('Gagal menghapus file: ' . $filePath);
+                }
             }
         }
 
-        // Delete the record from the database
-        $item->delete();
+        // Hapus data dari database
+        DB::table('masterSertifikat')
+            ->where([
+                'nomorRegister' => $request->nomorRegister,
+                'kodeSkpd' => $request->kodeSkpd
+            ])
+            ->delete();
 
-        // Commit the transaction if both actions are successful
+        // Komit transaksi
         DB::commit();
 
-        return response()->json(['success' => true, 'message' => 'Item deleted successfully.']);
+        return response()->json([
+            'status' => true,
+            'message' => 'Data berhasil dihapus!'
+        ], 200);
     } catch (\Exception $e) {
-        // Rollback the transaction if there is any error
-        DB::rollBack();
+        DB::rollBack(); // Batalkan transaksi jika terjadi error
 
-        Log::error('Delete error: ' . $e->getMessage());
-
-        return response()->json(['success' => false, 'message' => 'Failed to delete item.']);
+        return response()->json([
+            'status' => false,
+            'message' => 'Data gagal dihapus: ' . $e->getMessage()
+        ], 500);
     }
 }
 
@@ -308,9 +384,6 @@ public function getFiles(Request $request)
 
     return response()->json(['message' => 'File berhasil diperbarui']);
 }
-
-
-
 
 
 }

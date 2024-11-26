@@ -218,6 +218,7 @@
 
     <div class="modal fade" id="fileViewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
+
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Lihat File</h5>
@@ -250,6 +251,35 @@
                         </div>
                     </div>
                 </div>
+
+
+
+            <div class="modal fade" id="fileEditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="fileEditForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <input type="hidden" id="fileType" name="fileType">
+                        <input type="hidden" id="bpkbId" name="bpkbId">
+                        <input type="hidden" id="nomorRegister" name="nomorRegister">
+                        <div class="mb-3">
+                            <label class="form-label" id="fileEditLabel"></label>
+                            <input type="file" class="form-control" name="file" accept="application/pdf" required>
+                            <div class="form-text">Format file: PDF, Maksimal 2MB</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Simpan
+                        </button>
+                    </div>
+                </form>
+>>>>>>> b960a167d4f9225686ce836929bb13148e3b79ab
             </div>
         </div>
     </div>
@@ -287,6 +317,15 @@
 
 @endsection
 @push('js')
+<script>
+    function refreshPage() {
+        // Menutup modal terlebih dahulu
+        $('#fileViewModal').modal('hide');
+
+        // Me-refresh halaman setelah modal ditutup
+        location.reload();
+    }
+</script>
     <script>
         $(document).ready(function() {
             $.ajaxSetup({
@@ -313,7 +352,7 @@
         });
 
         $.ajax({
-            url: '/kelola_data/sertifikat/update-file',
+            url: "{{ route('kelola_data.sertifikat.updatefile') }}",
             type: 'POST',
             data: formData,
             processData: false,
@@ -343,7 +382,95 @@
                 });
             }
         });
+
+        function handleFileEdit(fileType) {
+    const fileLabels = {
+        'file': 'File Sertifikat',
+
+    };
+
+    $('#fileType').val(fileType);
+    $('#fileEditLabel').text(fileLabels[fileType]);
+    $('#bpkbId').val(currentBpkbId);
+    $('#nomorRegister').val(currentNomorBpkb);
+
+    $('#fileViewModal').modal('hide');
+    $('#fileEditModal').modal('show');
+
+    // Handle modal closing
+    $('#fileEditModal').on('hidden.bs.modal', function () {
+        $('#fileViewModal').modal('show');
     });
+}
+
+function handleViewFiles(bpkbId, nomorRegister) {
+    // Show loading state
+    currentBpkbId = bpkbId;
+    currentNomorBpkb = nomorRegister;
+    Swal.fire({
+        title: 'Memuat File...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Fetch file data
+    $.ajax({
+        url: `{{ route('kelola_data.sertifikat.get-files', ['id' => '__bpkbId__']) }}`.replace('__bpkbId__', bpkbId),
+        type: 'GET',
+        success: function(response) {
+            Swal.close();
+
+            // Ensure response contains the 'file' field and it's a valid path
+            if (response && response.file) {
+                const baseUrl = '{{ asset("/storage/uploads/sertifikat") }}';
+                const filePath = `${baseUrl}/${response.file}`;
+
+                // Check if the file path exists
+                $.ajax({
+                    url: filePath,
+                    type: 'HEAD',  // Check if the file exists with a HEAD request
+                    success: function() {
+                        // Set iframe sources if file exists
+                        document.getElementById('iframeSuratPenunjukan').src = filePath;
+
+                        // Show modal after iframe source is set
+                        new bootstrap.Modal(document.getElementById('fileViewModal')).show();
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'File Tidak Ditemukan',
+                            text: 'File yang diminta tidak ditemukan. Silakan periksa file tersebut.',
+                            confirmButtonText: 'Tutup'
+                        });
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Data File Tidak Valid',
+                    text: 'Data file tidak ditemukan atau tidak valid.',
+                    confirmButtonText: 'Tutup'
+                });
+            }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Gagal memuat file. Silakan coba lagi.',
+                confirmButtonText: 'Tutup'
+            });
+            console.error('Error loading files:', xhr);
+        }
+
+
+>>>>>>> b960a167d4f9225686ce836929bb13148e3b79ab
+    });
+
+}
 
         function handleFileEdit(fileType) {
     const fileLabels = {

@@ -98,50 +98,60 @@
             });
         });
 
-        function hapus(id) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'You won\'t be able to revert this!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Ya, Hapus'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: '/kelola_data/sertifikat/' + id,
-                type: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}'
+        function hapus(nomorRegister, kodeSkpd) {
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-success right-gap",
+                    cancelButton: "btn btn-danger"
                 },
-                success: function(response) {
-                    if (response.success) {
-                        Swal.fire(
-                            'Deleted!',
-                            response.message,
-                            'success'
-                        );
-                        $('#sertifikat').DataTable().ajax.reload(); // Refresh the data table
-                    } else {
-                        Swal.fire(
-                            'Failed!',
-                            response.message,
-                            'error'
-                        );
-                    }
-                },
-                error: function(xhr) {
-                    Swal.fire(
-                        'Error!',
-                        'An error occurred while deleting the item.',
-                        'error'
-                    );
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ya, hapus",
+                cancelButtonText: "Tidak, kembali!",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('kelola_data.sertifikat.delete') }}",
+                        type: "POST",
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            nomorRegister: nomorRegister,
+                            kodeSkpd: kodeSkpd
+                        },
+                        success: function(response) {
+                            swalWithBootstrapButtons.fire({
+                                title: "Terhapus!",
+                                text: response.message,
+                                icon: "success"
+                            });
+
+                            let tabel = $('#sertifikat').DataTable();
+
+                            tabel.ajax.reload();
+                        },
+                        error: function(e) {
+                            swalWithBootstrapButtons.fire({
+                                title: "Gagal!",
+                                text: e.responseJSON.message,
+                                icon: "error"
+                            });
+                        },
+                    });
+
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalWithBootstrapButtons.fire({
+                        title: "Batal",
+                        text: "Data tidak dihapus!",
+                        icon: "error"
+                    });
                 }
             });
         }
-    });
-}
 
     </script>
 

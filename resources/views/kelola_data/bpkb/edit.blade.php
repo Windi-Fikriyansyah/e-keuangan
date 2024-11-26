@@ -258,7 +258,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Lihat File</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="refreshPage()"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="nav nav-tabs nav-justified mb-3" role="tablist">
@@ -368,6 +368,15 @@
     </div>
 @endsection
 @push('js')
+<script>
+    function refreshPage() {
+        // Menutup modal terlebih dahulu
+        $('#fileViewModal').modal('hide');
+
+        // Me-refresh halaman setelah modal ditutup
+        location.reload();
+    }
+</script>
     <script>
         $(document).ready(function() {
             $.ajaxSetup({
@@ -394,7 +403,7 @@
         });
 
         $.ajax({
-            url: '/kelola_data/bpkb/update-file',
+            url: "{{ route('kelola_data.bpkb.update-file') }}", 
             type: 'POST',
             data: formData,
             processData: false,
@@ -461,13 +470,13 @@
 
         // Fetch file data
         $.ajax({
-            url: `/kelola_data/bpkb/get-files/${bpkbId}`,
+            url: `{{ route('kelola_data.bpkb.get-files', ['id' => '__bpkbId__']) }}`.replace('__bpkbId__', bpkbId),
             type: 'GET',
             success: function(response) {
                 Swal.close();
 
                 // Set iframe sources
-                const baseUrl = '{{ asset("storage/uploads/bpkb") }}';
+                const baseUrl = '{{ asset("/storage/uploads/bpkb") }}';
                 document.getElementById('iframeSuratPenunjukan').src =
                     `${baseUrl}/file_surat_penunjukan/${response.filesuratpenunjukan}`;
                 document.getElementById('iframeBA').src =
