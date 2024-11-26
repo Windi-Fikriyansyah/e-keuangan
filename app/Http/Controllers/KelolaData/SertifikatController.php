@@ -141,64 +141,7 @@ class SertifikatController extends Controller
         }
     }
 
-    public function lihatFile($id, $nomorRegister)
-    {
-        // Query untuk mendapatkan file berdasarkan id dan nomorRegister
-        $file = DB::table('masterSertifikat')->where('id', $id)
-                         ->where('nomorRegister', $nomorRegister)
-                         ->first();
 
-        // Cek jika file ditemukan
-        if ($file) {
-            return response()->json(['file' => $file->file]);
-        } else {
-            return response()->json(['file' => null], 404); // Kembalikan status 404 jika file tidak ditemukan
-        }
-    }
-
-
-    public function updateFile(Request $request)
-    {
-        // Validasi file
-        $request->validate([
-            'file' => 'required|mimes:pdf|max:2048', // Hanya file PDF yang diperbolehkan
-        ]);
-
-        // Cari file berdasarkan ID dan nomor register
-        $sertifikat = MasterSertifikat::where('id', $request->id)
-                                ->where('nomorRegister', $request->nomorRegister)
-                                ->first();
-
-        if ($sertifikat) {
-            // Menghapus file lama
-            $oldFile = storage_path('public/uploads/sertifikat/' . $sertifikat->file);
-            if (Storage::exists($oldFile)) {
-                $deleted = Storage::delete($oldFile); // Menghapus file lama jika ada
-                if ($deleted) {
-                    Log::info('File lama berhasil dihapus');
-                } else {
-                    Log::error('Gagal menghapus file lama');
-                }
-            }
-
-            // Upload file baru
-            $file = $request->file('file');
-            $filename = $request['nomorRegister'] . '.pdf';
-            $file->storeAs('public/uploads/sertifikat', $filename);
-
-            // Update nama file di database
-            $sertifikat->file = $filename;
-            if ($sertifikat->save()) {
-                return response()->json(['success' => true, 'message' => 'File berhasil diupdate']); // Mengembalikan status sukses
-            } else {
-                return response()->json(['success' => false, 'message' => 'Gagal memperbarui data file di database'], 500);
-            }
-
-
-        } else {
-            return response()->json(['success' => false], 404); // Jika file tidak ditemukan
-        }
-    }
 
     public function edit($nomorRegister, $kodeSkpd)
     {
@@ -310,6 +253,61 @@ class SertifikatController extends Controller
     }
 }
 
+
+public function getFiles(Request $request)
+    {
+        try {
+            // Ambil data file dari database (misalnya berdasarkan ID atau kriteria lainnya)
+            // Pastikan model dan kolomnya sesuai dengan struktur database kamu
+            $file = DB::table('masterSertifikat')->where('id', $request->id) // Atau sesuaikan dengan kriteria lainnya
+                ->first();
+
+            if (!$file) {
+                return response()->json(['message' => 'File not found'], 404);
+            }
+
+            // Return data file dalam bentuk JSON
+            return response()->json([
+                'file' => $file->file,
+            ]);
+        } catch (\Exception $e) {
+            // Tangani kesalahan jika terjadi
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function updateFile(Request $request)
+{
+
+    $request->validate([
+        'file' => 'required|mimes:pdf|max:2048',
+        'fileType' => 'required|in:file',
+        'bpkbId' => 'required|exists:masterSertifikat,id',
+        'nomorRegister' => 'required'
+    ]);
+
+    $bpkb = MasterSertifikat::findOrFail($request->bpkbId);
+
+    $fileFieldMap = [
+        'file' => 'file',
+    ];
+
+    $field = $fileFieldMap[$request->fileType];
+    $path = "uploads/sertifikat";
+
+    // Delete old file if exists
+    if ($bpkb->$field) {
+        Storage::delete("public/$path/" . $bpkb->$field);
+    }
+
+    // Store new file
+    $fileName = $request->nomorRegister . '.pdf';
+    $request->file('file')->storeAs("public/$path", $fileName);
+
+    $bpkb->update([$field => $fileName]);
+
+    return response()->json(['message' => 'File berhasil diperbarui']);
+}
 
 
 

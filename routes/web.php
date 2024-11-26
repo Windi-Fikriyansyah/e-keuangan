@@ -110,8 +110,8 @@ Route::middleware('auth')->group(function () {
             Route::post('update/{id}', [SertifikatController::class, 'update'])->name('sertifikat.update');
             Route::delete('/{id}', [SertifikatController::class, 'destroy'])->name('sertifikat.destroy');
             Route::post('delete', [SertifikatController::class, 'delete'])->name('delete');
-            Route::get('/file/{id}/{nomorRegister}', [SertifikatController::class, 'lihatFile'])->name('sertifikat.file.show');
-            Route::post('/file/update', [SertifikatController::class, 'updateFile'])->name('sertifikat.file.update');
+            Route::get('/get-files/{id}', [SertifikatController::class, 'getFiles']);
+            Route::post('/update-file', [SertifikatController::class, 'updateFile'])->name('update-file');
 
         });
 

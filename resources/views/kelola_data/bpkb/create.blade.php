@@ -269,6 +269,16 @@
                             @enderror
                         </div>
 
+                        <label class="col-sm-2 col-form-label">File Bpkb</label>
+                        <div class="col-sm-4">
+                            <input class="form-control @error('filebpkb') is-invalid @enderror" type="file"
+                                placeholder="Isi dengan File Surat Penunjukan" name="filebpkb"
+                                value="{{ old('filebpkb') }}">
+                            @error('filebpkb')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                     </div>
                     <div class="mb-3 text-end">
                         <button class="btn btn-primary" type="submit">Simpan</button>

@@ -122,6 +122,19 @@ class BPKBController extends Controller
             $request->file('filepaktaintegritas')->storeAs('public/uploads/bpkb/file_pakta_integritas', $filename);
             $validatedData['filepaktaintegritas'] = $filename;
         }
+
+        if ($request->hasFile('filebpkb') && $request->file('filebpkb')->isValid()) {
+            if ($request->file('filebpkb')->getClientOriginalExtension() !== 'pdf') {
+                return redirect()
+                    ->route('kelola_data.bpkp.create')
+                    ->withInput()
+                    ->with('message', 'Only PDF files are allowed for filebpkb.');
+            }
+            $filename = Auth::user()->kd_skpd . '_' . $validatedData['nomorBpkb'] . '_' . 'file_bpkb.pdf';
+            $request->file('filebpkb')->storeAs('public/uploads/bpkb/file_bpkb', $filename);
+            $validatedData['filebpkb'] = $filename;
+        }
+
             $nomorBaru = DB::table('masterBpkb')
                 ->selectRaw("ISNULL(MAX(nomorRegister),0)+1 as nomor")
                 ->first();
@@ -166,6 +179,7 @@ class BPKBController extends Controller
                     'filesuratpenunjukan' => $validatedData['filesuratpenunjukan'],
                     'fileba' => $validatedData['fileba'],
                     'filepaktaintegritas' => $validatedData['filepaktaintegritas'],
+                    'filebpkb' => $validatedData['filebpkb'],
                     'createdDate' => date('Y-m-d H:i:s'),
                     'createdUsername' => Auth::user()->name,
                     'updatedDate' => date('Y-m-d H:i:s'),
@@ -203,7 +217,8 @@ class BPKBController extends Controller
             return response()->json([
                 'filesuratpenunjukan' => $file->filesuratpenunjukan, // Nama kolom yang menyimpan nama file
                 'fileba' => $file->fileba,
-                'filepaktaintegritas' => $file->filepaktaintegritas // Nama kolom yang menyimpan nama file BA
+                'filepaktaintegritas' => $file->filepaktaintegritas,
+                'filebpkb' => $file->filebpkb // Nama kolom yang menyimpan nama file BA
             ]);
         } catch (\Exception $e) {
             // Tangani kesalahan jika terjadi

@@ -277,6 +277,11 @@
                                 <i class="fas fa-file-pdf me-1"></i>File Pakta Integritas
                             </button>
                         </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#filebpkb">
+                                <i class="fas fa-file-pdf me-1"></i>File BPKB
+                            </button>
+                        </li>
                     </ul>
                     @if ($dataBpkb->statusBpkb == '0' && $dataBpkb->statusPinjam == '0')
                     <div class="tab-content">
@@ -304,6 +309,14 @@
                             </div>
                             <iframe id="iframepaktaintegritas" class="w-100" style="height: 500px;" frameborder="0"></iframe>
                         </div>
+                        <div class="tab-pane fade" id="filebpkb">
+                            <div class="d-flex justify-content-end mb-2">
+                                <button class="btn btn-sm btn-success" onclick="handleFileEdit('filebpkb')">
+                                    <i class="fas fa-edit me-1"></i>Edit File
+                                </button>
+                            </div>
+                            <iframe id="iframebpkb" class="w-100" style="height: 500px;" frameborder="0"></iframe>
+                        </div>
                     </div>
                     @endif
                     <div class="tab-content">
@@ -315,6 +328,9 @@
                         </div>
                         <div class="tab-pane fade" id="filepaktaintegritas">
                             <iframe id="iframepaktaintegritas" class="w-100" style="height: 500px;" frameborder="0"></iframe>
+                        </div>
+                        <div class="tab-pane fade" id="filebpkb">
+                            <iframe id="iframebpkb" class="w-100" style="height: 500px;" frameborder="0"></iframe>
                         </div>
                     </div>
                 </div>
@@ -458,6 +474,8 @@
                     `${baseUrl}/file_ba/${response.fileba}`;
                 document.getElementById('iframepaktaintegritas').src =
                     `${baseUrl}/file_pakta_integritas/${response.filepaktaintegritas}`;
+                    document.getElementById('iframebpkb').src =
+                    `${baseUrl}/file_bpkb/${response.filebpkb}`;
 
                 // Show modal
                 new bootstrap.Modal(document.getElementById('fileViewModal')).show();
