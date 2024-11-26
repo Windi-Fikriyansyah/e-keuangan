@@ -84,7 +84,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('edit/{no_register}/{kd_skpd}', [BPKBController::class, 'edit'])->name('edit');
                 Route::post('update/{id}', [BPKBController::class, 'update'])->name('update');
                 Route::post('delete', [BPKBController::class, 'destroy'])->name('delete');
-                Route::get('/get-files/{id}', [BPKBController::class, 'getFiles']);
+                Route::get('/get-files/{id}', [BPKBController::class, 'getFiles'])->name('get-files');
                 Route::post('/update-file', [BPKBController::class, 'updateFile'])->name('update-file');
 
             });
