@@ -311,7 +311,7 @@
                         </div>
                         <div class="tab-pane fade" id="filebpkb">
                             <div class="d-flex justify-content-end mb-2">
-                                <button class="btn btn-sm btn-success" onclick="handleFileEdit('filebpkb')">
+                                <button class="btn btn-sm btn-success" onclick="handleFileEdit('bpkb')">
                                     <i class="fas fa-edit me-1"></i>Edit File
                                 </button>
                             </div>
@@ -439,7 +439,8 @@
     const fileLabels = {
         'suratPenunjukan': 'File Surat Penunjukan',
         'ba': 'File Berita Acara',
-        'paktaIntegritas': 'File Pakta Integritas'
+        'paktaIntegritas': 'File Pakta Integritas',
+        'bpkb': 'file bpkb',
     };
 
     $('#fileType').val(fileType);
@@ -483,7 +484,7 @@
                     `${baseUrl}/file_ba/${response.fileba}`;
                 document.getElementById('iframepaktaintegritas').src =
                     `${baseUrl}/file_pakta_integritas/${response.filepaktaintegritas}`;
-                    document.getElementById('iframebpkb').src =
+                document.getElementById('iframebpkb').src =
                     `${baseUrl}/file_bpkb/${response.filebpkb}`;
 
                 // Show modal

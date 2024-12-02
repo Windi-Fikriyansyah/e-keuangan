@@ -232,7 +232,7 @@ class BPKBController extends Controller
 
     $request->validate([
         'file' => 'required|mimes:pdf|max:2048',
-        'fileType' => 'required|in:suratPenunjukan,ba,paktaIntegritas',
+        'fileType' => 'required|in:suratPenunjukan,ba,paktaIntegritas,bpkb',
         'bpkbId' => 'required|exists:masterBpkb,id'
     ]);
 
@@ -241,7 +241,8 @@ class BPKBController extends Controller
     $fileFieldMap = [
         'suratPenunjukan' => 'filesuratpenunjukan',
         'ba' => 'fileba',
-        'paktaIntegritas' => 'filepaktaintegritas'
+        'paktaIntegritas' => 'filepaktaintegritas',
+        'bpkb' => 'bpkb'
     ];
 
     $field = $fileFieldMap[$request->fileType];

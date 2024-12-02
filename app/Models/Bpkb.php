@@ -51,6 +51,7 @@ class Bpkb extends Model
         'filesuratpenunjukan',
         'fileba',
         'filepaktaintegritas',
+        'filebpkb',
     ];
 
 
