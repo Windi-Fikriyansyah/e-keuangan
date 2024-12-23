@@ -27,6 +27,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
+        @if (!$showButton)
+    <div class="alert alert-danger" role="alert">
+        Tidak bisa melakukan peminjaman sebelum dikembalikan.
+    </div>
+    @endif
         <div class="card">
             <div class="card-body">
                 <form method="POST"action="{{ route('peminjaman.bpkb.store') }}" id="formBpkb">
@@ -286,7 +291,9 @@
                         </div>
                     </div>
                     <div class="mb-3 text-end">
+                        @if ($showButton)
                         <button class="btn btn-primary" type="submit">Simpan</button>
+                        @endif
                         <a href="{{ route('peminjaman.bpkb.index') }}" class="btn btn-warning">Kembali</a>
                     </div>
                 </form>

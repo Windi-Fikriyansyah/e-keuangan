@@ -206,7 +206,7 @@ class BPKBController extends Controller
         try {
             // Ambil data file dari database (misalnya berdasarkan ID atau kriteria lainnya)
             // Pastikan model dan kolomnya sesuai dengan struktur database kamu
-           
+
             $file = DB::table('masterBpkb')->where('id', $request->id) // Atau sesuaikan dengan kriteria lainnya
                 ->first();
 
@@ -278,67 +278,139 @@ class BPKBController extends Controller
     }
 
     public function update(EditRequest $request, $id)
-    {
-        DB::beginTransaction();
-        try {
-            DB::table('masterBpkb')
-                ->where([
-                    'id' => $id,
-                    'nomorRegister' => $request['nomorRegister'],
-                    'kodeSkpd' => $request['kodeSkpd']
-                ])
-                ->lockForUpdate()
-                ->first();
+{
+    DB::beginTransaction();
+    try {
+        // Ambil data lama dari tabel masterBpkb
+        $oldData = DB::table('masterBpkb')
+            ->where([
+                'id' => $id,
+                'nomorRegister' => $request['nomorRegister'],
+                'kodeSkpd' => $request['kodeSkpd']
+            ])
+            ->lockForUpdate()
+            ->first();
 
-            DB::table('masterBpkb')
-                ->where([
-                    'id' => $id,
-                    'nomorRegister' => $request['nomorRegister'],
-                    'kodeSkpd' => $request['kodeSkpd']
-                ])
-                ->update([
-                    'nomorBpkb' => $request['nomorBpkb'],
-                    'nomorPolisi' => $request['nomorPolisi'],
-                    'namaPemilik' => $request['namaPemilik'],
-                    'jenis' => $request['jenis'],
-                    'merk' => $request['merk'],
-                    'tipe' => $request['tipe'],
-                    'model' => $request['model'],
-                    'tahunPembuatan' => $request['tahunPembuatan'],
-                    'tahunPerakitan' => $request['tahunPerakitan'],
-                    'isiSilinder' => $request['isiSilinder'],
-                    'warna' => $request['warna'],
-                    'alamat' => $request['alamat'],
-                    'nomorRangka' => $request['nomorRangka'],
-                    'nomorMesin' => $request['nomorMesin'],
-                    'keterangan' => $request['keterangan'],
-                    'nomorPolisiLama' => $request['nomorPolisiLama'],
-                    'Nibbar' => $request['Nibbar'],
-                    'namapenerimakendaraan' => $request['namapenerimakendaraan'],
-                    'nomorBpkbLama' => $request['nomorBpkbLama'],
-                    'updatedDate' => date('Y-m-d H:i:s'),
-                    'updatedUsername' => Auth::user()->name,
-                ]);
-
-            DB::commit();
+        if (!$oldData) {
             return redirect()
                 ->route('kelola_data.bpkb.index')
-                ->with('message', 'Data BPKB berhasil diupdate!');
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            return redirect()
-                ->route(
-                    'kelola_data.bpkb.edit',
-                    [
-                        'no_register' => Crypt::encrypt($request['nomorRegister']),
-                        'kd_skpd' => Crypt::encrypt($request['kodeSkpd']),
-                    ]
-                )
-                ->withInput()
-                ->with('message', 'Data BPKB gagal diupdate!');
+                ->with('message', 'Data tidak ditemukan!');
         }
+
+        $existsInHistory = DB::table('HistoryBpkb')
+            ->where('nomorPolisi', $oldData->nomorPolisi)
+            ->exists();
+
+        if ($oldData->nomorPolisi !== $request['nomorPolisi'] && !$existsInHistory) {
+            // Simpan data lama ke historyBpkb
+            DB::table('HistoryBpkb')->insert([
+                'nomorRegister' => $oldData->nomorRegister,
+                'kodeSkpd' => $oldData->kodeSkpd,
+                'nomorBpkb' => $oldData->nomorBpkb,
+                'nomorPolisi' => $oldData->nomorPolisi,
+                'namaPemilik' => $oldData->namaPemilik,
+                'jenis' => $oldData->jenis,
+                'merk' => $oldData->merk,
+                'tipe' => $oldData->tipe,
+                'model' => $oldData->model,
+                'tahunPembuatan' => $oldData->tahunPembuatan,
+                'tahunPerakitan' => $oldData->tahunPerakitan,
+                'isiSilinder' => $oldData->isiSilinder,
+                'warna' => $oldData->warna,
+                'alamat' => $oldData->alamat,
+                'nomorRangka' => $oldData->nomorRangka,
+                'nomorMesin' => $oldData->nomorMesin,
+                'keterangan' => $oldData->keterangan,
+                'nomorPolisiLama' => $oldData->nomorPolisiLama,
+                'Nibbar' => $oldData->Nibbar,
+                'namapenerimakendaraan' => $oldData->namapenerimakendaraan,
+                'nomorBpkbLama' => $oldData->nomorBpkbLama,
+            ]);
+        }
+        // Cek apakah nomor polisi berubah
+        if ($oldData->nomorPolisi !== $request['nomorPolisi']) {
+            // Simpan data lama ke tabel historyBpkb
+
+
+            DB::table('HistoryBpkb')->insert([
+                'nomorRegister' => $request->nomorRegister,
+                'kodeSkpd' => $request->kodeSkpd,
+                'nomorBpkb' => $request->nomorBpkb,
+                'nomorPolisi' => $request->nomorPolisi,
+                'namaPemilik' => $request->namaPemilik,
+                'jenis' => $request->jenis,
+                'merk' => $request->merk,
+                'tipe' => $request->tipe,
+                'model' => $request->model,
+                'tahunPembuatan' => $request->tahunPembuatan,
+                'tahunPerakitan' => $request->tahunPerakitan,
+                'isiSilinder' => $request->isiSilinder,
+                'warna' => $request->warna,
+                'alamat' => $request->alamat,
+                'nomorRangka' => $request->nomorRangka,
+                'nomorMesin' => $request->nomorMesin,
+                'keterangan' => $request->keterangan,
+                'nomorPolisiLama' => $request->nomorPolisiLama,
+                'Nibbar' => $request->Nibbar,
+                'namapenerimakendaraan' => $request->namapenerimakendaraan,
+                'nomorBpkbLama' => $request->nomorBpkbLama,
+            ]);
+        }
+
+
+
+        // Update data baru di tabel masterBpkb
+        DB::table('masterBpkb')
+            ->where([
+                'id' => $id,
+                'nomorRegister' => $request['nomorRegister'],
+                'kodeSkpd' => $request['kodeSkpd']
+            ])
+            ->update([
+                'nomorBpkb' => $request['nomorBpkb'],
+                'nomorPolisi' => $request['nomorPolisi'],
+                'namaPemilik' => $request['namaPemilik'],
+                'jenis' => $request['jenis'],
+                'merk' => $request['merk'],
+                'tipe' => $request['tipe'],
+                'model' => $request['model'],
+                'tahunPembuatan' => $request['tahunPembuatan'],
+                'tahunPerakitan' => $request['tahunPerakitan'],
+                'isiSilinder' => $request['isiSilinder'],
+                'warna' => $request['warna'],
+                'alamat' => $request['alamat'],
+                'nomorRangka' => $request['nomorRangka'],
+                'nomorMesin' => $request['nomorMesin'],
+                'keterangan' => $request['keterangan'],
+                'nomorPolisiLama' => $request['nomorPolisiLama'],
+                'Nibbar' => $request['Nibbar'],
+                'namapenerimakendaraan' => $request['namapenerimakendaraan'],
+                'nomorBpkbLama' => $request['nomorBpkbLama'],
+                'updatedDate' => now(),
+                'updatedUsername' => Auth::user()->name,
+            ]);
+
+        DB::commit();
+
+        return redirect()
+            ->route('kelola_data.bpkb.index')
+            ->with('message', 'Data BPKB berhasil diupdate!');
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        return redirect()
+            ->route(
+                'kelola_data.bpkb.edit',
+                [
+                    'no_register' => Crypt::encrypt($request['nomorRegister']),
+                    'kd_skpd' => Crypt::encrypt($request['kodeSkpd']),
+                ]
+            )
+            ->withInput()
+            ->with('message', 'Data BPKB gagal diupdate! Error: ' . $e->getMessage());
     }
+}
+
 
     public function destroy(Request $request)
 {

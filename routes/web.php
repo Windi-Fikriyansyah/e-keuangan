@@ -7,6 +7,7 @@ use App\Http\Controllers\KelolaAkses\UserController;
 use App\Http\Controllers\KelolaData\AsalUsulTanahController;
 use App\Http\Controllers\KelolaData\BPKBController;
 use App\Http\Controllers\KelolaData\CariBpkbController;
+use App\Http\Controllers\KelolaData\HistoryBpkbController;
 use App\Http\Controllers\KelolaData\SertifikatController;
 use App\Http\Controllers\Laporan\BPKBController as LaporanBPKBController;
 use App\Http\Controllers\Laporan\SertifikatController as LaporanSertifikatController;
@@ -87,6 +88,19 @@ Route::middleware('auth')->group(function () {
                 Route::post('delete', [BPKBController::class, 'destroy'])->name('delete');
                 Route::get('/get-files/{id}', [BPKBController::class, 'getFiles'])->name('get-files');
                 Route::post('/update-file', [BPKBController::class, 'updateFile'])->name('update-file');
+
+            });
+        Route::prefix('historybpkb')->as('historybpkb.')
+            ->group(function () {
+                Route::get('', [HistoryBpkbController::class, 'index'])->name('index');
+                Route::post('load', [HistoryBpkbController::class, 'load'])->name('load');
+                Route::get('create', [HistoryBpkbController::class, 'create'])->name('create');
+                Route::post('store', [HistoryBpkbController::class, 'store'])->name('store');
+                Route::get('edit/{no_register}/{kd_skpd}/{nomorPolisi}', [HistoryBpkbController::class, 'edit'])->name('edit');
+                Route::post('update/{id}', [HistoryBpkbController::class, 'update'])->name('update');
+                Route::post('delete', [HistoryBpkbController::class, 'destroy'])->name('delete');
+                Route::get('/get-files/{id}', [HistoryBpkbController::class, 'getFiles'])->name('get-files');
+                Route::post('/update-file', [HistoryBpkbController::class, 'updateFile'])->name('update-file');
 
             });
 

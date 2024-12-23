@@ -105,7 +105,15 @@ class BPKBController extends Controller
     public function create()
     {
         $jenis = DB::table('masterBpkb')->select('jenis')->distinct()->get();
-        return view('kelola_peminjaman.bpkb.create', compact('jenis'));
+        $kdSkpd = Auth::user()->kd_skpd;
+        $incompleteCount = DB::table('pinjamanBpkb')
+        ->where('kodeSkpd', $kdSkpd)
+        ->where('statusPengembalian', '!=', 1)
+        ->count();
+
+        // Tombol hanya tampil jika tidak ada entri dengan statusPengembalian != 1
+        $showButton = ($incompleteCount === 0);
+        return view('kelola_peminjaman.bpkb.create', compact('jenis','showButton'));
     }
 
     public function loadBpkb(Request $request)
