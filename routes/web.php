@@ -15,6 +15,7 @@ use App\Http\Controllers\Laporan\Laporan;
 use App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Laporan\SertifikatController as LaporanSertifikatController;
 use App\Exports\SalesReportExport;
+use App\Http\Controllers\KelolaData\Ms_program;
 use App\Http\Controllers\KelolaData\Ms_sumberdana;
 use App\Http\Controllers\Transaksi\SetorKas;
 use Maatwebsite\Excel\Facades\Excel;
@@ -160,6 +161,19 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('edit/{id}', [PajakController::class, 'edit'])->middleware('permission:8')->name('edit');
                 Route::post('update/{id}', [PajakController::class, 'update'])->middleware('permission:8')->name('update');
                 Route::delete('/pajak/{id}', [PajakController::class, 'destroy'])->middleware('permission:8')->name('destroy');
+
+            });
+
+
+        Route::prefix('program')->as('program.')
+            ->group(function () {
+                Route::get('', [Ms_program::class, 'index'])->middleware('permission:43')->name('index');
+                Route::post('load', [Ms_program::class, 'load'])->middleware('permission:43')->name('load');
+                Route::get('create', [Ms_program::class, 'create'])->middleware('permission:43')->name('create');
+                Route::post('store', [Ms_program::class, 'store'])->middleware('permission:43')->name('store');
+                Route::get('edit/{id}', [Ms_program::class, 'edit'])->middleware('permission:43')->name('edit');
+                Route::post('update/{id}', [Ms_program::class, 'update'])->middleware('permission:43')->name('update');
+                Route::delete('/pajak/{id}', [Ms_program::class, 'destroy'])->middleware('permission:43')->name('destroy');
 
             });
 
