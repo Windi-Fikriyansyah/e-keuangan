@@ -75,14 +75,11 @@ class UserController extends Controller
      */
     public function create()
     {
-        $kd_skpd = DB::table('masterSkpd')
-            ->select('kodeSkpd as kd_skpd', 'namaSkpd as nm_skpd')
-            ->orderBy('kodeSkpd')
-            ->get();
+
 
         $daftar_peran = Role::all();
 
-        return view('kelola_akses.user.create', compact('kd_skpd', 'daftar_peran'));
+        return view('kelola_akses.user.create', compact('daftar_peran'));
     }
 
     /**
@@ -96,12 +93,13 @@ class UserController extends Controller
             $user = User::create([
                 'name' => $request->name,
                 'username' => $request->username,
-                'kd_skpd' => $request->kd_skpd,
                 'password' => Hash::make($request->password),
                 'tipe' => $request->tipe,
                 'status_aktif' => $request->status_aktif,
                 'role' => (int)$request->role,
                 'jabatan' => $request->jabatan,
+                'rek_pengeluaran' => $request->rek_pengeluaran,
+                'kd_skpd' => $request->kd_skpd
             ]);
 
             $user->syncRoles((int)$request->role);
@@ -131,16 +129,13 @@ class UserController extends Controller
     {
         $id = Crypt::decrypt($id);
 
-        $kd_skpd = DB::table('masterSkpd')
-            ->select('kodeSkpd as kd_skpd', 'namaSkpd as nm_skpd')
-            ->orderBy('kodeSkpd')
-            ->get();
+
 
         $data = User::find($id);
 
         $daftar_peran = Role::all();
 
-        return view('kelola_akses.user.edit', compact('kd_skpd', 'daftar_peran', 'data'));
+        return view('kelola_akses.user.edit', compact('daftar_peran', 'data'));
     }
 
     /**
@@ -156,12 +151,13 @@ class UserController extends Controller
                 ->update([
                     'name' => $request->name,
                     'username' => $request->username,
-                    'kd_skpd' => $request->kd_skpd,
                     // 'password' => Hash::make($request->password),
                     'tipe' => $request->tipe,
                     'status_aktif' => $request->status_aktif,
                     'role' => (int)$request->role,
                     'jabatan' => $request->jabatan,
+                    'kd_skpd' => $request->kd_skpd,
+                    'rek_pengeluaran' => $request->rek_pengeluaran,
                 ]);
 
             $user->syncRoles((int)$request->role);
@@ -197,39 +193,8 @@ class UserController extends Controller
     }
 
     // GANTI SKPD
-    public function ubahSkpd()
-    {
-        $daftarSkpd = DB::connection('simakda')
-            ->table('ms_skpd')
-            ->select('kd_skpd', 'nm_skpd')
-            ->groupBy('kd_skpd', 'nm_skpd')
-            ->get();
 
-        return view('ubahskpd.index', compact('daftarSkpd'));
-    }
 
-    public function simpanUbahSkpd(Request $request)
-    {
-        $id = Auth::user()->id;
-
-        DB::beginTransaction();
-        try {
-            $user = User::find($id);
-
-            $user
-                ->update([
-                    'kd_skpd' => $request->kodeskpd,
-                ]);
-
-            DB::commit();
-            return redirect()
-                ->route('ubah_skpd.index')
-                ->with('message', 'SKPD berhasil diubah');
-        } catch (Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->withInput();
-        }
-    }
 
     // UBAH PASSWORD
     public function ubahPassword()

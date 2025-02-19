@@ -1,34 +1,23 @@
 <?php
 
-use App\Http\Controllers\BAST\BPKBController as BASTBPKBController;
 use App\Http\Controllers\KelolaAkses\PermissionController;
 use App\Http\Controllers\KelolaAkses\RoleController;
 use App\Http\Controllers\KelolaAkses\UserController;
-use App\Http\Controllers\KelolaData\AsalUsulTanahController;
-use App\Http\Controllers\KelolaData\BPKBController;
-use App\Http\Controllers\KelolaData\CariBpkbController;
-use App\Http\Controllers\KelolaData\HistoryBpkbController;
-use App\Http\Controllers\KelolaData\SertifikatController;
-use App\Http\Controllers\Laporan\BPKBController as LaporanBPKBController;
+use App\Http\Controllers\transaksi\Transaksi;
+use App\Http\Controllers\transaksi\Terimapot;
+use App\Http\Controllers\transaksi\SetorPajak;
+use App\Http\Controllers\KelolaData\Subkegiatan;
+use App\Http\Controllers\KelolaData\Ms_anggaran;
+use App\Http\Controllers\KelolaData\PajakController;
+use App\Http\Controllers\KelolaData\PenguranganStok;
+use App\Http\Controllers\Laporan\LaporanStok;
+use App\Http\Controllers\Laporan\Laporan;
+use App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Laporan\SertifikatController as LaporanSertifikatController;
-use App\Http\Controllers\Peminjaman\BPKBController as PeminjamanBPKBController;
-use App\Http\Controllers\Peminjaman\SertifikatController as PeminjamanSertifikatController;
-use App\Http\Controllers\Penyerahan\BPKBController as PenyerahanBPKBController;
-use App\Http\Controllers\Penyerahan\SertifikatController as PenyerahanSertifikatController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\KelolaData\SKPDController;
-use App\Http\Controllers\KelolaData\MasterSertifikatController;
-use App\Http\Controllers\KelolaData\MasterTtdController;
-use App\Http\Controllers\Pengembalian\BPKBController as PengembalianBPKBController;
-use App\Http\Controllers\Pengembalian\SertifikatController as PengembalianSertifikatController;
-use App\Http\Controllers\VerifikasiAdmin\BPKBController as VerifikasiAdminBPKBController;
-use App\Http\Controllers\VerifikasiAdmin\SertifikatController as VerifikasiAdminSertifikatController;
-use App\Http\Controllers\VerifikasiOperator\BPKBController as VerifikasiOperatorBPKBController;
-use App\Http\Controllers\VerifikasiOperator\SertifikatController as VerifikasiOperatorSertifikatController;
-use App\Http\Controllers\VerifikasiPenyelia\BPKBController as VerifikasiPenyeliaBPKBController;
-use App\Http\Controllers\VerifikasiPenyelia\SertifikatController as VerifikasiPenyeliaSertifikatController;
-use App\Http\Controllers\VerifikasiBast\SertifikatController as BASTSertifikatController;
-
+use App\Exports\SalesReportExport;
+use App\Http\Controllers\KelolaData\Ms_sumberdana;
+use App\Http\Controllers\Transaksi\SetorKas;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
 
 
@@ -46,331 +35,223 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/dashboard', [Dashboard::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard-owner', [Dashboard::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard-owner');
+Route::get('/home', function () {
+    return view('home');
+})->middleware(['auth', 'verified'])->name('home');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('transaksi')->as('transaksi.')
+        ->group(function () {
+        Route::get('', [Transaksi::class, 'index'])->middleware('permission:14')->name('index');
+        Route::post('/load', [Transaksi::class, 'load'])->middleware('permission:14')->name('load');
+        Route::get('/create', [Transaksi::class, 'create'])->middleware('permission:14')->name('create');
+        Route::post('store', [Transaksi::class, 'store'])->middleware('permission:14')->name('store');
+        Route::get('/get-sub-kegiatan', [Transaksi::class, 'getSubKegiatan'])->middleware('permission:14')->name('get-sub-kegiatan');
+        Route::get('/get-no_sp2d', [Transaksi::class, 'getsp2d'])->middleware('permission:14')->name('get-no_sp2d');
+        Route::get('/get-sumberdana', [Transaksi::class, 'getsumberdana'])->middleware('permission:14')->name('get-sumberdana');
+        Route::get('/get-rekening', [Transaksi::class, 'getrekening'])->middleware('permission:14')->name('get-rekening');
+        Route::delete('/trmpot/{no_bukti}', [Transaksi::class, 'destroy'])->middleware('permission:14')->name('destroy');
 
-Route::middleware('auth')->group(function () {
+        Route::post('/edit', [Transaksi::class, 'edit'])->middleware('permission:14')->name('edit');
+        Route::get('/cariData', [Transaksi::class, 'cariData'])->middleware('permission:14')->name('cariData');
+        Route::get('/products/search', [Transaksi::class, 'search'])->middleware('permission:14')->name('search');
+        Route::get('/products/{id}', [Transaksi::class, 'getProductById'])->middleware('permission:14');
+        Route::post('/save', [Transaksi::class, 'saveTransaction'])->middleware('permission:14');
+        Route::get('/riwayat-transaksi', [Transaksi::class, 'showTransactionHistory'])->middleware('permission:14')->name('riwayat');
+    });
+    Route::prefix('trmpot')->as('trmpot.')
+        ->group(function () {
+        Route::get('', [Terimapot::class, 'index'])->middleware('permission:35')->name('index');
+        Route::post('/load', [Terimapot::class, 'load'])->middleware('permission:35')->name('load');
+        Route::get('/create', [Terimapot::class, 'create'])->middleware('permission:35')->name('create');
+        Route::post('store', [Terimapot::class, 'store'])->middleware('permission:35')->name('store');
+        Route::post('/get-notransaksi', [Terimapot::class, 'getNotransaksi'])->middleware('permission:35')->name('getTransactions');
+        Route::post('/get-no_sp2d', [Terimapot::class, 'getsp2d'])->middleware('permission:35')->name('get-no_sp2d');
+        Route::post('/getsubkegiatan', [Terimapot::class, 'getsubkegiatan'])->middleware('permission:35')->name('getsubkegiatan');
+        Route::get('/get-sumberdana', [Terimapot::class, 'getsumberdana'])->middleware('permission:35')->name('get-sumberdana');
+        Route::post('/get-rekening', [Terimapot::class, 'getrekening'])->middleware('permission:35')->name('get-rekening');
+        Route::post('/getrekan', [Terimapot::class, 'getrekan'])->middleware('permission:35')->name('getrekan');
+        Route::post('/getmspot', [Terimapot::class, 'getmspot'])->middleware('permission:35')->name('getmspot');
+        Route::delete('/trmpot/{no_bukti}', [Terimapot::class, 'destroy'])->middleware('permission:35')->name('destroy');
+        Route::get('edit/{no_bukti}', [Terimapot::class, 'edit'])->middleware('permission:35')->name('edit');
+        Route::post('update/{no_bukti}', [Terimapot::class, 'update'])->middleware('permission:35')->name('update');
+        Route::post('/getTransactionDetails', [Terimapot::class, 'getTransactionDetails'])->middleware('permission:35')->name('getTransactionDetails');
+
+        Route::get('/cariData', [Terimapot::class, 'cariData'])->middleware('permission:35')->name('cariData');
+        Route::get('/products/search', [Terimapot::class, 'search'])->middleware('permission:35')->name('search');
+        Route::get('/products/{id}', [Terimapot::class, 'getProductById'])->middleware('permission:35');
+        Route::post('/save', [Terimapot::class, 'saveTransaction'])->middleware('permission:35');
+        Route::get('/riwayat-Terimapot', [Terimapot::class, 'showTransactionHistory'])->middleware('permission:35')->name('riwayat');
+    });
+
+    Route::prefix('strpot')->as('strpot.')
+        ->group(function () {
+        Route::get('', [SetorPajak::class, 'index'])->middleware('permission:36')->name('index');
+        Route::post('/load', [SetorPajak::class, 'load'])->middleware('permission:36')->name('load');
+        Route::get('/create', [SetorPajak::class, 'create'])->middleware('permission:36')->name('create');
+        Route::post('store', [SetorPajak::class, 'store'])->middleware('permission:36')->name('store');
+        Route::post('/getnoterima', [SetorPajak::class, 'getnoterima'])->middleware('permission:36')->name('getnoterima');
+        Route::post('/getpotongandata', [SetorPajak::class, 'getpotongandata'])->middleware('permission:36')->name('getpotongandata');
+        Route::delete('/trmpot/{no_bukti}', [SetorPajak::class, 'destroy'])->middleware('permission:36')->name('destroy');
+        Route::get('edit/{no_bukti}', [SetorPajak::class, 'edit'])->middleware('permission:36')->name('edit');
+        Route::post('update/{no_bukti}', [SetorPajak::class, 'update'])->middleware('permission:36')->name('update');
+        Route::post('/getTransactionDetails', [SetorPajak::class, 'getTransactionDetails'])->middleware('permission:36')->name('getTransactionDetails');
+
+        Route::get('/cariData', [SetorPajak::class, 'cariData'])->middleware('permission:36')->name('cariData');
+        Route::get('/products/search', [SetorPajak::class, 'search'])->middleware('permission:36')->name('search');
+        Route::get('/products/{id}', [SetorPajak::class, 'getProductById'])->middleware('permission:36');
+        Route::post('/save', [SetorPajak::class, 'saveTransaction'])->middleware('permission:36');
+        Route::get('/riwayat-SetorPajak', [SetorPajak::class, 'showTransactionHistory'])->middleware('permission:36')->name('riwayat');
+    });
+
+    Route::prefix('setorkas')->as('setorkas.')
+        ->group(function () {
+        Route::get('', [SetorKas::class, 'index'])->middleware('permission:41')->name('index');
+        Route::post('/load', [SetorKas::class, 'load'])->middleware('permission:41')->name('load');
+        Route::get('/create', [SetorKas::class, 'create'])->middleware('permission:41')->name('create');
+        Route::post('store', [SetorKas::class, 'store'])->middleware('permission:41')->name('store');
+        Route::post('/getnosp2d', [SetorKas::class, 'getnosp2d'])->middleware('permission:41')->name('getnosp2d');
+        Route::post('/getsubkegiatan', [SetorKas::class, 'getsubkegiatan'])->middleware('permission:41')->name('getsubkegiatan');
+        Route::post('/getrekening', [SetorKas::class, 'getrekening'])->middleware('permission:41')->name('getrekening');
+
+        Route::post('/getpotongandata', [SetorKas::class, 'getpotongandata'])->middleware('permission:41')->name('getpotongandata');
+        Route::delete('/trmpot/{no_sts}', [SetorKas::class, 'destroy'])->middleware('permission:41')->name('destroy');
+        Route::get('edit/{no_bukti}', [SetorKas::class, 'edit'])->middleware('permission:41')->name('edit');
+        Route::post('update/{no_bukti}', [SetorKas::class, 'update'])->middleware('permission:41')->name('update');
+        Route::post('/getTransactionDetails', [SetorKas::class, 'getTransactionDetails'])->middleware('permission:41')->name('getTransactionDetails');
+
+        Route::get('/cariData', [SetorKas::class, 'cariData'])->middleware('permission:41')->name('cariData');
+        Route::get('/products/search', [SetorKas::class, 'search'])->middleware('permission:41')->name('search');
+        Route::get('/products/{id}', [SetorKas::class, 'getProductById'])->middleware('permission:41');
+        Route::post('/save', [SetorKas::class, 'saveTransaction'])->middleware('permission:41');
+        Route::get('/riwayat-SetorKas', [SetorKas::class, 'showTransactionHistory'])->middleware('permission:41')->name('riwayat');
+    });
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/laporan-penjualan/export', [Laporan::class, 'exportSalesReport'])->name('laporan.penjualan.export');
+
     // Permission
-    Route::resource('akses', PermissionController::class);
-    Route::post('akses/load', [PermissionController::class, 'load'])->name('akses.load');
+    Route::resource('akses', PermissionController::class)->middleware('permission:4');
+    Route::post('akses/load', [PermissionController::class, 'load'])->middleware('permission:4')->name('akses.load');
 
     // Role
-    Route::resource('peran', RoleController::class);
-    Route::post('peran/load', [RoleController::class, 'load'])->name('peran.load');
+    Route::resource('peran', RoleController::class)->middleware('permission:5');
+    Route::post('peran/load', [RoleController::class, 'load'])->middleware('permission:5')->name('peran.load');
 
     // User
-    Route::resource('user', UserController::class);
-    Route::post('user/load', [UserController::class, 'load'])->name('user.load');
+    Route::resource('user', UserController::class)->middleware('permission:6');
+    Route::post('user/load', [UserController::class, 'load'])->middleware('permission:6')->name('user.load');
+
 
     // Kelola Data
     Route::prefix('kelola_data')->as('kelola_data.')->group(function () {
         // SKPD
-        Route::group(['prefix' => 'skpd'], function () {
-            Route::get('', [SKPDController::class, 'index'])->name('skpd.index');
-            Route::post('load', [SKPDController::class, 'load'])->name('skpd.load');
-            Route::get('create', [SKPDController::class, 'create'])->name('skpd.create');
-            Route::post('store', [SKPDController::class, 'store'])->name('skpd.store');
-            Route::get('edit/{id}', [SKPDController::class, 'edit'])->name('skpd.edit');
-            Route::put('update/{id}', [SKPDController::class, 'update'])->name('skpd.update');
-            Route::delete('/{id}', [SKPDController::class, 'destroy'])->name('skpd.destroy');
-        });
+
         // BPKB
-        Route::prefix('bpkb')->as('bpkb.')
+        Route::prefix('pajak')->as('pajak.')
             ->group(function () {
-                Route::get('', [BPKBController::class, 'index'])->name('index');
-                Route::post('load', [BPKBController::class, 'load'])->name('load');
-                Route::get('create', [BPKBController::class, 'create'])->name('create');
-                Route::post('store', [BPKBController::class, 'store'])->name('store');
-                Route::get('edit/{no_register}/{kd_skpd}', [BPKBController::class, 'edit'])->name('edit');
-                Route::post('update/{id}', [BPKBController::class, 'update'])->name('update');
-                Route::post('delete', [BPKBController::class, 'destroy'])->name('delete');
-                Route::get('/get-files/{id}', [BPKBController::class, 'getFiles'])->name('get-files');
-                Route::post('/update-file', [BPKBController::class, 'updateFile'])->name('update-file');
-
-            });
-        Route::prefix('historybpkb')->as('historybpkb.')
-            ->group(function () {
-                Route::get('', [HistoryBpkbController::class, 'index'])->name('index');
-                Route::post('load', [HistoryBpkbController::class, 'load'])->name('load');
-                Route::get('create', [HistoryBpkbController::class, 'create'])->name('create');
-                Route::post('store', [HistoryBpkbController::class, 'store'])->name('store');
-                Route::get('edit/{no_register}/{kd_skpd}/{nomorPolisi}', [HistoryBpkbController::class, 'edit'])->name('edit');
-                Route::post('update/{id}', [HistoryBpkbController::class, 'update'])->name('update');
-                Route::post('delete', [HistoryBpkbController::class, 'destroy'])->name('delete');
-                Route::get('/get-files/{id}', [HistoryBpkbController::class, 'getFiles'])->name('get-files');
-                Route::post('/update-file', [HistoryBpkbController::class, 'updateFile'])->name('update-file');
+                Route::get('', [PajakController::class, 'index'])->middleware('permission:8')->name('index');
+                Route::post('load', [PajakController::class, 'load'])->middleware('permission:8')->name('load');
+                Route::get('create', [PajakController::class, 'create'])->middleware('permission:8')->name('create');
+                Route::post('store', [PajakController::class, 'store'])->middleware('permission:8')->name('store');
+                Route::get('edit/{id}', [PajakController::class, 'edit'])->middleware('permission:8')->name('edit');
+                Route::post('update/{id}', [PajakController::class, 'update'])->middleware('permission:8')->name('update');
+                Route::delete('/pajak/{id}', [PajakController::class, 'destroy'])->middleware('permission:8')->name('destroy');
 
             });
 
-        Route::prefix('caribpkb')->as('caribpkb.')
+        Route::prefix('subkegiatan')->as('subkegiatan.')
             ->group(function () {
-                Route::get('', [CariBpkbController::class, 'index'])->name('index');
-                Route::post('load', [CariBpkbController::class, 'load'])->name('load');
-                Route::get('create', [CariBpkbController::class, 'create'])->name('create');
-                Route::post('store', [CariBpkbController::class, 'store'])->name('store');
-                Route::get('edit/{no_register}/{kd_skpd}', [CariBpkbController::class, 'edit'])->name('edit');
-                Route::post('update/{id}', [CariBpkbController::class, 'update'])->name('update');
-                Route::post('delete', [CariBpkbController::class, 'destroy'])->name('delete');
-                Route::get('/get-files/{id}', [CariBpkbController::class, 'getFiles'])->name('get-files');
-                Route::post('/update-file', [CariBpkbController::class, 'updateFile'])->name('update-file');
-                Route::get('/getmerk', [CariBpkbController::class, 'getMerks'])->name('merks');
-                Route::get('/getjenis', [CariBpkbController::class, 'loadJenis'])->name('jenis');
-                Route::post('load_bpkb', [CariBpkbController::class, 'loadBpkb'])->name('load_bpkb');
+                Route::get('', [Subkegiatan::class, 'index'])->middleware('permission:34')->name('index');
+                Route::post('load', [Subkegiatan::class, 'load'])->middleware('permission:34')->name('load');
+                Route::get('create', [Subkegiatan::class, 'create'])->middleware('permission:34')->name('create');
+                Route::get('edit/{id}', [Subkegiatan::class, 'edit'])->middleware('permission:34')->name('edit');
+                Route::delete('/subkegiatan/{id}', [Subkegiatan::class, 'destroy'])->middleware('permission:8')->name('destroy');
+                Route::post('update/{id}', [Subkegiatan::class, 'update'])->middleware('permission:34')->name('update');
+                Route::get('/search-product', [Subkegiatan::class, 'searchProduct'])->middleware('permission:34')->name('search');
+                Route::get('/product/barcode/{barcode}', [Subkegiatan::class, 'getProductByBarcode'])->middleware('permission:34')->name('getByBarcode');
+                Route::post('store', [Subkegiatan::class, 'store'])->middleware('permission:34')->name('store');
+                Route::post('/getprogram', [Subkegiatan::class, 'getprogram'])->middleware('permission:35')->name('getprogram');
+
+
             });
 
-        // SERTIFIKAT
-        // Route::prefix('sertifikat')->as('sertifikat.')
-        //     ->group(function () {
-        //         Route::get('', [SertifikatController::class, 'index'])->name('index');
-        //         Route::post('load', [SertifikatController::class, 'load'])->name('load');
-        //         Route::get('create', [SertifikatController::class, 'create'])->name('create');
-        //         Route::post('store', [SertifikatController::class, 'store'])->name('store');
-        //         Route::get('edit/{no_register}/{kd_skpd}', [SertifikatController::class, 'edit'])->name('edit');
-        //         Route::post('update', [SertifikatController::class, 'update'])->name('update');
-        //         Route::post('delete', [SertifikatController::class, 'delete'])->name('delete');
-        //     });
+        Route::prefix('msanggaran')->as('msanggaran.')
+            ->group(function () {
+                Route::get('', [Ms_anggaran::class, 'index'])->middleware('permission:39')->name('index');
+                Route::post('load', [Ms_anggaran::class, 'load'])->middleware('permission:39')->name('load');
+                Route::get('create', [Ms_anggaran::class, 'create'])->middleware('permission:39')->name('create');
+                Route::get('edit/{id}', [Ms_anggaran::class, 'edit'])->middleware('permission:39')->name('edit');
+                Route::delete('/msanggaran/{id}', [Ms_anggaran::class, 'destroy'])->middleware('permission:8')->name('destroy');
+                Route::post('update/{id}', [Ms_anggaran::class, 'update'])->middleware('permission:39')->name('update');
+                Route::get('/search-product', [Ms_anggaran::class, 'searchProduct'])->middleware('permission:39')->name('search');
+                Route::get('/product/barcode/{barcode}', [Ms_anggaran::class, 'getProductByBarcode'])->middleware('permission:39')->name('getByBarcode');
+                Route::post('store', [Ms_anggaran::class, 'store'])->middleware('permission:39')->name('store');
+                Route::post('/msanggaran/upload', [Ms_anggaran::class, 'upload'])->middleware('permission:39')->name('upload');
+                Route::get('/download-format', [Ms_anggaran::class, 'downloadFormat'])->middleware('permission:39')->name('download_format');
+                Route::post('/getsubkegiatan', [Ms_anggaran::class, 'getsubkegiatan'])->middleware('permission:35')->name('getsubkegiatan');
 
-        Route::group(['prefix' => 'sertifikat'], function () {
-            Route::get('', [SertifikatController::class, 'index'])->name('sertifikat.index');
-            Route::post('load', [SertifikatController::class, 'load'])->name('sertifikat.load');
-            Route::get('create', [SertifikatController::class, 'create'])->name('sertifikat.create');
-            Route::post('store', [SertifikatController::class, 'store'])->name('sertifikat.store');
-            Route::get('edit/{no_register}/{kd_skpd}', [SertifikatController::class, 'edit'])->name('sertifikat.edit');
-            Route::post('update/{id}', [SertifikatController::class, 'update'])->name('sertifikat.update');
-            Route::delete('/{id}', [SertifikatController::class, 'destroy'])->name('sertifikat.destroy');
-            Route::post('delete', [SertifikatController::class, 'delete'])->name('sertifikat.delete');
-            Route::get('/get-files/{id}', [SertifikatController::class, 'getFiles'])->name('sertifikat.get-files');
-            Route::post('/update-file', [SertifikatController::class, 'updateFile'])->name('sertifikat.updatefile');
 
-        });
+            });
 
-        Route::group(['prefix' => 'master_ttd'], function () {
-            Route::get('', [MasterTtdController::class, 'index'])->name('master_ttd.index');
-            Route::post('load', [MasterTtdController::class, 'load'])->name('master_ttd.load');
-            Route::get('create', [MasterTtdController::class, 'create'])->name('master_ttd.create');
-            Route::post('', [MasterTtdController::class, 'store'])->name('master_ttd.store');
-            Route::get('edit/{id}', [MasterTtdController::class, 'edit'])->name('master_ttd.edit');
-            Route::put('update/{id}', [MasterTtdController::class, 'update'])->name('master_ttd.update');
-            Route::delete('/{id}', [MasterTtdController::class, 'destroy'])->name('master_ttd.destroy');
-        });
+        Route::prefix('mssumberdana')->as('mssumberdana.')
+            ->group(function () {
+                Route::get('', [Ms_sumberdana::class, 'index'])->middleware('permission:40')->name('index');
+                Route::post('load', [Ms_sumberdana::class, 'load'])->middleware('permission:40')->name('load');
+                Route::get('create', [Ms_sumberdana::class, 'create'])->middleware('permission:40')->name('create');
+                Route::get('edit/{id}', [Ms_sumberdana::class, 'edit'])->middleware('permission:40')->name('edit');
+                Route::delete('/mssumberdana/{id}', [Ms_sumberdana::class, 'destroy'])->middleware('permission:8')->name('destroy');
+                Route::post('update/{id}', [Ms_sumberdana::class, 'update'])->middleware('permission:40')->name('update');
+                Route::get('/search-product', [Ms_sumberdana::class, 'searchProduct'])->middleware('permission:40')->name('search');
+                Route::get('/product/barcode/{barcode}', [Ms_sumberdana::class, 'getProductByBarcode'])->middleware('permission:40')->name('getByBarcode');
+                Route::post('store', [Ms_sumberdana::class, 'store'])->middleware('permission:40')->name('store');
+                Route::post('/mssumberdana/upload', [Ms_sumberdana::class, 'upload'])->middleware('permission:40')->name('upload');
+                Route::get('/download-format', [Ms_sumberdana::class, 'downloadFormat'])->middleware('permission:40')->name('download_format');
 
-        Route::group(['prefix' => 'asalUsul'], function () {
-            Route::get('', [AsalUsulTanahController::class, 'index'])->name('asalUsul.index');
-            Route::post('load', [AsalUsulTanahController::class, 'load'])->name('asalUsul.load');
-            Route::get('create', [AsalUsulTanahController::class, 'create'])->name('asalUsul.create');
-            Route::post('', [AsalUsulTanahController::class, 'store'])->name('asalUsul.store');
-            Route::get('edit/{id}', [AsalUsulTanahController::class, 'edit'])->name('asalUsul.edit');
-            Route::put('update/{id}', [AsalUsulTanahController::class, 'update'])->name('asalUsul.update');
-            Route::delete('/{id}', [AsalUsulTanahController::class, 'destroy'])->name('asalUsul.destroy');
-        });
+
+
+            });
+
+        Route::prefix('PenguranganStok')->as('PenguranganStok.')
+            ->group(function () {
+                Route::get('', [PenguranganStok::class, 'index'])->middleware('permission:10')->name('index');
+                Route::post('load', [PenguranganStok::class, 'load'])->middleware('permission:10')->name('load');
+                Route::get('create', [PenguranganStok::class, 'create'])->middleware('permission:10')->name('create');
+                Route::get('edit/{id}', [PenguranganStok::class, 'edit'])->middleware('permission:10')->name('edit');
+                Route::delete('/delete/{id}', [PenguranganStok::class, 'destroy'])->middleware('permission:10')->name('delete');
+                Route::get('/search-product', [PenguranganStok::class, 'searchProduct'])->middleware('permission:10')->name('search');
+                Route::get('/product/barcode/{barcode}', [PenguranganStok::class, 'getProductByBarcode'])->middleware('permission:10')->name('getByBarcode');
+                Route::post('store', [PenguranganStok::class, 'store'])->middleware('permission:10')->name('store');
+
+
+            });
+
+
+
+
     });
 
-    // PEMINJAMAN
-    Route::prefix('peminjaman')->as('peminjaman.')->group(function () {
-        // BPKB
-        Route::prefix('bpkb')->as('bpkb.')
-            ->group(function () {
-                Route::get('', [PeminjamanBPKBController::class, 'index'])->name('index');
-                Route::post('load', [PeminjamanBPKBController::class, 'load'])->name('load');
-                Route::get('create', [PeminjamanBPKBController::class, 'create'])->name('create');
-                Route::post('store', [PeminjamanBPKBController::class, 'store'])->name('store');
-                Route::get('edit/{no_surat}/{kd_skpd}', [PeminjamanBPKBController::class, 'edit'])->name('edit');
-                Route::post('update/{id}', [PeminjamanBPKBController::class, 'update'])->name('update');
-                Route::post('delete', [PeminjamanBPKBController::class, 'delete'])->name('delete');
 
-                Route::post('load_bpkb', [PeminjamanBPKBController::class, 'loadBpkb'])->name('load_bpkb');
-                Route::get('cetak', [PeminjamanBPKBController::class, 'cetakPeminjaman'])->name('cetak');
-                Route::post('pengajuan', [PeminjamanBPKBController::class, 'pengajuanPeminjaman'])->name('pengajuan');
-                Route::get('/getmerk', [PeminjamanBPKBController::class, 'getMerks'])->name('merks');
-                Route::get('/getnomorregisters', [PeminjamanBPKBController::class, 'getNomorRegisters'])->name('nomor-registers');
-
-            });
-
-        // SERTIFIKAT
-        Route::prefix('sertifikat')->as('sertifikat.')
-            ->group(function () {
-                Route::get('', [PeminjamanSertifikatController::class, 'index'])->name('index');
-                Route::post('load', [PeminjamanSertifikatController::class, 'load'])->name('load');
-                Route::get('create', [PeminjamanSertifikatController::class, 'create'])->name('create');
-                Route::post('store', [PeminjamanSertifikatController::class, 'store'])->name('store');
-                Route::get('edit/{no_surat}/{kd_skpd}', [PeminjamanSertifikatController::class, 'edit'])->name('edit');
-                Route::post('update/{id}', [PeminjamanSertifikatController::class, 'update'])->name('update');
-                Route::post('delete', [PeminjamanSertifikatController::class, 'delete'])->name('delete');
-                Route::get('cetak', [PeminjamanSertifikatController::class, 'cetakPeminjaman'])->name('cetak');
-                Route::post('load_sertifikat', [PeminjamanSertifikatController::class, 'loadSertifikat'])->name('load_sertifikat');
-                Route::post('pengajuan', [PeminjamanSertifikatController::class, 'pengajuanPeminjaman'])->name('pengajuan');
-            });
-    });
-
-    // PENYERAHAN
-    Route::prefix('penyerahan')->as('penyerahan.')->group(function () {
-        // BPKB
-        Route::prefix('bpkb')->as('bpkb.')
-            ->group(function () {
-                Route::get('', [PenyerahanBPKBController::class, 'index'])->name('index');
-                Route::post('load', [PenyerahanBPKBController::class, 'load'])->name('load');
-                Route::get('create', [PenyerahanBPKBController::class, 'create'])->name('create');
-                Route::post('store', [PenyerahanBPKBController::class, 'store'])->name('store');
-                Route::get('edit/{no_register}/{kd_skpd}', [PenyerahanBPKBController::class, 'edit'])->name('edit');
-                Route::post('update', [PenyerahanBPKBController::class, 'update'])->name('update');
-                Route::post('delete', [PenyerahanBPKBController::class, 'delete'])->name('delete');
-            });
-
-        // SERTIFIKAT
-        Route::prefix('sertifikat')->as('sertifikat.')
-            ->group(function () {
-                Route::get('', [PenyerahanSertifikatController::class, 'index'])->name('index');
-                Route::post('load', [PenyerahanSertifikatController::class, 'load'])->name('load');
-                Route::get('create', [PenyerahanSertifikatController::class, 'create'])->name('create');
-                Route::post('store', [PenyerahanSertifikatController::class, 'store'])->name('store');
-                Route::get('edit/{no_register}/{kd_skpd}', [PenyerahanSertifikatController::class, 'edit'])->name('edit');
-                Route::post('update', [PenyerahanSertifikatController::class, 'update'])->name('update');
-                Route::post('delete', [PenyerahanSertifikatController::class, 'delete'])->name('delete');
-            });
-    });
-
-    // LAPORAN
     Route::prefix('laporan')->as('laporan.')->group(function () {
-        // BPKB
-        Route::prefix('bpkb')->as('bpkb.')
-            ->group(function () {
-                Route::get('', [LaporanBPKBController::class, 'index'])->name('index');
-                Route::post('tahun', [LaporanBPKBController::class, 'tahun'])->name('tahun');
-                Route::post('jenis', [LaporanBPKBController::class, 'jenis'])->name('jenis');
-                Route::post('Pengembalian', [LaporanBPKBController::class, 'Pengembalian'])->name('Pengembalian');
-                Route::post('merk', [LaporanBPKBController::class, 'merk'])->name('merk');
-                Route::post('tandaTangan', [LaporanBPKBController::class, 'tandaTangan'])->name('tandaTangan');
-                Route::get('cetakRekapBpkb', [LaporanBPKBController::class, 'cetakRekapBpkb'])->name('cetakRekapBpkb');
-                Route::get('cetakRekapPeminjaman', [LaporanBPKBController::class, 'cetakRekapPeminjaman'])->name('cetakRekapPeminjaman');
-            });
 
-        // SERTIFIKAT
-        Route::prefix('sertifikat')->as('sertifikat.')
+        Route::prefix('laporan')->as('laporan.')
             ->group(function () {
-                Route::get('', [LaporanSertifikatController::class, 'index'])->name('index');
-                Route::post('balikNama', [LaporanSertifikatController::class, 'balikNama'])->name('balikNama');
-                Route::post('Pengembalian', [LaporanSertifikatController::class, 'Pengembalian'])->name('Pengembalian');
-                Route::post('hak', [LaporanSertifikatController::class, 'hak'])->name('hak');
-                Route::post('asalUsul', [LaporanSertifikatController::class, 'asalUsul'])->name('asalUsul');
-                Route::post('tandaTangan', [LaporanSertifikatController::class, 'tandaTangan'])->name('tandaTangan');
-                Route::get('cetakRekapSertifikat', [LaporanSertifikatController::class, 'cetakRekapSertifikat'])->name('cetakRekapSertifikat');
-                Route::get('cetakRekapPeminjaman', [LaporanSertifikatController::class, 'cetakRekapPeminjaman'])->name('cetakRekapPeminjaman');
-            });
-    });
-
-    // VERIFIKASI OPERATOR
-    Route::prefix('verifikasi_operator')->as('verifikasi_operator.')->group(function () {
-        // BPKB
-        Route::prefix('bpkb')->as('bpkb.')
-            ->group(function () {
-                Route::get('', [VerifikasiOperatorBPKBController::class, 'index'])->name('index');
-                Route::post('load', [VerifikasiOperatorBPKBController::class, 'load'])->name('load');
-                Route::post('verifikasi', [VerifikasiOperatorBPKBController::class, 'verifikasi'])->name('verifikasi');
-                Route::post('tolak', [VerifikasiOperatorBPKBController::class, 'tolak'])->name('tolak');
-            });
-
-        // SERTIFIKAT
-        Route::prefix('sertifikat')->as('sertifikat.')
-            ->group(function () {
-                Route::get('', [VerifikasiOperatorSertifikatController::class, 'index'])->name('index');
-                Route::post('load', [VerifikasiOperatorSertifikatController::class, 'load'])->name('load');
-                Route::post('verif', [VerifikasiOperatorSertifikatController::class, 'verif'])->name('verif');
-                Route::post('verifikasi_operator', [VerifikasiOperatorSertifikatController::class, 'verifikasi_operator'])->name('verifikasi_operator');
-                Route::post('batalkan', [VerifikasiOperatorSertifikatController::class, 'batalkan'])->name('batalkan');
-                Route::post('tolak', [VerifikasiOperatorSertifikatController::class, 'tolak'])->name('tolak');
-            });
-    });
-
-    Route::prefix('verifikasi_admin')->as('verifikasi_admin.')->group(function () {
-        // BPKB
-        Route::prefix('bpkb')->as('bpkb.')
-            ->group(function () {
-                Route::get('', [VerifikasiAdminBPKBController::class, 'index'])->name('index');
-                Route::post('load', [VerifikasiAdminBPKBController::class, 'load'])->name('load');
-                Route::post('verifikasi', [VerifikasiAdminBPKBController::class, 'verifikasi'])->name('verifikasi');
-                Route::post('tolak', [VerifikasiAdminBPKBController::class, 'tolak'])->name('tolak');
-            });
-
-        // SERTIFIKAT
-        Route::prefix('sertifikat')->as('sertifikat.')
-            ->group(function () {
-                Route::get('', [VerifikasiAdminSertifikatController::class, 'index'])->name('index');
-                Route::post('load', [VerifikasiAdminSertifikatController::class, 'load'])->name('load');
-                Route::post('verif', [VerifikasiAdminSertifikatController::class, 'verif'])->name('verif');
-                Route::post('verifikasi_admin', [VerifikasiAdminSertifikatController::class, 'verifikasi_admin'])->name('verifikasi_admin');
-                Route::post('batalkan', [VerifikasiAdminSertifikatController::class, 'batalkan'])->name('batalkan');
-                Route::post('tolak', [VerifikasiAdminSertifikatController::class, 'tolak'])->name('tolak');
-            });
-    });
-
-    Route::prefix('verifikasi_penyelia')->as('verifikasi_penyelia.')->group(function () {
-        // BPKB
-        Route::prefix('bpkb')->as('bpkb.')
-            ->group(function () {
-                Route::get('', [VerifikasiPenyeliaBPKBController::class, 'index'])->name('index');
-                Route::post('load', [VerifikasiPenyeliaBPKBController::class, 'load'])->name('load');
-                Route::post('verifikasi', [VerifikasiPenyeliaBPKBController::class, 'verifikasi'])->name('verifikasi');
-                Route::post('tolak', [VerifikasiPenyeliaBPKBController::class, 'tolak'])->name('tolak');
-            });
-
-        // SERTIFIKAT
-        Route::prefix('sertifikat')->as('sertifikat.')
-            ->group(function () {
-                Route::get('', [VerifikasiPenyeliaSertifikatController::class, 'index'])->name('index');
-                Route::post('load', [VerifikasiPenyeliaSertifikatController::class, 'load'])->name('load');
-                Route::post('verif', [VerifikasiPenyeliaSertifikatController::class, 'verif'])->name('verif');
-                Route::post('verifikasi_penyelia', [VerifikasiPenyeliaSertifikatController::class, 'verifikasi_penyelia'])->name('verifikasi_penyelia');
-                Route::post('batalkan', [VerifikasiPenyeliaSertifikatController::class, 'batalkan'])->name('batalkan');
-                Route::post('tolak', [VerifikasiPenyeliaSertifikatController::class, 'tolak'])->name('tolak');
+                Route::get('', [Laporan::class, 'index'])->middleware('permission:33')->name('index');
+                Route::post('load', [Laporan::class, 'load'])->middleware('permission:33')->name('load');
+                Route::get('cetakbku', [Laporan::class, 'cetakbku'])->name('cetakbku');
+                Route::get('cetakbpp', [Laporan::class, 'cetakbpp'])->name('cetakbpp');
+                Route::get('cetakbpbank', [Laporan::class, 'cetakbpbank'])->name('cetakbpbank');
+                Route::post('tandaTangan', [Laporan::class, 'tandaTangan'])->name('tandaTangan');
+                Route::post('tandaTanganPa', [Laporan::class, 'tandaTanganPa'])->name('tandaTanganPa');
+                Route::get('cetakdth', [Laporan::class, 'cetakdth'])->name('cetakdth');
+                Route::get('cetakrealisasi', [Laporan::class, 'cetakrealisasi'])->name('cetakrealisasi');
             });
     });
 
 
-    Route::prefix('bast')->as('bast.')->group(function () {
-        // BPKB
-        Route::prefix('bpkb')->as('bpkb.')
-            ->group(function () {
-                Route::get('', [BASTBPKBController::class, 'index'])->name('index');
-                Route::post('load', [BASTBPKBController::class, 'load'])->name('load');
-                Route::post('simpan', [BASTBPKBController::class, 'simpan'])->name('simpan');
-                Route::post('hapus', [BASTBPKBController::class, 'hapus'])->name('hapus');
-                Route::get('cetak', [BASTBPKBController::class, 'cetak'])->name('cetak');
-            });
-
-        // SERTIFIKAT
-        Route::prefix('sertifikat')->as('sertifikat.')
-            ->group(function () {
-                Route::get('', [BASTSertifikatController::class, 'index'])->name('index');
-                Route::post('load', [BASTSertifikatController::class, 'load'])->name('load');
-                Route::post('verif', [BASTSertifikatController::class, 'verif'])->name('verif');
-                Route::post('verifikasi_bast', [BASTSertifikatController::class, 'verifikasi_bast'])->name('verifikasi_bast');
-                Route::post('batalkan', [BASTSertifikatController::class, 'batalkan'])->name('batalkan');
-                Route::post('hapus', [BASTSertifikatController::class, 'hapus'])->name('hapus');
-                Route::get('cetak', [BASTSertifikatController::class, 'cetakBast'])->name('cetak');
-            });
-    });
-
-    Route::prefix('pengembalian')->as('pengembalian.')->group(function () {
-        // BPKB
-        Route::prefix('bpkb')->as('bpkb.')
-            ->group(function () {
-                Route::get('', [PengembalianBPKBController::class, 'index'])->name('index');
-                Route::post('load', [PengembalianBPKBController::class, 'load'])->name('load');
-                Route::post('verifikasi', [PengembalianBPKBController::class, 'verifikasi'])->name('verifikasi');
-            });
-
-        // SERTIFIKAT
-        Route::prefix('sertifikat')->as('sertifikat.')
-            ->group(function () {
-                Route::get('', [PengembalianSertifikatController::class, 'index'])->name('index');
-                Route::post('load', [PengembalianSertifikatController::class, 'load'])->name('load');
-                Route::post('verif', [PengembalianSertifikatController::class, 'verif'])->name('verif');
-                Route::post('pengembalian', [PengembalianSertifikatController::class, 'pengembalian'])->name('pengembalian');
-                Route::post('batalkan', [PengembalianSertifikatController::class, 'batalkan'])->name('batalkan');
-            });
-    });
 });
 
 require __DIR__ . '/auth.php';

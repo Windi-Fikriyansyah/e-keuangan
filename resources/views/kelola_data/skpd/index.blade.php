@@ -2,7 +2,7 @@
 @section('title', 'SKPD')
 @section('content')
     <div class="page-heading">
-        <h3>Master SKPD</h3>
+        <h3>Data Master</h3>
     </div>
     <div class="page-content">
         <section class="section">

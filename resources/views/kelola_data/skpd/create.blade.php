@@ -1,5 +1,5 @@
 @extends('template.app')
-@section('title', 'Tambah Master TTD')
+@section('title', 'Tambah Master')
 @section('content')
     <div class="page-heading">
         <h3>Tambah Master SKPD</h3>

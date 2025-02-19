@@ -30,6 +30,18 @@
                             @enderror
                         </div>
                     </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Kode Skpd</label>
+                        <div class="col-sm-10">
+                            <input class="form-control @error('kd_skpd') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan nama" name="kd_skpd" id="kd_skpd" value="{{ $data->kd_skpd }}"
+                                autofocus>
+                            @error('kd_skpd')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Username</label>
                         <div class="col-sm-10">
@@ -42,24 +54,7 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">SKPD</label>
-                        <div class="col-sm-10">
-                            <select class="form-select @error('kd_skpd') is-invalid @enderror select_option" name="kd_skpd"
-                                id="kd_skpd" data-placeholder="Silahkan Pilih">
-                                <option value="" selected>Silahkan Pilih</option>
-                                @foreach ($kd_skpd as $skpd)
-                                    <option value="{{ $skpd->kd_skpd }}"
-                                        {{ $data->kd_skpd == $skpd->kd_skpd ? 'selected' : '' }}>
-                                        {{ $skpd->nm_skpd }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('kd_skpd')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Status</label>
                         <div class="col-sm-10">
@@ -82,10 +77,10 @@
                             <select class="form-select @error('tipe') is-invalid @enderror select_option" name="tipe"
                                 id="tipe" data-placeholder="Silahkan Pilih">
                                 <option value="" selected>Silahkan Pilih</option>
-                                <option value="admin" {{ $data->tipe == 'admin' ? 'selected' : '' }}>
-                                    Admin</option>
-                                <option value="skpd" {{ $data->tipe == 'skpd' ? 'selected' : '' }}>
-                                    SKPD</option>
+                                <option value="owner" {{ $data->tipe == 'owner' ? 'selected' : '' }}>
+                                    Owner</option>
+                                <option value="kasir" {{ $data->tipe == 'kasir' ? 'selected' : '' }}>
+                                    Kasir</option>
                             </select>
                             @error('tipe')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -114,6 +109,17 @@
                             <input class="form-control @error('jabatan') is-invalid @enderror" type="text"
                                 placeholder="Isi dengan nama" name="jabatan" id="jabatan" value="{{ $data->jabatan }}">
                             @error('jabatan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Rekening Pengeluaran</label>
+                        <div class="col-sm-10">
+                            <input class="form-control @error('rek_pengeluaran') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan nama" name="rek_pengeluaran" id="rek_pengeluaran" value="{{ $data->rek_pengeluaran }}">
+                            @error('rek_pengeluaran')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

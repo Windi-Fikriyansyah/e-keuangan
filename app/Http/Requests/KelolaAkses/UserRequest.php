@@ -55,7 +55,6 @@ class UserRequest extends FormRequest
             'password' => [$passwordRule, $cek],
             'password_lama' => [$passwordLamaRule],
             'confirmation_password' => [$passwordRule, 'same:password'],
-            'kd_skpd' => ['required'],
             'tipe' => ['required'],
             'status_aktif' => ['required'],
             'role' => ['required'],

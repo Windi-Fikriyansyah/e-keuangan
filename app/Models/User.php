@@ -26,7 +26,8 @@ class User extends Authenticatable
         'role',
         'jabatan',
         'tipe',
-        'status_aktif'
+        'status_aktif',
+        'rek_pengeluaran'
     ];
 
     /**

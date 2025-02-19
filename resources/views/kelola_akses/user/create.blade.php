@@ -43,6 +43,17 @@
                         </div>
                     </div>
                     <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Kode SKPD</label>
+                        <div class="col-sm-10">
+                            <input class="form-control @error('kd_skpd') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan Kode Skpd" name="kd_skpd" id="kd_skpd"
+                                value="{{ old('kd_skpd') }}">
+                            @error('kd_skpd')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Username</label>
                         <div class="col-sm-10">
                             <input class="form-control @error('username') is-invalid @enderror" type="text"
@@ -80,24 +91,7 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">SKPD</label>
-                        <div class="col-sm-10">
-                            <select class="form-select @error('kd_skpd') is-invalid @enderror select_option" name="kd_skpd"
-                                id="kd_skpd" data-placeholder="Silahkan Pilih">
-                                <option value="" selected>Silahkan Pilih</option>
-                                @foreach ($kd_skpd as $skpd)
-                                    <option value="{{ $skpd->kd_skpd }}"
-                                        {{ old('kd_skpd') == $skpd->kd_skpd ? 'selected' : '' }}>
-                                        {{ $skpd->nm_skpd }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('kd_skpd')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Status</label>
                         <div class="col-sm-10">
@@ -120,10 +114,10 @@
                             <select class="form-select @error('tipe') is-invalid @enderror select_option" name="tipe"
                                 id="tipe" data-placeholder="Silahkan Pilih">
                                 <option value="" selected>Silahkan Pilih</option>
-                                <option value="admin" {{ old('tipe') == 'admin' ? 'selected' : '' }}>
-                                    Admin</option>
-                                <option value="skpd" {{ old('tipe') == 'skpd' ? 'selected' : '' }}>
-                                    SKPD</option>
+                                <option value="owner" {{ old('tipe') == 'owner' ? 'selected' : '' }}>
+                                    Owner</option>
+                                <option value="kasir" {{ old('tipe') == 'kasir' ? 'selected' : '' }}>
+                                    Kasir</option>
                             </select>
                             @error('tipe')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -151,9 +145,21 @@
                         <label class="col-sm-2 col-form-label">Jabatan</label>
                         <div class="col-sm-10">
                             <input class="form-control @error('jabatan') is-invalid @enderror" type="text"
-                                placeholder="Isi dengan nama" name="jabatan" id="jabatan"
+                                placeholder="Isi dengan jabatan" name="jabatan" id="jabatan"
                                 value="{{ old('jabatan') }}">
                             @error('jabatan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Rek Pengeluaran</label>
+                        <div class="col-sm-10">
+                            <input class="form-control @error('rek_pengeluaran') is-invalid @enderror" type="text"
+                                placeholder="Isi dengan rek Pengeluaran" name="rek_pengeluaran" id="rek_pengeluaran"
+                                value="{{ old('rek_pengeluaran') }}">
+                            @error('rek_pengeluaran')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

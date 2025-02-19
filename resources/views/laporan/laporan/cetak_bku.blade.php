@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cetak Laporan BKU</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.4;
+            color: #333;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0.8rem;
+            background-color: #fff;
+            overflow-x: hidden;
+            font-size: 11px;
+        }
+
+        /* Header styles */
+        .header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem;
+        }
+
+        .header h1 {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.6;
+            margin-bottom: 0.3rem;
+        }
+
+        /* Table styles */
+        .table-container {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            font-size: 10px;
+        }
+
+        .main-table th,
+        .main-table td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            word-break: break-word;
+            vertical-align: top;
+        }
+
+        .main-table th {
+            background-color: #4a90e2;
+            color: white;
+            font-weight: 600;
+            text-align: left;
+            padding: 6px;
+            white-space: nowrap;
+        }
+
+        .main-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Column widths */
+        .col-no { width: 5%; }
+        .col-date { width: 10%; }
+        .col-number { width: 12%; }
+        .col-desc { width: 33%; }
+        .col-amount { width: 13%; }
+        .col-balance { width: 14%; }
+
+        /* Utility classes */
+        .numbers {
+            text-align: right;
+            font-family: 'Consolas', monospace;
+            font-size: 9px;
+            white-space: nowrap;
+        }
+
+        .saldo-lalu {
+            font-weight: 600;
+            background-color: #f2f2f2;
+        }
+
+        /* Footer and signature styles */
+        .footer {
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+
+        .signature {
+            float: right;
+            width: 200px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 11px;
+        }
+
+        .signature-content {
+            margin-top: 0.8rem;
+            padding: 0.8rem;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.4rem;
+            font-weight: 600;
+            margin: 0.8rem 0;
+        }
+
+        .signature-title {
+            margin-top: 0.4rem;
+            font-size: 10px;
+            color: #666;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                padding: 0.5rem;
+            }
+
+            .main-table {
+                font-size: 9px;
+            }
+
+            .header h1 {
+                font-size: 12px;
+            }
+
+            .numbers {
+                font-size: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            BUKU KAS UMUM PENGELUARAN<br>
+            PERIODE {{ \Carbon\Carbon::parse($tanggalawal)->translatedFormat('j F Y') }} -
+            {{ \Carbon\Carbon::parse($tanggalakhir)->translatedFormat('j F Y') }}
+        </h1>
+    </div>
+
+    <div class="table-container">
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th class="col-no">NO</th>
+                    <th class="col-date">Tanggal</th>
+                    <th class="col-number">No Bukti</th>
+                    <th class="col-desc">Uraian</th>
+                    <th class="col-amount">Penerimaan</th>
+                    <th class="col-amount">Pengeluaran</th>
+                    <th class="col-balance">Saldo</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $saldo = $saldoLalu ?? 0;
+                @endphp
+                <tr class="saldo-lalu">
+                    <td colspan="3"></td>
+                    <td>Saldo Lalu</td>
+                    <td></td>
+                    <td></td>
+                    <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
+                </tr>
+                @foreach ($trhtransout as $item)
+                    @php
+                        $saldo += $item->terima - $item->keluar;
+                    @endphp
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tgl_kas)->translatedFormat('j F Y') }}</td>
+                        <td>{{ $item->no_sp2d }}</td>
+                        <td>{{ $item->uraian }}</td>
+                        <td class="numbers">Rp {{ number_format($item->terima, 2, ',', '.') }}</td>
+                        <td class="numbers">Rp {{ number_format($item->keluar, 2, ',', '.') }}</td>
+                        <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <div class="signature">
+            <div>Kuburaya, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
+            <div class="signature-content">
+                <div>TEST</div>
+                <div class="signature-line">TEST</div>
+                <div class="signature-title">Coba</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
