@@ -284,6 +284,7 @@ class Transaksi extends Controller
                 $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
                 return [
                     'no_bukti' => $request->no_bukti,
+                    'tgl_bukti' => $request->tgl_bukti,
                     'kd_skpd' => auth()->user()->kd_skpd,
                     'jenis_terima_sp2d' => $jenis_terima_sp2d,
                     'kd_sub_kegiatan' => $detail['kd_sub_kegiatan'],

@@ -262,7 +262,11 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('tandaTanganPa', [Laporan::class, 'tandaTanganPa'])->name('tandaTanganPa');
                 Route::get('cetakdth', [Laporan::class, 'cetakdth'])->name('cetakdth');
                 Route::get('cetakrealisasi', [Laporan::class, 'cetakrealisasi'])->name('cetakrealisasi');
+                Route::get('cetakobjek', [Laporan::class, 'cetakobjek'])->name('cetakobjek');
+                Route::post('getsubkegiatan', [Laporan::class, 'getsubkegiatan'])->name('getsubkegiatan');
+                Route::post('getakunbelanja', [Laporan::class, 'getakunbelanja'])->name('getakunbelanja');
             });
+
     });
 
 

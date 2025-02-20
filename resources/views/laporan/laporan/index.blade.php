@@ -64,9 +64,9 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card card-info collapsed-card card-outline" id="DTH" data-bs-toggle="modal" data-bs-target="#modalDTH">
+                <div class="card card-info collapsed-card card-outline" id="rincianobjek" data-bs-toggle="modal" data-bs-target="#modalrincianobjek">
                     <div class="card-body">
-                        <span>DTH</span>
+                        <span>Rincian Objek</span>
                         <a class="stretched-link" href="#"></a>
                         <i class="fa fa-chevron-right float-end mt-2"></i>
                     </div>
@@ -116,10 +116,29 @@
                         <input type="date" id="tanggalakhir" name="tanggalakhir" class="form-control">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Tanggal TTD</label>
-                        <input type="date" id="tanggalTtdrekapbku" class="form-control">
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal TTD</label>
+                            <input type="date" id="tanggalTtdrekapbku" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bendahara</label>
+                            <select class="form-control" id="ttdbendaharabku">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">PA/KPA</label>
+                            <select class="form-control" id="ttdbku">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
 
                     <div class="mb-3 text-center">
                         <button type="button" class="btn btn-danger btn-md cetakbku" data-jenis="pdf">PDF</button>
@@ -174,10 +193,28 @@
                         <input type="date" id="tanggalakhir1" name="tanggalakhir1" class="form-control">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Tanggal TTD</label>
-                        <input type="date" id="tanggalTtdrekapbpp" class="form-control">
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal TTD</label>
+                            <input type="date" id="tanggalTtdrekapbpp" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bendahara</label>
+                            <select class="form-control" id="ttdbendaharabpp">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">PA/KPA</label>
+                            <select class="form-control" id="ttdbpp">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
 
                     <div class="mb-3 text-center">
                         <button type="button" class="btn btn-danger btn-md cetakbpp" data-jenis="pdf">PDF</button>
@@ -380,6 +417,102 @@
         </div>
     </div>
 
+    <div id="modalrincianobjek" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Laporan Rincian Objek</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="kd_skpdrekapobjek" class="form-label">Kode SKPD</label>
+                            <input type="text" value="{{ ($daftar_skpd->kd_skpd ?? '') }}" id="kd_skpdrekapobjek" name="kd_skpd" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="name_skpdrekapobjek" class="form-label">Nama SKPD</label>
+                            <input type="text" value="{{ ($daftar_skpd->name ?? '') }}" id="name_skpdrekapobjek" name="name_skpd" class="form-control" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Jenis Anggaran</label>
+                            <select class="form-control" id="jenis_anggaran">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                                <option value="Penetapan">M|Penetapan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Sub Kegiatan</label>
+                            <select class="form-control" id="sub_kegiatan">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Jenis</label>
+                            <select class="form-control" id="jenis_objek">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                                <option value="1">Cek Pemakaian Anggaran Akun Belanja</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Akun Belanja</label>
+                            <select class="form-control" id="akun_belanja">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal Awal</label>
+                            <input type="date" id="tanggalawalobjek" name="tanggalawal" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal Akhir</label>
+                            <input type="date" id="tanggalakhirobjek" name="tanggalakhir" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal TTD</label>
+                            <input type="date" id="tanggalTtdrekapobjek" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bendahara</label>
+                            <select class="form-control" id="ttdbendaharaobjek">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">PA/KPA</label>
+                            <select class="form-control" id="ttdobjek">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 text-center">
+                        <button type="button" class="btn btn-danger btn-md cetakobjek" data-jenis="pdf">PDF</button>
+                        <button type="button" class="btn btn-dark btn-md cetakobjek" data-jenis="layar">Layar</button>
+                        <button type="button" class="btn btn-dark btn-md cetakobjek" data-jenis="excel">Excel</button>
+                        <button type="button" class="btn btn-secondary btn-md" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('js')
@@ -451,6 +584,135 @@
         }
     });
 
+    $('#ttdbendaharabku').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...",
+        ajax: {
+            url: "{{ route('laporan.laporan.tandaTangan') }}",
+            dataType: 'json',
+            type: "POST",
+            data: function(params) {
+                return {
+                    _token: $('meta[name="csrf-token"]').attr('content'), // Tambahkan CSRF token
+                    q: $.trim(params.term),
+                    kodeSkpd: $('#kd_skpdrekapbku').val()
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map((ttd) => {
+                        return {
+                            text: ttd.nama,
+                            id: ttd.nip,
+                        };
+                    }),
+                    pagination: {
+                        more: data.current_page < data.last_page,
+                    },
+                };
+            },
+            cache: true
+        }
+    });
+
+
+    $('#ttdbku').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...",
+        ajax: {
+            url: "{{ route('laporan.laporan.tandaTanganPa') }}",
+            dataType: 'json',
+            type: "POST",
+            data: function(params) {
+                return {
+                    _token: $('meta[name="csrf-token"]').attr('content'), // Tambahkan CSRF token
+                    q: $.trim(params.term),
+                    kodeSkpd: $('#kd_skpdrekapbku').val()
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map((ttd) => {
+                        return {
+                            text: ttd.nama,
+                            id: ttd.nip,
+                        };
+                    }),
+                    pagination: {
+                        more: data.current_page < data.last_page,
+                    },
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('#ttdbendaharabpp').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...",
+        ajax: {
+            url: "{{ route('laporan.laporan.tandaTangan') }}",
+            dataType: 'json',
+            type: "POST",
+            data: function(params) {
+                return {
+                    _token: $('meta[name="csrf-token"]').attr('content'), // Tambahkan CSRF token
+                    q: $.trim(params.term),
+                    kodeSkpd: $('#kd_skpdrekapbpp').val()
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map((ttd) => {
+                        return {
+                            text: ttd.nama,
+                            id: ttd.nip,
+                        };
+                    }),
+                    pagination: {
+                        more: data.current_page < data.last_page,
+                    },
+                };
+            },
+            cache: true
+        }
+    });
+
+
+    $('#ttdbpp').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...",
+        ajax: {
+            url: "{{ route('laporan.laporan.tandaTanganPa') }}",
+            dataType: 'json',
+            type: "POST",
+            data: function(params) {
+                return {
+                    _token: $('meta[name="csrf-token"]').attr('content'), // Tambahkan CSRF token
+                    q: $.trim(params.term),
+                    kodeSkpd: $('#kd_skpdrekapbpp').val()
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map((ttd) => {
+                        return {
+                            text: ttd.nama,
+                            id: ttd.nip,
+                        };
+                    }),
+                    pagination: {
+                        more: data.current_page < data.last_page,
+                    },
+                };
+            },
+            cache: true
+        }
+    });
 
     $('#ttdbendaharabpbank').select2({
         theme: "bootstrap-5",
@@ -582,11 +844,176 @@
         }
     });
 
+    $('#ttdbendaharaobjek').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...",
+        ajax: {
+            url: "{{ route('laporan.laporan.tandaTangan') }}",
+            dataType: 'json',
+            type: "POST",
+            data: function(params) {
+                return {
+                    _token: $('meta[name="csrf-token"]').attr('content'), // Tambahkan CSRF token
+                    q: $.trim(params.term),
+                    kodeSkpd: $('#kd_skpdrekapobjek').val()
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map((ttd) => {
+                        return {
+                            text: ttd.nama,
+                            id: ttd.nip,
+                        };
+                    }),
+                    pagination: {
+                        more: data.current_page < data.last_page,
+                    },
+                };
+            },
+            cache: true
+        }
+    });
+
+
+    $('#ttdobjek').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...",
+        ajax: {
+            url: "{{ route('laporan.laporan.tandaTanganPa') }}",
+            dataType: 'json',
+            type: "POST",
+            data: function(params) {
+                return {
+                    _token: $('meta[name="csrf-token"]').attr('content'), // Tambahkan CSRF token
+                    q: $.trim(params.term),
+                    kodeSkpd: $('#kd_skpdrekapobjek').val()
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map((ttd) => {
+                        return {
+                            text: ttd.nama,
+                            id: ttd.nip,
+                        };
+                    }),
+                    pagination: {
+                        more: data.current_page < data.last_page,
+                    },
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('#sub_kegiatan').select2({
+    dropdownParent: $('#modalrincianobjek'),
+    theme: "bootstrap-5",
+    width: "100%",
+    placeholder: "Silahkan Pilih...",
+    ajax: {
+        url: "{{ route('laporan.laporan.getsubkegiatan') }}",
+        dataType: 'json',
+        type: "POST",
+        data: function(params) {
+            return {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                q: $.trim(params.term),
+                kodeSkpd: $('#kd_skpdrekapobjek').val()
+            };
+        },
+        processResults: function(data) {
+            // Memeriksa apakah data adalah objek tunggal atau array
+            if (!Array.isArray(data)) {
+                // Jika objek tunggal, ubah menjadi array dengan satu item
+                if (data && data.kd_sub_kegiatan) {
+                    return {
+                        results: [{
+                            id: data.kd_sub_kegiatan,
+                            text: data.kd_sub_kegiatan + ' - ' + data.nm_sub_kegiatan
+                        }]
+                    };
+                }
+                return { results: [] };
+            }
+
+            // Jika sudah array, proses seperti biasa
+            return {
+                results: data.map(function(item) {
+                    return {
+                        id: item.kd_sub_kegiatan,
+                        text: item.kd_sub_kegiatan + ' - ' + item.nm_sub_kegiatan
+                    };
+                }),
+                pagination: {
+                    more: data.current_page && data.last_page ?
+                          data.current_page < data.last_page : false
+                }
+            };
+        },
+        cache: true
+    }
+});
+
+
+$('#akun_belanja').select2({
+    dropdownParent: $('#modalrincianobjek'),
+    theme: "bootstrap-5",
+    width: "100%",
+    placeholder: "Silahkan Pilih...",
+    ajax: {
+        url: "{{ route('laporan.laporan.getakunbelanja') }}",
+        dataType: 'json',
+        type: "POST",
+        data: function(params) {
+            return {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                q: $.trim(params.term),
+                kodeSkpd: $('#kd_skpdrekapobjek').val()
+            };
+        },
+        processResults: function(data) {
+            // Memeriksa apakah data adalah objek tunggal atau array
+            if (!Array.isArray(data)) {
+                // Jika objek tunggal, ubah menjadi array dengan satu item
+                if (data && data.kd_rek6) {
+                    return {
+                        results: [{
+                            id: data.kd_rek6,
+                            text: data.kd_rek6 + ' - ' + data.nm_rek6
+                        }]
+                    };
+                }
+                return { results: [] };
+            }
+
+            // Jika sudah array, proses seperti biasa
+            return {
+                results: data.map(function(item) {
+                    return {
+                        id: item.kd_rek6,
+                        text: item.kd_rek6 + ' - ' + item.nm_rek6
+                    };
+                }),
+                pagination: {
+                    more: data.current_page && data.last_page ?
+                          data.current_page < data.last_page : false
+                }
+            };
+        },
+        cache: true
+    }
+});
         $('.cetakbku').on('click', function () {
             let kd_skpd = $('#kd_skpdrekapbku').val();
             let tanggalawal = $('#tanggalawal').val();
             let tanggalakhir = $('#tanggalakhir').val();
             let tanggalTtd = $('#tanggalTtdrekapbku').val();
+            let ttdbendahara = $('#ttdbendaharabku').val(); // Pastikan ID ini sesuai
+            let ttdpa_kpa = $('#ttdbku').val();
             let jenis_print = $(this).data("jenis");
 
             if (!kd_skpd) {
@@ -621,6 +1048,8 @@
             url.searchParams.append("tanggalawal", tanggalawal);
             url.searchParams.append("tanggalakhir", tanggalakhir);
             url.searchParams.append("tanggalTtd", tanggalTtd);
+            url.searchParams.append("ttdbendaharadth", ttdbendahara); // Pastikan cocok dengan request controller
+            url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
             url.searchParams.append("jenis_print", jenis_print);
 
             window.open(url.toString(), "_blank");
@@ -698,6 +1127,8 @@
             let tanggalawal = $('#tanggalawal1').val();
             let tanggalakhir = $('#tanggalakhir1').val();
             let tanggalTtd = $('#tanggalTtdrekapbpp').val();
+            let ttdbendahara = $('#ttdbendaharabpp').val(); // Pastikan ID ini sesuai
+            let ttdpa_kpa = $('#ttdbpp').val();
             let jenis_print = $(this).data("jenis");
 
             if (!kd_skpd) {
@@ -732,6 +1163,8 @@
             url.searchParams.append("tanggalawal", tanggalawal);
             url.searchParams.append("tanggalakhir", tanggalakhir);
             url.searchParams.append("tanggalTtd", tanggalTtd);
+            url.searchParams.append("ttdbendaharadth", ttdbendahara); // Pastikan cocok dengan request controller
+            url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
             url.searchParams.append("jenis_print", jenis_print);
 
             window.open(url.toString(), "_blank");
@@ -864,6 +1297,116 @@
             url.searchParams.append("tanggalTtd", tanggalTtd);
             url.searchParams.append("ttdbendaharadth", ttdbendahara); // Pastikan cocok dengan request controller
             url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
+            url.searchParams.append("jenis_print", jenis_print);
+
+            window.open(url.toString(), "_blank");
+        });
+
+        $('.cetakobjek').on('click', function () {
+            let kd_skpd = $('#kd_skpdrekapobjek').val();
+            let tanggalawal = $('#tanggalawalobjek').val();
+            let tanggalakhir = $('#tanggalakhirobjek').val();
+            let tanggalTtd = $('#tanggalTtdrekapobjek').val();
+            let ttdbendahara = $('#ttdbendaharaobjek').val(); // Pastikan ID ini sesuai
+            let ttdpa_kpa = $('#ttdobjek').val();
+            let jenis_anggaran = $('#jenis_anggaran').val();
+            let sub_kegiatan = $('#sub_kegiatan').val(); // Pastikan ID ini sesuai
+            let jenis = $('#jenis_objek').val();
+            let akun_belanja = $('#akun_belanja').val();
+            let jenis_print = $(this).data("jenis");
+
+            if (!kd_skpd) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih SKPD!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!jenis_anggaran) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih Jenis Anggaran!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!sub_kegiatan) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih Sub Kegiatan!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!jenis) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih Jenis!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!akun_belanja) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih Akun Belanja!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!tanggalawal || !tanggalakhir) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih rentang tanggal!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!tanggalTtd) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih tanggal tanda tangan!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!ttdbendahara) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih bendahara!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!ttdpa_kpa) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih PA/KPA!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            let url = new URL("{{ route('laporan.laporan.cetakobjek') }}", window.location.origin);
+            url.searchParams.append("kd_skpd", kd_skpd);
+            url.searchParams.append("tanggalawal", tanggalawal);
+            url.searchParams.append("tanggalakhir", tanggalakhir);
+            url.searchParams.append("tanggalTtd", tanggalTtd);
+            url.searchParams.append("ttdbendaharadth", ttdbendahara); // Pastikan cocok dengan request controller
+            url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
+            url.searchParams.append("jenis_anggaran", jenis_anggaran); // Pastikan cocok dengan request controller
+            url.searchParams.append("sub_kegiatan", sub_kegiatan);
+            url.searchParams.append("jenis", jenis); // Pastikan cocok dengan request controller
+            url.searchParams.append("akun_belanja", akun_belanja);
             url.searchParams.append("jenis_print", jenis_print);
 
             window.open(url.toString(), "_blank");
