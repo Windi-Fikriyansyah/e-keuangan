@@ -237,6 +237,12 @@
                                 id="nm_rek"
                                 style="width: 50%; margin-left: 15px;"
                             >
+                            <input
+                                type="hidden"
+                                class="form-control custom-border"
+                                id="id_sumberdana"
+                                style="width: 50%; margin-left: 15px;"
+                            >
                         </div>
 
 
@@ -269,7 +275,7 @@
                             </div>
                             <div class="col-4 d-flex align-items-center">
                                 <label for="realisasiSPD" class="form-label mb-0 w-100">Realisasi</label>
-                                <input type="text" disabled class="form-control" id="realisasiSPD" value="{{ number_format($realisasi, 0, ',', '.') }}" name="realisasiSPD" oninput="formatRupiah(this); hitungSisa('totalSPD', 'realisasiSPD', 'sisaSPD');">
+                                <input type="text" disabled class="form-control" id="realisasiSPD" name="realisasiSPD" oninput="formatRupiah(this); hitungSisa('totalSPD', 'realisasiSPD', 'sisaSPD');">
                             </div>
                             <div class="col-4 d-flex align-items-center">
                                 <label for="sisaSPD" class="form-label mb-0 w-100">Sisa</label>
@@ -284,7 +290,7 @@
                             </div>
                             <div class="col-4 d-flex align-items-center">
                                 <label for="realisasiAnggaranKas" class="form-label mb-0 w-100">Realisasi</label>
-                                <input type="text" disabled class="form-control" id="realisasiAnggaranKas" name="realisasiAnggaranKas" value="{{ number_format($realisasi, 0, ',', '.') }}" oninput="formatRupiah(this); hitungSisa('totalAnggaranKas', 'realisasiAnggaranKas', 'sisaAnggaranKas');">
+                                <input type="text" disabled class="form-control" id="realisasiAnggaranKas" name="realisasiAnggaranKas" oninput="formatRupiah(this); hitungSisa('totalAnggaranKas', 'realisasiAnggaranKas', 'sisaAnggaranKas');">
                             </div>
                             <div class="col-4 d-flex align-items-center">
                                 <label for="sisaAnggaranKas" class="form-label mb-0 w-100">Sisa</label>
@@ -299,7 +305,7 @@
                             </div>
                             <div class="col-4 d-flex align-items-center">
                                 <label for="realisasiAnggaran" class="form-label mb-0 w-100">Realisasi</label>
-                                <input type="text" disabled class="form-control" id="realisasiAnggaran" name="realisasiAnggaran" value="{{ number_format($realisasi, 0, ',', '.') }}" oninput="formatRupiah(this); hitungSisa('anggaran', 'realisasiAnggaran', 'sisaAnggaran');">
+                                <input type="text" disabled class="form-control" id="realisasiAnggaran" name="realisasiAnggaran" oninput="formatRupiah(this); hitungSisa('anggaran', 'realisasiAnggaran', 'sisaAnggaran');">
                             </div>
                             <div class="col-4 d-flex align-items-center">
                                 <label for="sisaAnggaran" class="form-label mb-0 w-100">Sisa</label>
@@ -327,7 +333,7 @@
                             </div>
                             <div class="col-4 d-flex align-items-center">
                                 <label for="realisasinilaisumberdana" class="form-label mb-0 w-100">Realisasi</label>
-                                <input type="text" disabled class="form-control" id="realisasinilaisumberdana" name="realisasinilaisumberdana" value="{{ number_format($realisasi, 0, ',', '.') }}" oninput="formatRupiah(this); hitungSisa('nilaisumberdana', 'realisasinilaisumberdana', 'sisanilaisumberdana');">
+                                <input type="text" disabled class="form-control" id="realisasinilaisumberdana" name="realisasinilaisumberdana" oninput="formatRupiah(this); hitungSisa('nilaisumberdana', 'realisasinilaisumberdana', 'sisanilaisumberdana');">
                             </div>
                             <div class="col-4 d-flex align-items-center">
                                 <label for="sisanilaisumberdana" class="form-label mb-0 w-100">Sisa</label>
@@ -599,7 +605,7 @@ function formatRupiah(input) {
         input.value = rupiah.replace("Rp", "").trim(); // Menghilangkan "Rp" agar mudah diproses
     }
 
-    function hitungSisa(totalId, realisasiId, sisaId) {
+function hitungSisa(totalId, realisasiId, sisaId) {
         let total = parseFloat(document.getElementById(totalId).value.replace(/\D/g, "")) || 0;
         let realisasi = parseFloat(document.getElementById(realisasiId).value.replace(/\D/g, "")) || 0;
         let sisa = total - realisasi;
@@ -766,32 +772,76 @@ $(document).ready(function() {
         //     }
         // });
 
-        $('#kd_dana').select2({
-            dropdownParent: $('#inputKegiatanModal .modal-content'),
-            placeholder: 'Pilih Sub Kegiatan',
-            width: 'resolve',
-            theme: 'bootstrap-5',
-        });
+        // $('#kd_dana').select2({
+        //     dropdownParent: $('#inputKegiatanModal .modal-content'),
+        //     placeholder: 'Pilih Sub Kegiatan',
+        //     width: 'resolve',
+        //     theme: 'bootstrap-5',
+        // });
 
-        // Ambil data Sub Kegiatan via AJAX
-        $.ajax({
-            url: "{{ route('transaksi.get-sumberdana') }}",
-            type: 'GET',
-            success: function(response) {
-                $('#kd_dana').empty().append('<option value="">Pilih Sub Kegiatan</option>');
-                $.each(response, function(index, item) {
-                    $('#kd_dana').append(
-                        '<option value="' + item.kd_dana + '" data-nm_dana="' + item.nm_dana + '" data-anggaran_tahun="' + item.anggaran_tahun + '">' +
-                        item.kd_dana + ' || ' + item.nm_dana +
-                        '</option>'
-                    );
-                });
-                $('#kd_dana').trigger('change');
-            },
-            error: function(xhr, status, error) {
-                console.error("Error fetching kd_dana: ", error);
-            }
-        });
+        // // Ambil data Sub Kegiatan via AJAX
+        // $.ajax({
+        //     url: "{{ route('transaksi.get-sumberdana') }}",
+        //     type: 'GET',
+        //     success: function(response) {
+        //         $('#kd_dana').empty().append('<option value="">Pilih Sub Kegiatan</option>');
+        //         $.each(response, function(index, item) {
+        //             $('#kd_dana').append(`
+        //             <option value="${item.kd_dana}"
+        //                     data-id_sumberdana="${item.id}"
+        //                     data-nm_dana="${item.nm_dana}"
+        //                     data-anggaran_tahun="${item.anggaran_tahun}">
+        //                 ${item.kd_dana} || ${item.nm_dana}
+        //             </option>
+        //         `);
+        //         });
+        //         $('#kd_dana').trigger('change');
+        //     },
+        //     error: function(xhr, status, error) {
+        //         console.error("Error fetching kd_dana: ", error);
+        //     }
+        // });
+
+        $('#kd_rek').change(function () {
+        var kd_rek = $(this).val(); // Ambil kode rekening yang dipilih
+        var csrfToken = $('meta[name="csrf-token"]').attr('content'); // Ambil CSRF token
+
+        if (kd_rek) {
+            $.ajax({
+                url: "{{ route('transaksi.getrealisasi') }}", // Pastikan route ini sesuai
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken // Tambahkan CSRF token
+                },
+                data: { kd_rek: kd_rek },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.success) {
+                        $('#realisasiSPD').val(formatRupiah2(response.realisasiSPD ?? 0));
+                        $('#realisasiAnggaranKas').val(formatRupiah2(response.realisasiAnggaranKas ?? 0));
+                        $('#realisasiAnggaran').val(formatRupiah2(response.realisasiAnggaran ?? 0));
+                        $('#realisasinilaisumberdana').val(formatRupiah2(response.realisasiSumberDana ?? 0));
+
+                        hitungSisa('totalSPD', 'realisasiSPD', 'sisaSPD');
+                        hitungSisa('totalAnggaranKas', 'realisasiAnggaranKas', 'sisaAnggaranKas');
+                        hitungSisa('anggaran', 'realisasiAnggaran', 'sisaAnggaran');
+                        hitungSisa('nilaisumberdana', 'realisasinilaisumberdana', 'sisanilaisumberdana');
+                    } else {
+                        alert("Data realisasi tidak ditemukan!");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error: ", status, error);
+                }
+            });
+        }
+    });
+
+    function formatRupiah2(angka) {
+        let number = parseInt(angka); // Konversi ke integer untuk menghilangkan desimal
+        let number_string = number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Pisahkan ribuan dengan titik
+        return 'Rp. ' + number_string; // Tambahkan prefix Rp.
+    }
 
         $('#kd_rek').select2({
             dropdownParent: $('#inputKegiatanModal .modal-content'),
@@ -810,6 +860,7 @@ $(document).ready(function() {
             $('#kd_rek').append(
                     `<option value="${item.kd_rek}"
                         data-nm_rek="${item.nm_rek}"
+                        data-id_sumberdana="${item.id_sumberdana}"
                         data-anggaran-tw1="${item.anggaran_tw1}"
                         data-anggaran-tw2="${item.anggaran_tw2}"
                         data-anggaran-tw3="${item.anggaran_tw3}"
@@ -829,6 +880,47 @@ $(document).ready(function() {
         console.error("Error fetching kd_rek: ", error);
     }
 });
+
+$('#kd_dana').select2({
+        dropdownParent: $('#inputKegiatanModal .modal-content'),
+        placeholder: 'Pilih Sumber Dana',
+        width: 'resolve',
+        theme: 'bootstrap-5',
+    });
+
+    // Ketika kd_rek dipilih, ambil daftar kd_dana berdasarkan id_sumberdana
+    $('#kd_rek').on('change', function() {
+        var idSumberDana = $('#kd_rek option:selected').data('id_sumberdana');
+
+        if (idSumberDana) {
+            $.ajax({
+                url: "{{ route('transaksi.get-sumberdana') }}",
+                type: 'GET',
+                data: { id_sumberdana: idSumberDana }, // Kirim id_sumberdana ke controller
+                success: function(response) {
+                    $('#kd_dana').empty().append('<option value="">Pilih Sumber Dana</option>');
+                    $.each(response, function(index, item) {
+                        $('#kd_dana').append(`
+                            <option value="${item.id}"
+                             data-id_sumberdana="${item.id}"
+                             data-nm_dana="${item.nm_dana}"
+                             data-anggaran_tahun="${item.anggaran_tahun}">
+                         ${item.kd_dana} || ${item.nm_dana}
+                     </option>
+                 `);
+
+
+                    });
+                    $('#kd_dana').trigger('change');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching kd_dana: ", error);
+                }
+            });
+        } else {
+            $('#kd_dana').empty().append('<option value="">Pilih Sumber Dana</option>').trigger('change');
+        }
+    });
 
     });
 
@@ -863,6 +955,7 @@ $(document).ready(function() {
     $(document).on('change', '#kd_rek', function () {
         var selectedOption = $(this).find('option:selected');
         var nmrek = selectedOption.data('nm_rek') || '';
+        var idsumberdana = selectedOption.data('id_sumberdana') || '';
         var anggaranTahun = selectedOption.data('anggaran') || '';
         var status_anggaran = selectedOption.data('status_anggaran') || '';
         var status_anggaran_kas = selectedOption.data('status_anggaran_kas') || '';
@@ -881,6 +974,7 @@ $(document).ready(function() {
 
         // Masukkan ke dalam input
         $('#nm_rek').val(nmrek);
+        $('#id_sumberdana').val(idsumberdana);
         $('#statusAnggaran').val(status_anggaran);
         $('#statusAnggaranKas').val(status_anggaran_kas);
         $('#totalSPD').val(formatRupiah1(totalSPD)); // Total SPD sesuai triwulan

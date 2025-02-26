@@ -44,7 +44,8 @@ class Transaksi extends Controller
         return DataTables::of($data->get()) // Tambahkan get() di sini
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
-                $btn = '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('transaksi.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
+                $btn = '<a href="' . route('transaksi.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
+                $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('transaksi.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -70,13 +71,10 @@ class Transaksi extends Controller
                             ->where('kodeSkpd', $kd_skpd) // Filter berdasarkan kd_skpd
                             ->value('saldoawal');
 
-                            $realisasi = DB::table('masterSkpd')
-                            ->where('kodeSkpd', $kd_skpd) // Filter berdasarkan kd_skpd
-                            ->value('realisasi');
 
 
 
-        return view('transaksi.create', compact('kd_skpd','nm_skpd','newNoBukti','rek_pengeluaran','kd_sub_kegiatan','saldo_awal','realisasi'));
+        return view('transaksi.create', compact('kd_skpd','nm_skpd','newNoBukti','rek_pengeluaran','kd_sub_kegiatan','saldo_awal'));
     }
 
     public function getSubKegiatan(Request $request)
@@ -108,10 +106,14 @@ class Transaksi extends Controller
 
     public function getsumberdana(Request $request)
     {
+
     try {
         $query = DB::table('ms_sumberdana')
-            ->select('kd_dana', 'nm_dana','anggaran_tahun');
+            ->select('id','kd_dana', 'nm_dana','anggaran_tahun');
 
+        if ($request->has('id_sumberdana')) {
+                $query->where('id', $request->id_sumberdana);
+            }
         // Search both kd_sub_kegiatan and nm_sub_kegiatan
         if ($request->has('search')) {
             $query->where(function($q) use ($request) {
@@ -136,7 +138,7 @@ class Transaksi extends Controller
     {
     try {
         $query = DB::table('ms_anggaran')
-            ->select('kd_rek', 'nm_rek','anggaran_tahun','anggaran_tw1','anggaran_tw2','anggaran_tw3','anggaran_tw4','rek1','rek2','rek3','rek4','rek5','rek6','rek7','rek8','rek9','rek10','rek11','rek12','status_anggaran','status_anggaran_kas');
+            ->select('kd_rek', 'nm_rek','anggaran_tahun','anggaran_tw1','anggaran_tw2','anggaran_tw3','anggaran_tw4','rek1','rek2','rek3','rek4','rek5','rek6','rek7','rek8','rek9','rek10','rek11','rek12','status_anggaran','status_anggaran_kas','id_sumberdana');
 
         // Search both kd_sub_kegiatan and nm_sub_kegiatan
         if ($request->has('search')) {
@@ -250,6 +252,8 @@ class Transaksi extends Controller
                 'id_trhtransout' => $request->no_bukti,
             ]);
 
+
+
             $saldo_awal = DB::table('masterSkpd')
             ->where('kodeSkpd', auth()->user()->kd_skpd)
             ->value('saldoawal');
@@ -318,6 +322,25 @@ class Transaksi extends Controller
                 DB::table('trdtransout')->insert($detailInserts);
             }
 
+            $detailInserts1 = array_map(function($detail) use ($request) {
+                $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
+                return [
+                    'no_kas' => $request->no_bukti,
+                    'kd_skpd' => auth()->user()->kd_skpd,
+                    'kd_sub_kegiatan' => $detail['kd_sub_kegiatan'],
+                    'nm_sub_kegiatan' => $detail['nm_sub_kegiatan'],
+                    'kd_rek6' => $detail['kd_rek'],
+                    'nm_rek6' => $detail['nm_rek'],
+                    'terima' => $jenis_terima_sp2d == 1 ? str_replace(['Rp', '.', ' '], '', $detail['nilai']) : 0, // Jika 1, simpan di 'terima'
+                    'keluar' => $jenis_terima_sp2d == 0 ? str_replace(['Rp', '.', ' '], '', $detail['nilai']) : 0,
+                    'id_trhtransout' => $request->no_bukti,
+                ];
+            }, $details);
+            if (!empty($detailInserts1)) {
+                DB::table('trdbku')->insert($detailInserts1);
+            }
+
+
             DB::commit();
             return redirect()->route('transaksi.index')
                 ->with('success', 'Transaksi berhasil disimpan');
@@ -330,6 +353,71 @@ class Transaksi extends Controller
         }
     }
 
+
+    public function edit($no_bukti)
+    {
+        // Dekripsi ID yang terenkripsi
+        $decryptedId = Crypt::decrypt($no_bukti);
+
+
+        // Ambil data pajak berdasarkan ID menggunakan Query Builder
+        $transaksi = DB::table('trhtransout')->where('no_bukti', $decryptedId)->first();
+
+        $potonganDetails = DB::table('trdtransout')
+        ->join('ms_sumberdana', function ($join) {
+            $join->on(
+                DB::raw('trdtransout.sumber COLLATE Latin1_General_CI_AS'),
+                '=',
+                DB::raw('ms_sumberdana.kd_dana COLLATE Latin1_General_CI_AS')
+            );
+        })
+        ->where('trdtransout.no_bukti', $decryptedId)
+        ->select(
+            'trdtransout.nm_sub_kegiatan',
+            'trdtransout.kd_rek6',
+            'trdtransout.nm_rek6',
+            'trdtransout.sumber',
+            'trdtransout.nilai',
+            'ms_sumberdana.nm_dana'
+        )
+        ->distinct() // Tambahkan ini
+        ->get();
+
+
+        // Cek apakah data ditemukan
+        if (!$transaksi) {
+            return redirect()->route('transaksi.index')->with('message', 'Data Terima Potongan Pajak tidak ditemukan.');
+        }
+        $rek_pengeluaran = Auth::user()->rek_pengeluaran;
+
+        // Tampilkan view untuk mengedit data
+        return view('transaksi.edit', compact('transaksi','potonganDetails','rek_pengeluaran'));
+    }
+
+    public function getrealisasi(Request $request)
+    {
+        $kd_rek = $request->kd_rek;
+
+        $realisasi = DB::table('trdtransout')
+            ->where('kd_skpd', auth()->user()->kd_skpd)
+            ->where('kd_rek6', $kd_rek)
+            ->where('jenis_terima_sp2d', "0")
+            ->select(
+                DB::raw('SUM(nilai) as realisasi')
+            )
+            ->first();
+
+        // Pastikan nilai realisasi tidak null
+        $response = [
+            'success' => true,
+            'realisasiSPD' => $realisasi->realisasi ?? 0,
+            'realisasiAnggaranKas' => $realisasi->realisasi ?? 0, // Gantilah jika ada kolom berbeda
+            'realisasiAnggaran' => $realisasi->realisasi ?? 0,
+            'realisasiSumberDana' => $realisasi->realisasi ?? 0,
+        ];
+
+        return response()->json($response);
+    }
 
     public function destroy($no_bukti)
     {
@@ -356,6 +444,7 @@ class Transaksi extends Controller
             DB::table('trhtransout')->where('no_bukti', $decryptedId)->delete();
             DB::table('trdtransout')->where('no_bukti', $decryptedId)->delete();
             DB::table('trhbku')->where('no_kas', $decryptedId)->where('id_trhtransout', $decryptedId)->delete();
+            DB::table('trdbku')->where('no_kas', $decryptedId)->where('id_trhtransout', $decryptedId)->delete();
 
             // Update saldoawal di masterSkpd sesuai jenis_terima_sp2d
             if ($jenis_terima_sp2d == 1) {

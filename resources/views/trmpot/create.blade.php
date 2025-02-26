@@ -376,7 +376,7 @@ document.getElementById("btnTambahPotongan").addEventListener("click", function(
         let nilai = document.getElementById("nilai").value;
 
         // Validasi input
-        if (!kd_rek6 || !kdrekpot || !nmrekpot || !nmrekan || !npwp || !ebilling || !nilai) {
+        if (!kd_rek6 || !kdrekpot || !nmrekpot || !nmrekan || !npwp || !nilai) {
             Swal.fire({
                 icon: "warning",
                 title: "Oops...",

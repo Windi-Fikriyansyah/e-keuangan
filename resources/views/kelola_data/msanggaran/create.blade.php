@@ -77,6 +77,8 @@
                                 <input type="text" name="rek12" oninput="formatRupiah(this);" id="rek12" class="form-control" value="{{ old('rek12', $pajak->rek12 ?? '') }}">
                             </div>
 
+
+
                             <div class="form-group">
                                 <label for="rek12">Kode Sub Kegiatan</label>
                                 <select class="form-select @error('kd_sub_kegiatan') is-invalid @enderror"
@@ -87,6 +89,13 @@
                             <div class="form-group">
                                 <label for="rek12">Nama Sub Kegiatan</label>
                                 <input type="text" name="nm_sub_kegiatan" readonly id="nm_sub_kegiatan" class="form-control" value="{{ old('nm_sub_kegiatan', $pajak->nm_sub_kegiatan ?? '') }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rek12">Kode Sumber Dana</label>
+                                <select class="form-select @error('id_sumberdana') is-invalid @enderror"
+                                name="id_sumberdana" id="id_sumberdana" style="width: 100%">
+                                </select>
                             </div>
 
 
@@ -141,6 +150,13 @@
                                 <label for="rek12">Nama Program</label>
                                 <input type="text" name="nm_program" id="nm_program" readonly class="form-control" value="{{ old('nm_program', $pajak->nm_program ?? '') }}">
                                 <input type="hidden" name="kd_program" id="kd_program" readonly class="form-control" value="{{ old('kd_program', $pajak->kd_program ?? '') }}">
+                            </div>
+
+
+
+                            <div class="form-group">
+                                <label for="rek12">Nama Sumber Dana</label>
+                                <input type="text" name="nm_sumberdana" readonly id="nm_sumberdana" class="form-control" value="{{ old('nm_sumberdana', $pajak->nm_sumberdana ?? '') }}">
                             </div>
                         </div>
                     </div>
@@ -205,8 +221,37 @@ $(document).ready(function() {
     });
 
 
+    $('#id_sumberdana').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...",
+        minimumInputLength: 0,
+        ajax: {
+            url: "{{ route('kelola_data.msanggaran.getsumberdana') }}",
+            dataType: 'json',
+            type: "POST",
+            delay: 250, // Menambahkan delay untuk mengurangi beban server
+            data: function(params) {
+                return { q: $.trim(params.term) };
+            },
+            processResults: function(data) {
+                return { results: data.map(item => ({
+                            id: item.id,
+                            text: item.text,
+                            nm_sumberdana: item.nm_sumberdana,
+                        }))
+                     };
+            }
+        }
+    });
 
 
+
+    $('#id_sumberdana').on('select2:select', function(e) {
+            var data = e.params.data;
+            console.log(data);
+            $('#nm_sumberdana').val(data.nm_sumberdana);
+        });
 
     $('#kd_sub_kegiatan').on('select2:select', function(e) {
             var data = e.params.data;

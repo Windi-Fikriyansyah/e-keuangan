@@ -44,8 +44,8 @@ class Terimapot extends Controller
         return DataTables::of($data->get()) // Tambahkan get() di sini
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
-                // $btn = '<a href="' . route('trmpot.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-warning btn-sm" style="margin-right:4px"><i class="fas fa-edit"></i></a>';
-                $btn = '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('trmpot.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
+                $btn = '<a href="' . route('trmpot.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
+                $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('trmpot.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -79,6 +79,7 @@ class Terimapot extends Controller
     $kd_skpd = auth()->user()->kd_skpd;
     $sertifikat = DB::table('trhtransout')
         ->select('no_bukti', 'tgl_bukti', 'no_sp2d', 'total', 'ket')
+        ->where('jenis_terima_sp2d', "1")
         ->where('kd_skpd', $kd_skpd)
         ->whereNotIn('no_bukti', $usedNoBukti)
         ->when(!empty($search), function ($query) use ($search) {
@@ -173,18 +174,19 @@ class Terimapot extends Controller
     {
         $search = $request->q;
 
-        $sertifikat = DB::table('ms_rekan')
-            ->select('Rekanan','Pimpinan','NPWP','Alamat')
+        $sertifikat = DB::table('ms_rekening_bank_online')
+            ->select('nmrekan as Rekanan','pimpinan as Pimpinan','npwp as NPWP','alamat as Alamat','kd_skpd','nm_rekening')
+            ->where('kd_skpd', Auth::user()->kd_skpd)
             ->when(!empty($search), function ($query) use ($search) {
-                $query->where('Rekanan', 'LIKE', "%{$search}%");
+                $query->where('nm_rekening', 'LIKE', "%{$search}%");
             })
             ->limit(10)
             ->get();
 
         $data = $sertifikat->map(function ($item) {
             return [
-                'id' => $item->Rekanan,
-                'text' => $item->Rekanan,
+                'id' => $item->nm_rekening,
+                'text' => $item->nm_rekening,
                 'pimpinan' => $item->Pimpinan,
                 'npwp' => $item->NPWP,
                 'alamat' => $item->Alamat,
@@ -301,14 +303,14 @@ class Terimapot extends Controller
             'pay' => 'required',
             'kd_sub_kegiatan' => 'required',
             'kd_rek6' => 'required',
-            'nmrekan' => 'required',
+            'nmrekan' => 'nullable',
             'beban' => 'required',
-            'alamat' => 'required',
+            'alamat' => 'nullable',
             'ket' => 'required',
-            'npwp' => 'required',
+            'npwp' => 'nullable',
             'nm_sub_kegiatan' => 'required',
             'nm_rek6' => 'required',
-            'pimpinan' => 'required',
+            'pimpinan' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -375,6 +377,39 @@ class Terimapot extends Controller
 
         ]);
 
+        $trhbku = DB::table('trhbku')->insert([
+            'no_kas' => $request->no_bukti,
+            'tgl_kas' => $request->tgl_bukti,
+            'uraian' => $request->ket,
+            'no_sp2d' => $request->no_sp2d,
+            'kd_skpd' => auth()->user()->kd_skpd,
+            'nm_skpd' => auth()->user()->name,
+            'id_user' => auth()->user()->id,
+            'terima' => $totalNilai,
+            'created_at' => Carbon::now('Asia/Jakarta'),
+            'id_trmpot' => $request->no_bukti,
+        ]);
+
+        $saldo_awal = DB::table('masterSkpd')
+            ->where('kodeSkpd', auth()->user()->kd_skpd)
+            ->value('saldoawal');
+
+
+            if ($saldo_awal === null) {
+                $saldo_awal = 0;
+            }
+
+
+            $total_belanja= $totalNilai;
+            // **Mengupdate saldo awal berdasarkan jenis penerimaan**
+            $saldo_baru = $saldo_awal + $total_belanja;
+
+            DB::table('masterSkpd')
+                ->where('kodeSkpd', auth()->user()->kd_skpd)
+                ->update([
+                    'saldoawal' => $saldo_baru,
+                ]);
+
 
         // Create detail records
         foreach ($potonganData as $potongan) {
@@ -389,6 +424,17 @@ class Terimapot extends Controller
                 'rekanan' => $potongan['nmrekan'],
                 'npwp' => $potongan['npwp'],
                 'ntpn' => $potongan['ntpn'] ?? null,
+            ]);
+
+            DB::table('trdbku')->insert([
+                'no_kas' => $request->no_bukti,
+                'kd_sub_kegiatan' => $request->kd_sub_kegiatan,
+                'nm_sub_kegiatan' => $request->nm_sub_kegiatan,
+                'kd_rek6' => $potongan['kdrekpot'],
+                'nm_rek6' => $potongan['nmrekpot'],
+                'terima' => str_replace(['Rp', '.', ','], '', $potongan['nilai']),
+                'kd_skpd' => $request->kd_skpd,
+                'id_trmpot' => $request->no_bukti,
             ]);
         }
 
@@ -414,10 +460,37 @@ public function destroy($no_bukti)
 {
     try {
         $decryptedId = Crypt::decrypt($no_bukti);
-        DB::table('trhtrmpot')->where('no_bukti', $decryptedId)->delete();
 
+        $trmpot = DB::table('trhtrmpot')
+                ->where('no_bukti', $decryptedId)
+                ->first();
+
+            if (!$trmpot) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'trmpot tidak ditemukan.'
+                ], 404);
+            }
+
+
+            $total = $trmpot->nilai;
+            $kodeSkpd = auth()->user()->kd_skpd;
+
+        DB::table('trhtrmpot')->where('no_bukti', $decryptedId)->delete();
+        DB::table('trhbppajak')->where('no_bukti', $decryptedId)->where('no_trmpot', $decryptedId)->delete();
         $decryptedId = Crypt::decrypt($no_bukti);
         DB::table('trdtrmpot')->where('no_bukti', $decryptedId)->delete();
+        DB::table('trhbku')->where('no_kas', $decryptedId)->where('id_trmpot', $decryptedId)->delete();
+        DB::table('trdbku')->where('no_kas', $decryptedId)->where('id_trmpot', $decryptedId)->delete();
+
+
+
+            DB::table('masterSkpd')
+                ->where('kodeSkpd', $kodeSkpd)
+                ->update([
+                    'saldoawal' => DB::raw("saldoawal - $total")
+                ]);
+
 
         return response()->json([
             'success' => true,

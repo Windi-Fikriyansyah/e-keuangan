@@ -171,13 +171,10 @@
         <table class="main-table">
             <thead>
                 <tr>
+                    <th class="col-date">No</th>
                     <th class="col-date">Tanggal</th>
                     <th class="col-number">No Bukti</th>
                     <th class="col-desc">Uraian</th>
-                    <th class="col-code">Kode Rekening</th>
-                    <th class="col-name">Nama Rekening</th>
-                    <th class="col-billing">ID BILLING</th>
-                    <th class="col-ntpn">NTPN</th>
                     <th class="col-amount">Penerimaan</th>
                     <th class="col-amount">Pengeluaran</th>
                     <th class="col-balance">Saldo</th>
@@ -186,9 +183,10 @@
             <tbody>
                 @php
                     $saldo = $saldoLalu ?? 0;
+                    $rowNumber = 1;
                 @endphp
                 <tr class="saldo-lalu">
-                    <td colspan="7">Saldo Sebelumnya</td>
+                    <td colspan="4">Saldo Sebelumnya</td>
                     <td colspan="2"></td>
                     <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
                 </tr>
@@ -197,13 +195,10 @@
                         $saldo += $item->terima - $item->keluar;
                     @endphp
                     <tr>
+                        <td>{{ $rowNumber++ }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tgl_bukti)->translatedFormat('j F Y') }}</td>
-                        <td>{{ $item->no_sp2d }}</td>
+                        <td>{{ $item->no_bukti }}</td>
                         <td>{{ $item->uraian }}</td>
-                        <td>{!! $item->kd_rek6 ?? '-' !!}</td>
-                        <td>{!! $item->nm_rek6 ?? '-' !!}</td>
-                        <td>{!! $item->ebilling ?? '-' !!}</td>
-                        <td>{!! $item->ntpn ?? '-' !!}</td>
                         <td class="numbers">Rp {{ number_format($item->terima, 2, ',', '.') }}</td>
                         <td class="numbers">Rp {{ number_format($item->keluar, 2, ',', '.') }}</td>
                         <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>

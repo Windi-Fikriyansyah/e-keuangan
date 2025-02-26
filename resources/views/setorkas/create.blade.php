@@ -210,7 +210,7 @@
     </div>
 
     <div class="modal fade" id="inputKegiatanModal" tabindex="-1" aria-labelledby="inputKegiatanModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="inputKegiatanModalLabel">Input Rincian Transaksi</h5>
@@ -237,7 +237,7 @@
 
                         <div class="mb-3 d-flex align-items-center">
                             <label for="nm_rek" class="form-label me-5" style="min-width: 120px;">Nama Rekening</label>
-                            <input type="text" class="form-control" id="nm_rek" name="nm_rek" required>
+                            <input type="text" class="form-control" id="nm_rek" name="nm_rek" required readonly>
 
                         </div>
                         <div class="mb-3 d-flex align-items-center">
@@ -522,6 +522,7 @@ $(document).ready(function() {
         width: "100%",
         placeholder: "Silahkan Pilih...",
         minimumInputLength: 0,
+        dropdownParent: $('#inputKegiatanModal'),
         ajax: {
             url: "{{ route('setorkas.getrekening') }}",
             dataType: 'json',
@@ -540,7 +541,8 @@ $(document).ready(function() {
                     results: data
                 };
             }
-        }
+        },
+
     });
 
 function formatRupiah(angka) {

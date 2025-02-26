@@ -178,6 +178,7 @@
             <tbody>
                 @php
                     $saldo = $saldoLalu ?? 0;
+                    $rowNumber = 1;
                 @endphp
                 <tr class="saldo-lalu">
                     <td colspan="3"></td>
@@ -187,21 +188,55 @@
                     <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
                 </tr>
                 @foreach ($trhtransout as $item)
-                    @php
-                        $saldo += $item->terima - $item->keluar;
-                    @endphp
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $rowNumber++ }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tgl_kas)->translatedFormat('j F Y') }}</td>
                         <td>{{ $item->no_sp2d }}</td>
-                        <td>{{ $item->uraian }}</td>
-                        <td class="numbers">Rp {{ number_format($item->terima, 2, ',', '.') }}</td>
-                        <td class="numbers">Rp {{ number_format($item->keluar, 2, ',', '.') }}</td>
-                        <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
+                        <td><strong>{{ $item->uraian }}</strong></td>
+                        <td class="numbers"></td>
+                        <td class="numbers"></td>
+                        <td class="numbers"></td> {{-- Tidak menampilkan saldo di sini --}}
                     </tr>
+                    @php
+                        $key = $item->no_kas . '-' .
+                       ($item->id_trhkasin_pkd ?? '0') . '-' .
+                       ($item->id_trhtransout ?? '0') . '-' .
+                       ($item->id_trmpot ?? '0') . '-' .
+                       ($item->id_strpot ?? '0');
+                    @endphp
+                    @if (isset($detailGrouped[$key]))
+                        @foreach ($detailGrouped[$key] as $detail)
+                            @php
+                                $saldo += $detail->terima - $detail->keluar;
+                            @endphp
+                            <tr class="child-row">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td> - {{ $detail->nm_rek6 }}</td>
+                                <td class="numbers">Rp {{ number_format($detail->terima, 2, ',', '.') }}</td>
+                                <td class="numbers">Rp {{ number_format($detail->keluar, 2, ',', '.') }}</td>
+                                <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                    @elseif($item->terima != 0 || $item->keluar != 0)
+                        @php
+                            $saldo += $item->terima - $item->keluar;
+                        @endphp
+                        <tr class="child-row">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td> - {{ $item->uraian }}</td>
+                            <td class="numbers">Rp {{ number_format($item->terima, 2, ',', '.') }}</td>
+                            <td class="numbers">Rp {{ number_format($item->keluar, 2, ',', '.') }}</td>
+                            <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
+                        </tr>
+                    @endif
                 @endforeach
             </tbody>
         </table>
+
     </div>
 
     <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">

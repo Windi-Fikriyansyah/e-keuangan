@@ -78,6 +78,39 @@ class Ms_anggaran extends Controller
     }
 
 
+    public function getsumberdana(Request $request)
+    {
+
+        $search = $request->q;
+
+        $sertifikat = DB::table('ms_sumberdana')
+            ->select('id','kd_dana','sumber_dana','anggaran_tahun')
+            ->when(!empty($search), function ($query) use ($search) {
+                $query->where('kd_dana', 'LIKE', "%{$search}%")
+                      ->orWhere('sumber_dana', 'LIKE', "%{$search}%");
+            })
+            ->limit(100)
+            ->get();
+
+        $data = $sertifikat->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'text' => implode(' | ', [
+                    $item->id,
+                    $item->kd_dana,
+                    $item->sumber_dana,
+                    $item->anggaran_tahun,
+
+                ]),
+                'nm_sumberdana' => $item->sumber_dana,
+            ];
+        });
+
+        return response()->json($data);
+
+    }
+
+
     public function downloadFormat()
 {
     $filePath = public_path('template/format_ms_anggaran.xlsx'); // Pastikan file template ada di folder public/template/
@@ -129,8 +162,8 @@ public function store(Request $request)
         'nm_rek' => 'required|string|max:255',
         'kd_sub_kegiatan' => 'required',
         'nm_sub_kegiatan' => 'required|string|max:255',
-        'kd_program' => 'required',
-        'nm_program' => 'required|string|max:255',
+        'kd_program' => 'nullable',
+        'nm_program' => 'nullable|string|max:255',
         'anggaran_tahun' => 'nullable',
         'anggaran_tw1' => 'nullable',
         'anggaran_tw2' => 'nullable',
@@ -150,6 +183,7 @@ public function store(Request $request)
         'rek12' => 'nullable',
         'status_anggaran' => 'nullable|string',
         'status_anggaran_kas' => 'nullable|string',
+        'id_sumberdana' => 'nullable',
     ], [
         'kd_rek.required' => 'Kode rekening harus diisi.',
         'nm_rek.required' => 'Nama rekening harus diisi.',
@@ -182,6 +216,7 @@ public function store(Request $request)
         'rek12' => isset($validatedData['rek12']) ? (int) str_replace(['.', ','], '', $validatedData['rek12']) : 0,
         'status_anggaran' => $validatedData['status_anggaran'],
         'status_anggaran_kas' => $validatedData['status_anggaran_kas'],
+        'id_sumberdana' => $validatedData['id_sumberdana'],
     ];
 
     // Insert data ke dalam database

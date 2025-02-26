@@ -39,7 +39,7 @@
                         </div>
                         <label class="col-sm-2 col-form-label">Nama SKPD</label>
                         <div class="col-sm-4">
-                            <input class="form-control" type="text" name="nm_skpd" value="{{ $trmpot->nm_skpd }}" readonly>
+                            <input class="form-control" type="text" name="nm_skpd" value="{{ $trmpot->nm_skpd }}" disabled>
                             <input type="hidden" name="nm_skpd" value="{{ $trmpot->nm_skpd }}">
                         </div>
                     </div>
@@ -54,7 +54,7 @@
                         <div class="col-sm-4">
                             <input class="form-control @error('tgl_bukti') is-invalid @enderror" type="date"
                                 name="tgl_bukti"
-                                value="{{ $trmpot->tgl_bukti }}">
+                                value="{{ $trmpot->tgl_bukti }}" disabled>
                             @error('tgl_bukti')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -67,7 +67,7 @@
                             <select class="form-select @error('id_trhtransout') is-invalid @enderror"
                                     name="id_trhtransout"
                                     id="id_transout"
-                                    style="width: 100%">
+                                    style="width: 100%" disabled>
                                 <option value="">Silahkan Pilih...</option>
                                 @if(isset($trmpot) && isset($trhtransout))
                                     <option value="{{ $trmpot->id_trhtransout }}" selected>
@@ -88,7 +88,7 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Tanggal Transaksi</label>
                         <div class="col-sm-4">
-                            <input name="tgl_transaksi" placeholder="YYYY/MM/DD" id="tgl_transaksi" class="form-control" value="{{$trhtransout->tgl_bukti}}" type="text" disabled>
+                            <input name="tgl_transaksi"  placeholder="YYYY/MM/DD" id="tgl_transaksi" class="form-control" value="{{$trhtransout->tgl_bukti}}" type="text" disabled>
                         </div>
 
                         <div class="col-sm-4">
@@ -100,7 +100,7 @@
                         <label class="col-sm-2 col-form-label">No SP2D</label>
                         <div class="col-sm-4">
                             <select class="form-select @error('no_sp2d') is-invalid @enderror"
-                            name="no_sp2d" id="no_sp2d" style="width: 100%">
+                            name="no_sp2d" id="no_sp2d" disabled style="width: 100%">
                                 <option value="">Silahkan Pilih...</option>
                                 @if(isset($trmpot))
                                     <option value="{{ $trmpot->no_sp2d }}" selected>
@@ -114,7 +114,7 @@
                         <div class="col-sm-4">
 
                             <select class="form-select @error('pay') is-invalid @enderror"
-                                name="pay" id="pay" style="width: 100%">
+                                name="pay" id="pay" disabled style="width: 100%">
                                 <option value="">Silahkan Pilih...</option>
                                 @if(isset($trmpot))
                                     <option value="{{ $trmpot->pay }}" selected>
@@ -130,7 +130,7 @@
                         <label class="col-sm-2 col-form-label">Kode Kegiatan</label>
                         <div class="col-sm-4">
                             <select class="form-select @error('kd_sub_kegiatan') is-invalid @enderror"
-                            name="kd_sub_kegiatan" id="kd_sub_kegiatan" style="width: 100%">
+                            name="kd_sub_kegiatan" id="kd_sub_kegiatan" disabled style="width: 100%">
                                 <option value="">Silahkan Pilih...</option>
                                 @if(isset($trmpot))
                                     <option value="{{ $trmpot->kd_sub_kegiatan }}" selected>
@@ -142,7 +142,7 @@
                          </div>
                         <label class="col-sm-2 col-form-label">Nama Kegiatan</label>
                         <div class="col-sm-4">
-                            <input name="nm_sub_kegiatan" value="{{ $trmpot->nm_sub_kegiatan }}" placeholder="Nama Kegiatan" id="nm_sub_kegiatan" class="form-control" type="text" readonly>
+                            <input name="nm_sub_kegiatan" disabled value="{{ $trmpot->nm_sub_kegiatan }}" placeholder="Nama Kegiatan" id="nm_sub_kegiatan" class="form-control" type="text" readonly>
                         </div>
                     </div>
 
@@ -150,7 +150,7 @@
                         <label class="col-sm-2 col-form-label">Kode Rekening</label>
                         <div class="col-sm-4">
                             <select class="form-select @error('kd_rek6') is-invalid @enderror"
-                            name="kd_rek6" id="kd_rek6" style="width: 100%">
+                            name="kd_rek6" id="kd_rek6" style="width: 100%" disabled>
                             <option value="">Silahkan Pilih...</option>
                                 @if(isset($trmpot))
                                     <option value="{{ $trmpot->kd_rek6 }}" selected>
@@ -161,7 +161,7 @@
                          </div>
                         <label class="col-sm-2 col-form-label">Nama Rekening</label>
                         <div class="col-sm-4">
-                            <input name="nm_rek6" value="{{ $trmpot->nm_rek6 }}" placeholder="Nama Rekening" id="nm_rek6" class="form-control" type="text" readonly>
+                            <input name="nm_rek6" disabled value="{{ $trmpot->nm_rek6 }}" placeholder="Nama Rekening" id="nm_rek6" class="form-control" type="text">
                         </div>
                     </div>
 
@@ -169,7 +169,7 @@
                         <label class="col-sm-2 col-form-label">Rekanan</label>
                         <div class="col-sm-4">
                             <select class="form-select @error('nmrekan') is-invalid @enderror"
-                            name="nmrekan" id="nmrekan" style="width: 100%">
+                            name="nmrekan" id="nmrekan" style="width: 100%" disabled>
                             <option value="">Silahkan Pilih...</option>
                                 @if(isset($trmpot))
                                     <option value="{{ $trmpot->nmrekan }}" selected>
@@ -180,7 +180,7 @@
                          </div>
                         <label class="col-sm-2 col-form-label">Pimpinan</label>
                         <div class="col-sm-4">
-                            <input name="pimpinan" value="{{ $trmpot->pimpinan }}" placeholder="Nama Pimpinan" id="pimpinan" class="form-control" type="text" readonly>
+                            <input name="pimpinan" value="{{ $trmpot->pimpinan }}" placeholder="Nama Pimpinan" id="pimpinan" class="form-control" type="text" disabled>
                         </div>
                     </div>
 
@@ -188,7 +188,7 @@
                         <label class="col-sm-2 col-form-label">Beban</label>
                         <div class="col-sm-4">
                             <select class="form-select @error('beban') is-invalid @enderror"
-                            name="beban" id="beban" style="width: 100%">
+                            name="beban" id="beban" style="width: 100%" disabled>
                             <option value="">Silahkan Pilih</option>
                             @if(isset($trmpot))
                                     <option value="{{ $trmpot->beban }}" selected>
@@ -205,14 +205,14 @@
                          </div>
                         <label class="col-sm-2 col-form-label">NPWP</label>
                         <div class="col-sm-4">
-                            <input name="npwp" value="{{ $trmpot->npwp }}" placeholder="Nama NPWP" id="npwp" class="form-control" type="text" readonly>
+                            <input name="npwp" disabled value="{{ $trmpot->npwp }}" placeholder="Nama NPWP" id="npwp" class="form-control" type="text" readonly>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Alamat</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control @error('alamat') is-invalid @enderror" name="alamat" placeholder="Alamat">{{ old('alamat', $trmpot->alamat) }}</textarea>
+                            <textarea class="form-control @error('alamat') is-invalid @enderror" name="alamat" placeholder="Alamat" disabled>{{ old('alamat', $trmpot->alamat) }}</textarea>
                             @error('alamat')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -223,7 +223,7 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Keterangan</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control @error('ket') is-invalid @enderror" name="ket"
+                            <textarea class="form-control @error('ket') is-invalid @enderror" disabled name="ket"
                                 placeholder="Keterangan">{{ old('ket', $trmpot->ket) }}</textarea>
                             @error('ket')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -235,30 +235,29 @@
                         <label class="col-sm-2 col-form-label">Rekening Potongan</label>
                         <div class="col-sm-4">
                             <select class="form-select @error('kdrekpot') is-invalid @enderror"
-                            name="kdrekpot" id="kdrekpot" style="width: 100%">
+                            name="kdrekpot" disabled id="kdrekpot" style="width: 100%">
                             </select>
                          </div>
                         <label class="col-sm-2 col-form-label">Nama Rekening</label>
                         <div class="col-sm-4">
-                            <input name="nmrekpot" placeholder="Nama Rekening" id="nmrekpot" class="form-control" type="text" disabled>
+                            <input name="nmrekpot" disabled placeholder="Nama Rekening" id="nmrekpot" class="form-control" type="text" disabled>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">No Billing</label>
                         <div class="col-sm-4">
-                            <input name="ebilling" placeholder="No Billing" id="ebilling" class="form-control" type="text" >
+                            <input name="ebilling" disabled placeholder="No Billing" id="ebilling" class="form-control" type="text" >
                          </div>
                         <label class="col-sm-2 col-form-label">Nilai</label>
                         <div class="col-sm-4">
-                            <input id="nilai" name="nilai" oninput="formatRupiah(this);" class="form-control" type="text">
+                            <input id="nilai" name="nilai" disabled oninput="formatRupiah(this);" class="form-control" type="text">
                         </div>
                     </div>
-                    <button class="btn btn-primary" type="button" id="btnTambahPotongan">Tambah Potongan</button>
+                    <input type="hidden" id="btnTambahPotongan"></input>
 
 
                     <div class="mb-3 text-end">
-                        <button class="btn btn-primary" type="submit">Simpan</button>
                         <a href="{{ route('trmpot.index') }}" class="btn btn-warning">Kembali</a>
                     </div>
                 </form>
@@ -311,7 +310,6 @@
                                     <th>NPWP</th>
                                     <th>No Billing</th>
                                     <th>Nilai</th>
-                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>

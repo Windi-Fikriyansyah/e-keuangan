@@ -54,8 +54,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/get-sumberdana', [Transaksi::class, 'getsumberdana'])->middleware('permission:14')->name('get-sumberdana');
         Route::get('/get-rekening', [Transaksi::class, 'getrekening'])->middleware('permission:14')->name('get-rekening');
         Route::delete('/trmpot/{no_bukti}', [Transaksi::class, 'destroy'])->middleware('permission:14')->name('destroy');
+        Route::post('/getrealisasi', [Transaksi::class, 'getrealisasi'])->middleware('permission:14')->name('getrealisasi');
 
-        Route::post('/edit', [Transaksi::class, 'edit'])->middleware('permission:14')->name('edit');
+        Route::get('edit/{no_bukti}', [Transaksi::class, 'edit'])->middleware('permission:14')->name('edit');
         Route::get('/cariData', [Transaksi::class, 'cariData'])->middleware('permission:14')->name('cariData');
         Route::get('/products/search', [Transaksi::class, 'search'])->middleware('permission:14')->name('search');
         Route::get('/products/{id}', [Transaksi::class, 'getProductById'])->middleware('permission:14');
@@ -199,14 +200,15 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('load', [Ms_anggaran::class, 'load'])->middleware('permission:39')->name('load');
                 Route::get('create', [Ms_anggaran::class, 'create'])->middleware('permission:39')->name('create');
                 Route::get('edit/{id}', [Ms_anggaran::class, 'edit'])->middleware('permission:39')->name('edit');
-                Route::delete('/msanggaran/{id}', [Ms_anggaran::class, 'destroy'])->middleware('permission:8')->name('destroy');
+                Route::delete('/msanggaran/{id}', [Ms_anggaran::class, 'destroy'])->middleware('permission:39')->name('destroy');
                 Route::post('update/{id}', [Ms_anggaran::class, 'update'])->middleware('permission:39')->name('update');
                 Route::get('/search-product', [Ms_anggaran::class, 'searchProduct'])->middleware('permission:39')->name('search');
                 Route::get('/product/barcode/{barcode}', [Ms_anggaran::class, 'getProductByBarcode'])->middleware('permission:39')->name('getByBarcode');
                 Route::post('store', [Ms_anggaran::class, 'store'])->middleware('permission:39')->name('store');
                 Route::post('/msanggaran/upload', [Ms_anggaran::class, 'upload'])->middleware('permission:39')->name('upload');
                 Route::get('/download-format', [Ms_anggaran::class, 'downloadFormat'])->middleware('permission:39')->name('download_format');
-                Route::post('/getsubkegiatan', [Ms_anggaran::class, 'getsubkegiatan'])->middleware('permission:35')->name('getsubkegiatan');
+                Route::post('/getsubkegiatan', [Ms_anggaran::class, 'getsubkegiatan'])->middleware('permission:39')->name('getsubkegiatan');
+                Route::post('/getsumberdana', [Ms_anggaran::class, 'getsumberdana'])->middleware('permission:39')->name('getsumberdana');
 
 
             });
@@ -265,6 +267,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('cetakobjek', [Laporan::class, 'cetakobjek'])->name('cetakobjek');
                 Route::post('getsubkegiatan', [Laporan::class, 'getsubkegiatan'])->name('getsubkegiatan');
                 Route::post('getakunbelanja', [Laporan::class, 'getakunbelanja'])->name('getakunbelanja');
+                Route::get('cetakspj', [Laporan::class, 'cetakspj'])->name('cetakspj');
             });
 
     });

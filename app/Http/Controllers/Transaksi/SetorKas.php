@@ -333,6 +333,25 @@ public function getrekening(Request $request)
                 DB::table('trdkasin_pkd')->insert($detailInserts);
             }
 
+            $detailInserts1 = array_map(function($detail) use ($request) {
+                $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
+                return [
+                    'no_kas' => $request->no_kas,
+                    'kd_skpd' => auth()->user()->kd_skpd,
+                    'kd_sub_kegiatan' => $request->kd_sub_kegiatan,
+                    'nm_sub_kegiatan' => $request->nm_sub_kegiatan,
+                    'kd_rek6' => $detail['kd_rek'],
+                    'nm_rek6' => $detail['nm_rek'],
+                    'keluar' => str_replace(['Rp', '.', ' '], '', $detail['nilai']),
+                    'id_trhkasin_pkd' => $request->no_kas,
+                ];
+            }, $details);
+            if (!empty($detailInserts1)) {
+                DB::table('trdbku')->insert($detailInserts1);
+            }
+
+
+
             DB::commit();
             return redirect()->route('setorkas.index')
                 ->with('success', 'Setor Sisa Kas berhasil disimpan');
@@ -359,6 +378,11 @@ public function destroy($no_sts)
         DB::table('trhkasin_pkd')->where('no_sts', $decryptedId)->delete();
         DB::table('trdkasin_pkd')->where('no_sts', $decryptedId)->delete();
         DB::table('trhbku')
+        ->where('no_kas', $decryptedId)
+        ->where('id_trhkasin_pkd', $decryptedId)
+        ->delete();
+
+        DB::table('trdbku')
         ->where('no_kas', $decryptedId)
         ->where('id_trhkasin_pkd', $decryptedId)
         ->delete();

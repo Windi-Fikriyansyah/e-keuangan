@@ -44,7 +44,8 @@ class SetorPajak extends Controller
         return DataTables::of($data->get()) // Tambahkan get() di sini
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
-                $btn = '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('strpot.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
+                $btn = '<a href="' . route('strpot.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
+                $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('strpot.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -52,6 +53,35 @@ class SetorPajak extends Controller
     }
 }
 
+    public function edit($no_bukti)
+    {
+        // Dekripsi ID yang terenkripsi
+        $decryptedId = Crypt::decrypt($no_bukti);
+
+
+        // Ambil data pajak berdasarkan ID menggunakan Query Builder
+        $strpot = DB::table('trhstrpot')->where('no_bukti', $decryptedId)->first();
+
+        $potonganDetails = DB::table('trdstrpot')
+                ->where('no_bukti', $decryptedId)
+                ->select(
+                    'kd_rek6',
+                    'nm_rek6',
+                    'rekanan',
+                    'npwp',
+                    'ntpn',
+                    'ebilling',
+                    'nilai'
+                )
+                ->get();
+        // Cek apakah data ditemukan
+        if (!$strpot) {
+            return redirect()->route('strpot.index')->with('message', 'Data Terima Potongan Pajak tidak ditemukan.');
+        }
+
+        // Tampilkan view untuk mengedit data
+        return view('setor_potongan.edit', compact('strpot','potonganDetails'));
+    }
 
     public function create()
     {
@@ -375,14 +405,14 @@ class SetorPajak extends Controller
             'pay' => 'required',
             'kd_sub_kegiatan' => 'required',
             'kd_rek6' => 'required',
-            'nmrekan' => 'required',
+            'nmrekan' => 'nullable',
             'beban' => 'required',
-            'alamat' => 'required',
+            'alamat' => 'nullable',
             'ket' => 'required',
-            'npwp' => 'required',
+            'npwp' => 'nullable',
             'nm_sub_kegiatan' => 'required',
             'nm_rek6' => 'required',
-            'pimpinan' => 'required',
+            'pimpinan' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -427,7 +457,8 @@ class SetorPajak extends Controller
             'pimpinan' => $request->pimpinan,
             'alamat' => $request->alamat,
             'no_ntpn' => $request->ntpn,
-            'pay' => $request->pay
+            'pay' => $request->pay,
+            'beban' => $request->beban
         ]);
 
         $trhbppajak = DB::table('trhbppajak')->insert([
@@ -446,6 +477,41 @@ class SetorPajak extends Controller
             'no_strpot' => $request->no_bukti,
 
         ]);
+
+        $trhbku = DB::table('trhbku')->insert([
+            'no_kas' => $request->no_bukti,
+            'tgl_kas' => $request->tgl_bukti,
+            'uraian' => $request->ket,
+            'no_sp2d' => $request->no_sp2d,
+            'kd_skpd' => $request->kd_skpd,
+            'nm_skpd' => $request->nm_skpd,
+            'id_user' => auth()->user()->id,
+            'keluar' => $totalNilai,
+            'created_at' => Carbon::now('Asia/Jakarta'),
+            'id_strpot' => $request->no_bukti,
+        ]);
+
+        $saldo_awal = DB::table('masterSkpd')
+            ->where('kodeSkpd', auth()->user()->kd_skpd)
+            ->value('saldoawal');
+
+
+            if ($saldo_awal === null) {
+                $saldo_awal = 0;
+            }
+
+
+            $total_belanja= $totalNilai;
+            // **Mengupdate saldo awal berdasarkan jenis penerimaan**
+            $saldo_baru = $saldo_awal - $total_belanja;
+
+            DB::table('masterSkpd')
+                ->where('kodeSkpd', auth()->user()->kd_skpd)
+                ->update([
+                    'saldoawal' => $saldo_baru,
+                ]);
+
+
 
         $trhbppajak = DB::table('trdtrmpot')
         ->where('no_bukti', $request->no_terima)
@@ -469,6 +535,17 @@ class SetorPajak extends Controller
                 'ntpn' => $request->ntpn,
                 'id_terima' => intval($potongan['id_trdtrmpot']),
                 'no_sp2d' => $request->no_sp2d,
+            ]);
+
+            DB::table('trdbku')->insert([
+                'no_kas' => $request->no_bukti,
+                'kd_sub_kegiatan' => $request->kd_sub_kegiatan,
+                'nm_sub_kegiatan' => $request->nm_sub_kegiatan,
+                'kd_rek6' => $potongan['kdrekpot'],
+                'nm_rek6' => $potongan['nmrekpot'],
+                'keluar' => floatval($potongan['nilai']),
+                'kd_skpd' => $request->kd_skpd,
+                'id_strpot' => $request->no_bukti,
             ]);
         }
 
@@ -494,10 +571,33 @@ public function destroy($no_bukti)
 {
     try {
         $decryptedId = Crypt::decrypt($no_bukti);
-        DB::table('trhstrpot')->where('no_bukti', $decryptedId)->delete();
+        $strpot = DB::table('trhstrpot')
+                ->where('no_bukti', $decryptedId)
+                ->first();
 
+            if (!$strpot) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'strpot tidak ditemukan.'
+                ], 404);
+            }
+
+
+            $total = $strpot->nilai;
+            $kodeSkpd = auth()->user()->kd_skpd;
+
+        DB::table('trhstrpot')->where('no_bukti', $decryptedId)->delete();
+        DB::table('trhbppajak')->where('no_bukti', $decryptedId)->where('no_strpot', $decryptedId)->delete();
         $decryptedId = Crypt::decrypt($no_bukti);
         DB::table('trdstrpot')->where('no_bukti', $decryptedId)->delete();
+        DB::table('trhbku')->where('no_kas', $decryptedId)->where('id_strpot', $decryptedId)->delete();
+        DB::table('trdbku')->where('no_kas', $decryptedId)->where('id_strpot', $decryptedId)->delete();
+
+        DB::table('masterSkpd')
+                ->where('kodeSkpd', $kodeSkpd)
+                ->update([
+                    'saldoawal' => DB::raw("saldoawal + $total")
+                ]);
 
         return response()->json([
             'success' => true,
@@ -511,36 +611,6 @@ public function destroy($no_bukti)
     }
 }
 
-public function edit($no_bukti)
-{
-    // Dekripsi ID yang terenkripsi
-    $decryptedId = Crypt::decrypt($no_bukti);
-
-
-    // Ambil data pajak berdasarkan ID menggunakan Query Builder
-    $trmpot = DB::table('trhstrpot')->where('no_bukti', $decryptedId)->first();
-    $trhtransout = DB::table('trhtransout')->where('no_bukti', $trmpot->id_trhtransout)->first();
-
-    $potonganDetails = DB::table('trdtrmpot')
-            ->where('no_bukti', $decryptedId)
-            ->select(
-                'kd_rek_trans',
-                'kd_rek6',
-                'nm_rek6',
-                'rekanan',
-                'npwp',
-                'ebilling',
-                'nilai'
-            )
-            ->get();
-    // Cek apakah data ditemukan
-    if (!$trmpot) {
-        return redirect()->route('trmpot.index')->with('message', 'Data Terima Potongan Pajak tidak ditemukan.');
-    }
-
-    // Tampilkan view untuk mengedit data
-    return view('trmpot.edit', compact('trmpot','trhtransout','potonganDetails'));
-}
 
 public function update(Request $request, $no_bukti)
 {
