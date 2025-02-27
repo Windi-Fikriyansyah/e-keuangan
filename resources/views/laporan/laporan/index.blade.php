@@ -75,7 +75,7 @@
         </div>
     </div>
 
-    <div class="page-content">
+    {{-- <div class="page-content">
         <div class="row">
             <div class="col-md-6">
                 <div class="card card-info collapsed-card card-outline" id="spj" data-bs-toggle="modal" data-bs-target="#modalspj">
@@ -88,7 +88,7 @@
             </div>
 
         </div>
-    </div>
+    </div> --}}
 
     <!-- Modal BKU -->
     <div id="modalBku" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
