@@ -60,7 +60,8 @@
                         <div class="col-sm-4">
                             <select class="form-select @error('jenis_beban') is-invalid @enderror" name="jenis_beban">
                                 <option value="" disabled selected>Pilih Jenis Beban</option>
-                                <option value="UP/GU" {{ old('jenis_beban') == 'UP/GU' ? 'selected' : '' }}>UP/GU</option>
+                                <option value="UP" {{ old('jenis_beban') == 'UP' ? 'selected' : '' }}>UP</option>
+                                <option value="GU" {{ old('jenis_beban') == 'GU' ? 'selected' : '' }}>GU</option>
                                 <option value="TU" {{ old('jenis_beban') == 'TU' ? 'selected' : '' }}>TU</option>
                                 <option value="GAJI" {{ old('jenis_beban') == 'GAJI' ? 'selected' : '' }}>GAJI</option>
                                 <option value="Barang & Jasa" {{ old('jenis_beban') == 'Barang & Jasa' ? 'selected' : '' }}>Barang & Jasa</option>

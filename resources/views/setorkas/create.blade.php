@@ -111,10 +111,11 @@
                             <select class="form-select @error('jns_cp') is-invalid @enderror"
                             name="jns_cp" id="jns_cp" style="width: 100%">
                             <option value="" disabled selected>Silahkan Pilih</option>
-                            <option value="1">UP/GU</option>
-                            <option value="2">TU</option>
-                            <option value="3">GAJI</option>
-                            <option value="4">Barang & Jasa</option>
+                            <option value="UP">UP</option>
+                            <option value="GU">GU</option>
+                            <option value="TU">TU</option>
+                            <option value="LS GAJI">LS GAJI</option>
+                            <option value="LS Barang & Jasa">LS Barang & Jasa</option>
                             </select>
                         </div>
                     </div>

@@ -268,6 +268,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('getsubkegiatan', [Laporan::class, 'getsubkegiatan'])->name('getsubkegiatan');
                 Route::post('getakunbelanja', [Laporan::class, 'getakunbelanja'])->name('getakunbelanja');
                 Route::get('cetakspj', [Laporan::class, 'cetakspj'])->name('cetakspj');
+                Route::get('cetakrinciancp', [Laporan::class, 'cetakrinciancp'])->name('cetakrinciancp');
             });
 
     });

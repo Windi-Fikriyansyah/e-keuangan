@@ -75,9 +75,9 @@
         </div>
     </div>
 
-    {{-- <div class="page-content">
+    <div class="page-content">
         <div class="row">
-            <div class="col-md-6">
+            {{-- <div class="col-md-6">
                 <div class="card card-info collapsed-card card-outline" id="spj" data-bs-toggle="modal" data-bs-target="#modalspj">
                     <div class="card-body">
                         <span>SPJ Fungsional</span>
@@ -85,10 +85,19 @@
                         <i class="fa fa-chevron-right float-end mt-2"></i>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
+            <div class="col-md-6">
+                <div class="card card-info collapsed-card card-outline" id="rinciancp" data-bs-toggle="modal" data-bs-target="#modalrinciancp">
+                    <div class="card-body">
+                        <span>Rincian CP</span>
+                        <a class="stretched-link" href="#"></a>
+                        <i class="fa fa-chevron-right float-end mt-2"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div> --}}
+    </div>
 
     <!-- Modal BKU -->
     <div id="modalBku" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
@@ -591,6 +600,69 @@
         </div>
     </div>
 
+    <div id="modalrinciancp" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Laporan Rincian CP</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="kd_skpdrekaprinciancp" class="form-label">Kode SKPD</label>
+                            <input type="text" value="{{ ($daftar_skpd->kd_skpd ?? '') }}" id="kd_skpdrekaprinciancp" name="kd_skpd" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="name_skpdrekaprinciancp" class="form-label">Nama SKPD</label>
+                            <input type="text" value="{{ ($daftar_skpd->name ?? '') }}" id="name_skpdrekaprinciancp" name="name_skpd" class="form-control" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal Awal</label>
+                            <input type="date" id="tanggalawalrinciancp" name="tanggalawal" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal Akhir</label>
+                            <input type="date" id="tanggalakhirrinciancp" name="tanggalakhir" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal TTD</label>
+                            <input type="date" id="tanggalTtdrekaprinciancp" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bendahara</label>
+                            <select class="form-control" id="ttdbendahararinciancp">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">PA/KPA</label>
+                            <select class="form-control" id="ttdrinciancp">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 text-center">
+                        <button type="button" class="btn btn-danger btn-md cetakrinciancp" data-jenis="pdf">PDF</button>
+                        <button type="button" class="btn btn-dark btn-md cetakrinciancp" data-jenis="layar">Layar</button>
+                        <button type="button" class="btn btn-dark btn-md cetakrinciancp" data-jenis="excel">Excel</button>
+                        <button type="button" class="btn btn-secondary btn-md" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('js')
@@ -643,6 +715,71 @@
                     _token: $('meta[name="csrf-token"]').attr('content'), // Tambahkan CSRF token
                     q: $.trim(params.term),
                     kodeSkpd: $('#kd_skpdrekapdth').val()
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map((ttd) => {
+                        return {
+                            text: ttd.nama,
+                            id: ttd.nip,
+                        };
+                    }),
+                    pagination: {
+                        more: data.current_page < data.last_page,
+                    },
+                };
+            },
+            cache: true
+        }
+    });
+
+    $('#ttdbendahararinciancp').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...",
+        ajax: {
+            url: "{{ route('laporan.laporan.tandaTangan') }}",
+            dataType: 'json',
+            type: "POST",
+            data: function(params) {
+                return {
+                    _token: $('meta[name="csrf-token"]').attr('content'), // Tambahkan CSRF token
+                    q: $.trim(params.term),
+                    kodeSkpd: $('#kd_skpdrekaprinciancp').val()
+                };
+            },
+            processResults: function(data) {
+                return {
+                    results: data.map((ttd) => {
+                        return {
+                            text: ttd.nama,
+                            id: ttd.nip,
+                        };
+                    }),
+                    pagination: {
+                        more: data.current_page < data.last_page,
+                    },
+                };
+            },
+            cache: true
+        }
+    });
+
+
+    $('#ttdrinciancp').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...",
+        ajax: {
+            url: "{{ route('laporan.laporan.tandaTanganPa') }}",
+            dataType: 'json',
+            type: "POST",
+            data: function(params) {
+                return {
+                    _token: $('meta[name="csrf-token"]').attr('content'), // Tambahkan CSRF token
+                    q: $.trim(params.term),
+                    kodeSkpd: $('#kd_skpdrekaprinciancp').val()
                 };
             },
             processResults: function(data) {
@@ -1622,6 +1759,74 @@ $('#akun_belanja').select2({
 
             window.open(url.toString(), "_blank");
         });
+
+
+        $('.cetakrinciancp').on('click', function () {
+            let kd_skpd = $('#kd_skpdrekaprinciancp').val();
+            let tanggalawal = $('#tanggalawalrinciancp').val();
+            let tanggalakhir = $('#tanggalakhirrinciancp').val();
+            let tanggalTtd = $('#tanggalTtdrekaprinciancp').val();
+            let ttdbendahara = $('#ttdbendahararinciancp').val(); // Pastikan ID ini sesuai
+            let ttdpa_kpa = $('#ttdrinciancp').val();
+            let jenis_print = $(this).data("jenis");
+
+            if (!ttdbendahara) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih bendahara!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!ttdpa_kpa) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih PA/KPA!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!kd_skpd) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih SKPD!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!tanggalawal || !tanggalakhir) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih rentang tanggal!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!tanggalTtd) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih tanggal tanda tangan!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            let url = new URL("{{ route('laporan.laporan.cetakrinciancp') }}", window.location.origin);
+            url.searchParams.append("kd_skpd", kd_skpd);
+            url.searchParams.append("tanggalawal", tanggalawal);
+            url.searchParams.append("tanggalakhir", tanggalakhir);
+            url.searchParams.append("tanggalTtd", tanggalTtd);
+            url.searchParams.append("ttdbendaharadth", ttdbendahara); // Pastikan cocok dengan request controller
+            url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
+            url.searchParams.append("jenis_print", jenis_print);
+
+            window.open(url.toString(), "_blank");
+        });
+
     });
 </script>
 @endpush

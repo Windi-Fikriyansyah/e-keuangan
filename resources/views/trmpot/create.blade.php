@@ -146,7 +146,7 @@
                             <option value="TU">TU</option>
                             <option value="LS GAJI">LS GAJI</option>
                             <option value="LS PPKD">LS PPKD</option>
-                            <option value="LS BARANG JASA">LS BARANG JASA</option>
+                            <option value="LS Barang & Jasa">LS Barang & Jasa</option>
                             </select>
                          </div>
                         <label class="col-sm-2 col-form-label">NPWP</label>
