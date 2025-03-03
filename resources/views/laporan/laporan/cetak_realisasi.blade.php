@@ -96,7 +96,9 @@
             </thead>
             <tbody>
                 @php
-                    $groupedData = $trhtransout->groupBy('kd_kegiatan')->sortKeys(); // Mengelompokkan data berdasarkan kd_kegiatan
+                    $groupedData = $trhtransout->groupBy('kd_kegiatan')->sortKeys();
+                    $grandTotalAnggaran = 0;
+                $grandTotalRealisasi = 0; // Mengelompokkan data berdasarkan kd_kegiatan
                 @endphp
 
                 @foreach ($groupedData as $kd_kegiatan => $items)
@@ -105,7 +107,9 @@
                         $totalRealisasi = $items->sum('nilai'); // Total realisasi per parent
                         $totalAnggaran = $items->sum('anggaran_tahun'); // Total anggaran per parent
                         $sisaAnggaran = $totalAnggaran - $totalRealisasi; // Hitung sisa anggaran
-                        $persentase = $totalAnggaran > 0 ? ($totalRealisasi / $totalAnggaran) * 100 : 0; // Persentase
+                        $persentase = $totalAnggaran > 0 ? ($totalRealisasi / $totalAnggaran) * 100 : 0;
+                        $grandTotalAnggaran += $totalAnggaran;
+                    $grandTotalRealisasi += $totalRealisasi; // Persentase
                     @endphp
 
                     <!-- Row untuk Parent -->
@@ -132,6 +136,20 @@
                         </tr>
                     @endforeach
                 @endforeach
+
+                @php
+                $grandSisaAnggaran = $grandTotalAnggaran - $grandTotalRealisasi;
+                $grandPersentase = $grandTotalAnggaran > 0 ? ($grandTotalRealisasi / $grandTotalAnggaran) * 100 : 0;
+                @endphp
+
+                <!-- Baris Total Keseluruhan -->
+                <tr class="total-row">
+                    <td colspan="2" style="text-align: right;"><strong>TOTAL</strong></td>
+                    <td class="numbers"><strong>{{ number_format($grandTotalAnggaran, 2, ',', '.') }}</strong></td>
+                    <td class="numbers"><strong>{{ number_format($grandTotalRealisasi, 2, ',', '.') }}</strong></td>
+                    <td class="numbers"><strong>{{ number_format($grandSisaAnggaran, 2, ',', '.') }}</strong></td>
+                    <td class="numbers"><strong>{{ number_format($grandPersentase, 2, ',', '.') }}%</strong></td>
+                </tr>
             </tbody>
         </table>
 
