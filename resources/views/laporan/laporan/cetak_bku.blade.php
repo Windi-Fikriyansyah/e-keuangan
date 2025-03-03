@@ -179,6 +179,8 @@
                 @php
                     $saldo = $saldoLalu ?? 0;
                     $rowNumber = 1;
+                    $totalTerima = 0;
+                    $totalKeluar = 0;
                 @endphp
                 <tr class="saldo-lalu">
                     <td colspan="3"></td>
@@ -208,6 +210,8 @@
                         @foreach ($detailGrouped[$key] as $detail)
                             @php
                                 $saldo += $detail->terima - $detail->keluar;
+                                $totalTerima += $detail->terima;
+                            $totalKeluar += $detail->keluar;
                             @endphp
                             <tr class="child-row">
                                 <td></td>
@@ -222,6 +226,8 @@
                     @elseif($item->terima != 0 || $item->keluar != 0)
                         @php
                             $saldo += $item->terima - $item->keluar;
+                            $totalTerima += $item->terima;
+                            $totalKeluar += $item->keluar;
                         @endphp
                         <tr class="child-row">
                             <td></td>
@@ -234,9 +240,39 @@
                         </tr>
                     @endif
                 @endforeach
+                <tr class="total-row">
+                    <td colspan="4"><strong>Saldo Kas di Bendahara Pengeluaran/Bendahara Pengeluaran Pembantu Periode ini</strong></td>
+                    <td class="numbers"><strong>Rp {{ number_format($totalTerima, 2, ',', '.') }}</strong></td>
+                    <td class="numbers"><strong>Rp {{ number_format($totalKeluar, 2, ',', '.') }}</strong></td>
+                    <td class="numbers"><strong>Rp {{ number_format($saldo, 2, ',', '.') }}</strong></td>
+                </tr>
             </tbody>
         </table>
 
+        <br>
+
+    <div class="saldo-summary">
+        <p><strong>Terdiri dari:</strong></p>
+    <table style="width: 30%; border-collapse: collapse;">
+        <tr>
+            <td>1. Saldo Tunai</td>
+            <td style="text-align: right;">Rp {{ number_format(0, 2, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td>2. Saldo Bank</td>
+            <td style="text-align: right;">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
+        </tr>
+
+        <tr>
+            <td>3. Surat Berharga</td>
+            <td style="text-align: right;">Rp {{ number_format(0, 2, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td>4. Saldo Pajak</td>
+            <td style="text-align: right;">Rp {{ number_format(0, 2, ',', '.') }}</td>
+        </tr>
+    </table>
+    </div>
     </div>
 
     <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">
