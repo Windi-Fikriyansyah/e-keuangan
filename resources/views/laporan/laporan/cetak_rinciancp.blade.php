@@ -100,39 +100,41 @@
 
         /* Footer and signature styles */
         .footer {
-            margin-top: 3rem;
+            margin-top: 1.5rem;
             width: 100%;
-            display: flex;
-            justify-content: space-between;
         }
 
-        .signature-left {
+        .signature {
+            float: right;
+            width: 200px;
             text-align: center;
-            width: 45%;
-        }
-
-        .signature-right {
-            text-align: center;
-            width: 45%;
+            margin-bottom: 1.5rem;
+            font-size: 11px;
         }
 
         .signature-content {
-            margin-top: 5rem;
+            margin-top: 0.8rem;
+            padding: 0.8rem;
         }
 
-        .signature-name {
-            font-weight: bold;
-            text-decoration: underline;
-            margin-bottom: 0.2rem;
+        .signature-line {
+            display: inline-block;
+            width: 250px; /* Sesuaikan panjang garis */
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.4rem;
+            font-weight: 600;
+            margin: 0.8rem auto; /* Menengahkan */
+            white-space: nowrap; /* Mencegah teks turun ke baris baru */
+            overflow: hidden; /* Opsional, mencegah teks keluar */
+            text-overflow: ellipsis;
         }
 
         .signature-title {
+            margin-top: 0.4rem;
             font-size: 10px;
+            color: #666;
         }
 
-        .signature-nip {
-            font-size: 10px;
-        }
 
         /* Print styles */
         @media print {
@@ -271,23 +273,27 @@
         </table>
     </div>
 
-    <div class="footer">
-        <div class="signature-left">
-            <div>Disetujui oleh</div>
-            <div>Plh. Kepala Dinas Kesehatan Prov.kalimantan Barat</div>
+    <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">
+        <div class="signature" style="flex: 1; text-align: center;">
+            <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
+            <div>{{ $pa_kpa->jabatan}}</div>
             <div class="signature-content">
-                <div class="signature-name">YULIANA, SKM</div>
-                <div class="signature-title">Pembina (IV/a)</div>
-                <div class="signature-nip">NIP. 19711201 199203 2 006</div>
+                <div></div>
+                <br>
+                <div class="signature-line">{{$pa_kpa->nama}}</div>
+                <div class="signature-title">{{$pa_kpa->pangkat}}</div>
+                <div class="signature-title">NIP. {{$pa_kpa->nip}}</div>
             </div>
         </div>
-        <div class="signature-right">
-            <div>Pontianak, 01 Maret 2025</div>
-            <div>Bendahara Pengeluaran</div>
+        <div class="signature" style="flex: 1; text-align: center;">
+            <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
+            <div>{{ $bendahara->jabatan}}</div>
             <div class="signature-content">
-                <div class="signature-name">EDTRI PURWANTI, A.Md</div>
-                <div class="signature-title">Penata (III/c)</div>
-                <div class="signature-nip">NIP. 19840331 200604 2 010</div>
+                <div></div>
+                <br>
+                <div class="signature-line">{{$bendahara->nama}}</div>
+                <div class="signature-title">{{$bendahara->pangkat}}</div>
+                <div class="signature-title">NIP. {{$bendahara->nip}}</div>
             </div>
         </div>
     </div>

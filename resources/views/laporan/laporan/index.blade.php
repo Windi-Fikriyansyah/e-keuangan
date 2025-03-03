@@ -90,7 +90,7 @@
             <div class="col-md-6">
                 <div class="card card-info collapsed-card card-outline" id="rinciancp" data-bs-toggle="modal" data-bs-target="#modalrinciancp">
                     <div class="card-body">
-                        <span>Rincian CP</span>
+                        <span>Register CP</span>
                         <a class="stretched-link" href="#"></a>
                         <i class="fa fa-chevron-right float-end mt-2"></i>
                     </div>
