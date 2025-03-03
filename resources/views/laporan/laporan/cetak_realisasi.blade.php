@@ -96,10 +96,10 @@
             </thead>
             <tbody>
                 @php
-                    $groupedData = $trhtransout->groupBy('kd_sub_kegiatan')->sortKeys(); // Mengelompokkan data berdasarkan kd_sub_kegiatan
+                    $groupedData = $trhtransout->groupBy('kd_kegiatan')->sortKeys(); // Mengelompokkan data berdasarkan kd_kegiatan
                 @endphp
 
-                @foreach ($groupedData as $kd_sub_kegiatan => $items)
+                @foreach ($groupedData as $kd_kegiatan => $items)
                     @php
                         $firstItem = $items->first(); // Ambil item pertama untuk menampilkan parent
                         $totalRealisasi = $items->sum('nilai'); // Total realisasi per parent
@@ -110,8 +110,8 @@
 
                     <!-- Row untuk Parent -->
                     <tr class="parent-row">
-                        <td><strong>{{ $firstItem->kd_sub_kegiatan }}</strong></td>
-                        <td><strong>{{ $firstItem->nm_sub_kegiatan }}</strong></td>
+                        <td><strong>{{ $kd_kegiatan }}</strong></td>
+                        <td><strong>{{ $firstItem->nm_kegiatan ?? 'Tidak Ada Nama' }}</strong></td>
                         <td class="numbers"><strong>{{ number_format($totalAnggaran, 2, ',', '.') }}</strong></td>
                         <td class="numbers"><strong>{{ number_format($totalRealisasi, 2, ',', '.') }}</strong></td>
                         <td class="numbers"><strong>{{ number_format($sisaAnggaran, 2, ',', '.') }}</strong></td>
@@ -119,26 +119,21 @@
                     </tr>
 
                     <!-- Row untuk Sub-Item -->
-                    <!-- Row untuk Sub-Item -->
-                    @foreach ($items->sortBy('kd_rek6') as $sub)
-                    @continue(empty($sub->kd_rek6)) <!-- Pastikan nilainya tidak kosong -->
-                    <tr>
-                        <td>{{ $sub->kd_sub_kegiatan }}.{{ $sub->kd_rek6 }}</td>
-                        <td style="padding-left: 20px;">└ {{ $sub->nm_rek6 ?? 'Tidak Ada Nama' }}</td>
-                        <td class="numbers">{{ number_format($sub->anggaran_tahun ?? 0, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($sub->nilai ?? 0, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format(($sub->anggaran_tahun ?? 0) - ($sub->nilai ?? 0), 2, ',', '.') }}</td>
-                        <td class="numbers">
-                            {{ ($sub->anggaran_tahun ?? 0) > 0 ? number_format(($sub->nilai / $sub->anggaran_tahun) * 100, 2, ',', '.') : '0.00' }}%
-                        </td>
-                    </tr>
-
+                    @foreach ($items->sortBy('kd_rek5') as $sub)
+                        <tr>
+                            <td>{{ $kd_kegiatan }}.{{ $sub->kd_rek5 ?? '-' }}</td>
+                            <td style="padding-left: 20px;">└ {{ $sub->nm_rek5 ?? 'Tidak Ada Nama' }}</td>
+                            <td class="numbers">{{ number_format($sub->anggaran_tahun ?? 0, 2, ',', '.') }}</td>
+                            <td class="numbers">{{ number_format($sub->nilai ?? 0, 2, ',', '.') }}</td>
+                            <td class="numbers">{{ number_format(($sub->anggaran_tahun ?? 0) - ($sub->nilai ?? 0), 2, ',', '.') }}</td>
+                            <td class="numbers">
+                                {{ ($sub->anggaran_tahun ?? 0) > 0 ? number_format(($sub->nilai / $sub->anggaran_tahun) * 100, 2, ',', '.') : '0,00' }}%
+                            </td>
+                        </tr>
                     @endforeach
-
                 @endforeach
             </tbody>
         </table>
-
 
 
     </div>

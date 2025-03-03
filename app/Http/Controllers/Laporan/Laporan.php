@@ -511,23 +511,34 @@ public function cetakrealisasi(Request $request)
         ->where('kd_skpd', $kd_skpd)
         ->first();
 
-    // Ambil data transaksi dengan informasi sub_kegiatan
-    $trhtransout = DB::table('trdtransout')
-        ->leftJoin('ms_anggaran', function ($join) {
-            $join->on(DB::raw("trdtransout.kd_rek6 COLLATE SQL_Latin1_General_CP1_CI_AS"), '=',
-                    DB::raw("ms_anggaran.kd_rek COLLATE SQL_Latin1_General_CP1_CI_AS"));
+    $trhtransout = DB::table('ms_anggaran')
+        ->leftJoin('trdtransout', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+            $join->on(
+                    DB::raw("CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
+                    '=',
+                    DB::raw("CAST(trdtransout.kd_rek6 AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
+                )
+                ->where('trdtransout.kd_skpd', '=', $kd_skpd)
+                ->where('trdtransout.jenis_terima_sp2d', '=', "0")
+                ->whereBetween('trdtransout.tgl_bukti', [$tanggalawal, $tanggalakhir]);
         })
-        ->join('ms_sub_kegiatan', 'trdtransout.kd_sub_kegiatan', '=', 'ms_sub_kegiatan.kd_sub_kegiatan') // Join dengan tabel sub kegiatan
-        ->where('trdtransout.kd_skpd', $kd_skpd)
-        ->where('trdtransout.jenis_terima_sp2d', "0")
-        ->whereBetween('trdtransout.tgl_bukti', [$tanggalawal, $tanggalakhir])
+        ->leftJoin('ms_sub_kegiatan', function ($join) {
+            $join->on(
+                DB::raw("CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
+                '=',
+                DB::raw("CAST(ms_sub_kegiatan.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
+            );
+        })
         ->select(
-            'trdtransout.*',
+            'ms_anggaran.kd_sub_kegiatan as kd_kegiatan',
+            'ms_anggaran.nm_sub_kegiatan as nm_kegiatan',
+            'ms_anggaran.kd_rek as kd_rek5',
+            'ms_anggaran.nm_rek as nm_rek5',
             'ms_anggaran.anggaran_tahun',
-            'ms_sub_kegiatan.nm_sub_kegiatan'
+            'trdtransout.*'
         )
-        ->orderBy('trdtransout.kd_sub_kegiatan') // Urutkan berdasarkan kode sub kegiatan
-    ->orderBy('trdtransout.kd_rek6')
+        ->orderBy('ms_anggaran.kd_sub_kegiatan')
+        ->orderBy('ms_anggaran.kd_rek')
         ->get();
 
 
