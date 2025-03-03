@@ -122,7 +122,7 @@
                     @foreach ($items->sortBy('kd_rek5') as $sub)
                         <tr>
                             <td>{{ $kd_kegiatan }}.{{ $sub->kd_rek5 ?? '-' }}</td>
-                            <td style="padding-left: 20px;">└ {{ $sub->nm_rek5 ?? 'Tidak Ada Nama' }}</td>
+                            <td style="padding-left: 20px;"> {{ $sub->nm_rek5 ?? 'Tidak Ada Nama' }}</td>
                             <td class="numbers">{{ number_format($sub->anggaran_tahun ?? 0, 2, ',', '.') }}</td>
                             <td class="numbers">{{ number_format($sub->nilai ?? 0, 2, ',', '.') }}</td>
                             <td class="numbers">{{ number_format(($sub->anggaran_tahun ?? 0) - ($sub->nilai ?? 0), 2, ',', '.') }}</td>

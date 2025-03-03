@@ -511,7 +511,7 @@ public function cetakrealisasi(Request $request)
         ->where('kd_skpd', $kd_skpd)
         ->first();
 
-    $trhtransout = DB::table('ms_anggaran')
+        $trhtransout = DB::table('ms_anggaran')
         ->leftJoin('trdtransout', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
             $join->on(
                     DB::raw("CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
@@ -535,7 +535,14 @@ public function cetakrealisasi(Request $request)
             'ms_anggaran.kd_rek as kd_rek5',
             'ms_anggaran.nm_rek as nm_rek5',
             'ms_anggaran.anggaran_tahun',
-            'trdtransout.*'
+            DB::raw("SUM(trdtransout.nilai) as nilai") // Menjumlahkan nilai jika kd_rek5 sama
+        )
+        ->groupBy(
+            'ms_anggaran.kd_sub_kegiatan',
+            'ms_anggaran.nm_sub_kegiatan',
+            'ms_anggaran.kd_rek',
+            'ms_anggaran.nm_rek',
+            'ms_anggaran.anggaran_tahun'
         )
         ->orderBy('ms_anggaran.kd_sub_kegiatan')
         ->orderBy('ms_anggaran.kd_rek')
