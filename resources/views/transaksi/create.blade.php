@@ -983,65 +983,69 @@ $('#kd_dana').select2({
     // Tangkap perubahan pada dropdown rekening
     // Tangkap perubahan pada dropdown rekening
     $(document).on('change', '#kd_rek', function () {
-        var selectedOption = $(this).find('option:selected');
-        var nmrek = selectedOption.data('nm_rek') || '';
-        var idsumberdana = selectedOption.data('id_sumberdana') || '';
-        var anggaranTahun = selectedOption.data('anggaran') || '';
-        var status_anggaran = selectedOption.data('status_anggaran') || '';
-        var status_anggaran_kas = selectedOption.data('status_anggaran_kas') || '';
-        // Pastikan selectedMonth & selectedTriwulan sudah di-set
-        var selectedMonth = $('#kd_rek').data('selected-month') || new Date().getMonth() + 1;
-        var selectedTriwulan = $('#kd_rek').data('selected-triwulan') || Math.ceil(selectedMonth / 3);
+    let selectedOption = $(this).find('option:selected');
+    let nmrek = selectedOption.data('nm_rek') || '';
+    let idsumberdana = selectedOption.data('id_sumberdana') || '';
+    let anggaranTahun = parseFloat(selectedOption.data('anggaran')) || 0;
+    let status_anggaran = selectedOption.data('status_anggaran') || '';
+    let status_anggaran_kas = selectedOption.data('status_anggaran_kas') || '';
 
-        console.log("Bulan saat ini:", selectedMonth);
-        console.log("Triwulan saat ini:", selectedTriwulan);
+    // Pastikan selectedMonth & selectedTriwulan sudah di-set
+    let selectedMonth = $('#kd_rek').data('selected-month') || new Date().getMonth() + 1;
+    let selectedTriwulan = $('#kd_rek').data('selected-triwulan') || Math.ceil(selectedMonth / 3);
 
-        // Pilih anggaran triwulan yang sesuai
-        var totalSPD = selectedOption.data(`anggaran-tw${selectedTriwulan}`) || 0;
+    console.log("Bulan saat ini:", selectedMonth);
+    console.log("Triwulan saat ini:", selectedTriwulan);
 
-        // Ambil anggaran sesuai bulan yang dipilih
-        var anggaranBulan = selectedOption.data(`rek${selectedMonth}`) || 0;
+    // Pilih anggaran triwulan yang sesuai
+    let totalSPD = parseFloat(selectedOption.data(`anggaran-tw${selectedTriwulan}`)) || 0;
 
-        var totalAnggaranSebelumnya = 0;
-        for (var i = 1; i < selectedMonth; i++) {
-            totalAnggaranSebelumnya += selectedOption.data(`rek${i}`) || 0;
-        }
-        console.log("total anggaran sebelumi:", totalAnggaranSebelumnya);
+    // Ambil anggaran sesuai bulan yang dipilih
+    let anggaranBulan = parseFloat(selectedOption.data(`rek${selectedMonth}`)) || 0;
 
-        var kd_rek = $(this).val();
-        $.ajax({
-        url: "{{ route('transaksi.get-total-nilai') }}",
-        type: 'POST',
-        data: {
-            _token: "{{ csrf_token() }}",  // CSRF token agar request valid di Laravel
-            kd_rek: kd_rek
-        },
-        success: function(response) {
-            var totalNilai = response.total_nilai || 0;
+    let totalAnggaranSebelumnya = 0;
+    for (let i = 1; i < selectedMonth; i++) {
+        totalAnggaranSebelumnya += parseFloat(selectedOption.data(`rek${i}`)) || 0;
+    }
 
-            var totalAnggaranKas = anggaranBulan + (totalAnggaranSebelumnya - totalNilai);
+    let totalspdsebelumnya = 0;
+    for (let i = 1; i < selectedTriwulan; i++) {
+        totalspdsebelumnya += parseFloat(selectedOption.data(`anggaran-tw${i}`)) || 0;
+    }
+    console.log("Total anggaran sebelumnya:", totalspdsebelumnya);
 
+    let kd_rek = $(this).val();
 
-            $('#nm_rek').val(nmrek);
-            $('#id_sumberdana').val(idsumberdana);
-            $('#statusAnggaran').val(status_anggaran);
-            $('#statusAnggaranKas').val(status_anggaran_kas);
-            $('#totalSPD').val(formatRupiah1(totalSPD));
-            $('#anggaran').val(formatRupiah1(anggaranTahun));
-            $('#totalAnggaranKas').val(formatRupiah1(totalAnggaranKas));
+    $.post("{{ route('transaksi.get-total-nilai') }}", {
+        _token: "{{ csrf_token() }}",
+        kd_rek: kd_rek
+    }).done(function(response) {
+        let totalNilai = parseFloat(response.total_nilai) || 0;
+        let totalAnggaranKas = (selectedMonth === 1) ? anggaranBulan : anggaranBulan + (totalAnggaranSebelumnya - totalNilai);
+        let totalSPDFinal = (selectedTriwulan === 1) ? totalSPD : totalSPD + (totalspdsebelumnya - totalNilai);
 
-            console.log("Total SPD (Triwulan " + selectedTriwulan + "):", totalSPD);
-            console.log("Total Anggaran Kas (Bulan " + selectedMonth + "):", totalAnggaranKas);
+        $('#nm_rek').val(nmrek);
+        $('#id_sumberdana').val(idsumberdana);
+        $('#statusAnggaran').val(status_anggaran);
+        $('#statusAnggaranKas').val(status_anggaran_kas);
+        $('#totalSPD').val(formatRupiah1(totalSPDFinal));
+        $('#anggaran').val(formatRupiah1(anggaranTahun));
+        $('#totalAnggaranKas').val(formatRupiah1(totalAnggaranKas));
 
-            hitungSisa("totalSPD", "realisasiSPD", "sisaSPD");
-            hitungSisa('anggaran', 'realisasiAnggaran', 'sisaAnggaran');
-            hitungSisa('totalAnggaranKas', 'realisasiAnggaranKas', 'sisaAnggaranKas');
-        },
-        error: function(xhr, status, error) {
-            console.error("Error fetching total nilai from trdtransout:", error);
-        }
+        console.table({
+            "Total SPD": totalSPDFinal,
+            "Total Anggaran Kas": totalAnggaranKas,
+            "Total Nilai": totalNilai
+        });
+
+        hitungSisa("totalSPD", "realisasiSPD", "sisaSPD");
+        hitungSisa("anggaran", "realisasiAnggaran", "sisaAnggaran");
+        hitungSisa("totalAnggaranKas", "realisasiAnggaranKas", "sisaAnggaranKas");
+    }).fail(function(xhr, status, error) {
+        console.error("Error fetching total nilai:", error);
     });
-    });
+});
+
 
 
     function formatRupiah1(angka) {
