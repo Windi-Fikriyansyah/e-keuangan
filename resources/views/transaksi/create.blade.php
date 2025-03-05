@@ -953,6 +953,7 @@ $('#kd_dana').select2({
     });
 
     // Tangkap perubahan pada dropdown rekening
+    // Tangkap perubahan pada dropdown rekening
     $(document).on('change', '#kd_rek', function () {
         var selectedOption = $(this).find('option:selected');
         var nmrek = selectedOption.data('nm_rek') || '';
@@ -973,20 +974,47 @@ $('#kd_dana').select2({
         // Ambil anggaran sesuai bulan yang dipilih
         var anggaranBulan = selectedOption.data(`rek${selectedMonth}`) || 0;
 
-        // Masukkan ke dalam input
-        $('#nm_rek').val(nmrek);
-        $('#id_sumberdana').val(idsumberdana);
-        $('#statusAnggaran').val(status_anggaran);
-        $('#statusAnggaranKas').val(status_anggaran_kas);
-        $('#totalSPD').val(formatRupiah1(totalSPD)); // Total SPD sesuai triwulan
-        $('#anggaran').val(formatRupiah1(anggaranTahun));
-        $('#totalAnggaranKas').val(formatRupiah1(anggaranBulan)); // Total Anggaran Kas sesuai bulan
-        console.log("Total SPD (Triwulan " + selectedTriwulan + "):", totalSPD);
-        console.log("Total Anggaran Kas (Bulan " + selectedMonth + "):", anggaranBulan);
-        hitungSisa("totalSPD", "realisasiSPD", "sisaSPD");
-        hitungSisa('anggaran', 'realisasiAnggaran', 'sisaAnggaran');
-        hitungSisa('totalAnggaranKas', 'realisasiAnggaranKas', 'sisaAnggaranKas');
+        var totalAnggaranSebelumnya = 0;
+        for (var i = 1; i < selectedMonth; i++) {
+            totalAnggaranSebelumnya += selectedOption.data(`rek${i}`) || 0;
+        }
+        console.log("total anggaran sebelumi:", totalAnggaranSebelumnya);
+
+        var kd_rek = $(this).val();
+        $.ajax({
+        url: "{{ route('transaksi.get-total-nilai') }}",
+        type: 'POST',
+        data: {
+            _token: "{{ csrf_token() }}",  // CSRF token agar request valid di Laravel
+            kd_rek: kd_rek
+        },
+        success: function(response) {
+            var totalNilai = response.total_nilai || 0;
+
+            var totalAnggaranKas = anggaranBulan + (totalAnggaranSebelumnya - totalNilai);
+
+
+            $('#nm_rek').val(nmrek);
+            $('#id_sumberdana').val(idsumberdana);
+            $('#statusAnggaran').val(status_anggaran);
+            $('#statusAnggaranKas').val(status_anggaran_kas);
+            $('#totalSPD').val(formatRupiah1(totalSPD));
+            $('#anggaran').val(formatRupiah1(anggaranTahun));
+            $('#totalAnggaranKas').val(formatRupiah1(totalAnggaranKas));
+
+            console.log("Total SPD (Triwulan " + selectedTriwulan + "):", totalSPD);
+            console.log("Total Anggaran Kas (Bulan " + selectedMonth + "):", totalAnggaranKas);
+
+            hitungSisa("totalSPD", "realisasiSPD", "sisaSPD");
+            hitungSisa('anggaran', 'realisasiAnggaran', 'sisaAnggaran');
+            hitungSisa('totalAnggaranKas', 'realisasiAnggaranKas', 'sisaAnggaranKas');
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching total nilai from trdtransout:", error);
+        }
     });
+    });
+
 
     function formatRupiah1(angka) {
     let number_string = angka.toString().replace(/[^,\d]/g, ''),

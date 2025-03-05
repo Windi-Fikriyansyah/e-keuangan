@@ -55,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/get-rekening', [Transaksi::class, 'getrekening'])->middleware('permission:14')->name('get-rekening');
         Route::delete('/trmpot/{no_bukti}', [Transaksi::class, 'destroy'])->middleware('permission:14')->name('destroy');
         Route::post('/getrealisasi', [Transaksi::class, 'getrealisasi'])->middleware('permission:14')->name('getrealisasi');
+        Route::post('/get-total-nilai', [Transaksi::class, 'gettotalnilai'])->middleware('permission:14')->name('get-total-nilai');
 
         Route::get('edit/{no_bukti}', [Transaksi::class, 'edit'])->middleware('permission:14')->name('edit');
         Route::get('/cariData', [Transaksi::class, 'cariData'])->middleware('permission:14')->name('cariData');
@@ -78,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/getmspot', [Terimapot::class, 'getmspot'])->middleware('permission:35')->name('getmspot');
         Route::delete('/trmpot/{no_bukti}', [Terimapot::class, 'destroy'])->middleware('permission:35')->name('destroy');
         Route::get('edit/{no_bukti}', [Terimapot::class, 'edit'])->middleware('permission:35')->name('edit');
+        Route::get('ubah/{no_bukti}', [Terimapot::class, 'ubah'])->middleware('permission:35')->name('ubah');
         Route::post('update/{no_bukti}', [Terimapot::class, 'update'])->middleware('permission:35')->name('update');
         Route::post('/getTransactionDetails', [Terimapot::class, 'getTransactionDetails'])->middleware('permission:35')->name('getTransactionDetails');
 

@@ -134,6 +134,22 @@ class Transaksi extends Controller
     }
     }
 
+    public function gettotalnilai(Request $request)
+    {
+        // $kd_rek = $request->kd_rek;
+
+        $kd_rek = $request->input('kd_rek');
+        // Ambil total nilai dari tabel `trdtransout` berdasarkan kd_rek
+        $totalNilai = DB::table('trdtransout')
+            ->where('kd_rek6', $kd_rek)
+            ->where('jenis_terima_sp2d', "0")
+            ->sum('nilai');
+
+        return response()->json([
+            'total_nilai' => $totalNilai
+        ]);
+    }
+
     public function getrekening(Request $request)
     {
     try {
