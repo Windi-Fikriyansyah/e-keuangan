@@ -446,6 +446,34 @@
 
 <script>
 
+document.addEventListener("DOMContentLoaded", function () {
+    const jenisBeban = document.querySelector("select[name='jenis_beban']");
+    const terimaSp2d = document.getElementById("terima_sp2d");
+
+    const subKegiatan = document.getElementById("kd_sub_kegiatan");
+    const rekening = document.getElementById("kd_rek");
+    const sumberDana = document.getElementById("kd_dana");
+
+    function toggleFields() {
+        const selectedBeban = jenisBeban.value;
+        const isChecked = terimaSp2d.checked;
+
+        // Jika jenis beban adalah UP atau GU dan "Terima SP2D" dicentang, maka disable fields
+        const shouldDisable = (selectedBeban === "UP" || selectedBeban === "GU") && isChecked;
+
+        subKegiatan.disabled = shouldDisable;
+        rekening.disabled = shouldDisable;
+        sumberDana.disabled = shouldDisable;
+    }
+
+    // Event listener untuk perubahan pada jenis beban dan checkbox
+    jenisBeban.addEventListener("change", toggleFields);
+    terimaSp2d.addEventListener("change", toggleFields);
+
+    // Panggil fungsi pertama kali untuk memastikan kondisi awal
+    toggleFields();
+});
+
 
 function hitungTotalBelanja() {
     let totalBelanja = 0;
