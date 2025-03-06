@@ -97,6 +97,15 @@
                             <input type="checkbox" id="terima_sp2d" name="jenis_terima_sp2d" value="1" class='form-check-input'>
                                     <label for="terima_sp2d">Terima SP2D</label>
                         </div>
+
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label"></label>
+                        <div class="col-sm-10">
+                            <input type="checkbox" id="perlimpahan" name="jenis_perlimpahan" value="1" class='form-check-input'>
+                                    <label for="perlimpahan">Perlimpahan</label>
+                        </div>
+
                     </div>
 
 
@@ -469,6 +478,35 @@ document.addEventListener("DOMContentLoaded", function () {
     // Event listener untuk perubahan pada jenis beban dan checkbox
     jenisBeban.addEventListener("change", toggleFields);
     terimaSp2d.addEventListener("change", toggleFields);
+
+    // Panggil fungsi pertama kali untuk memastikan kondisi awal
+    toggleFields();
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const jenisBeban = document.querySelector("select[name='jenis_beban']");
+    const perlimpahan = document.getElementById("perlimpahan");
+
+    const subKegiatan = document.getElementById("kd_sub_kegiatan");
+    const rekening = document.getElementById("kd_rek");
+    const sumberDana = document.getElementById("kd_dana");
+
+    function toggleFields() {
+        const selectedBeban = jenisBeban.value;
+        const isChecked = perlimpahan.checked;
+
+        // Jika jenis beban adalah UP atau GU dan "Terima SP2D" dicentang, maka disable fields
+        const shouldDisable = (selectedBeban === "UP" || selectedBeban === "GU") && isChecked;
+
+        subKegiatan.disabled = shouldDisable;
+        rekening.disabled = shouldDisable;
+        sumberDana.disabled = shouldDisable;
+    }
+
+    // Event listener untuk perubahan pada jenis beban dan checkbox
+    jenisBeban.addEventListener("change", toggleFields);
+    perlimpahan.addEventListener("change", toggleFields);
 
     // Panggil fungsi pertama kali untuk memastikan kondisi awal
     toggleFields();
