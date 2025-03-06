@@ -31,7 +31,14 @@ class SetorKas extends Controller
         $search = $request->search;
 
         $data = DB::table('trhkasin_pkd')
-            ->where('kd_skpd', Auth::user()->kd_skpd);
+            ->where('kd_skpd', Auth::user()->kd_skpd)
+            ->select([
+                'no_sts',
+                DB::raw("COALESCE(tgl_sts, '') as tgl_sts"), // Pastikan tgl_sts tidak null
+                'keterangan',
+                'kd_skpd',
+                DB::raw("'trhkasin_pkd' as sumber_data")
+            ]);
 
         if ($search) {
             $data = $data->where(function ($query) use ($search) {
@@ -40,13 +47,33 @@ class SetorKas extends Controller
                       ->orWhere('keterangan', 'like', "%" . $search . "%"); // Tambahan untuk pencarian lebih fleksibel
             });
         }
+        $data1 = $data->get(); // Eksekusi query
 
-        return DataTables::of($data->get()) // Tambahkan get() di sini
+        // Ambil data dari trdbku yang mengandung "utang belanja"
+        $data2 = DB::table('trdbku')
+        ->where('trdbku.nm_rek6', 'like', '%utang belanja%')
+        ->select([
+            'trdbku.no_kas as no_sts',
+            'trdbku.kd_skpd',
+            'trdbku.nm_rek6 as keterangan',
+            DB::raw("'' as tgl_sts"),
+            DB::raw("'trdbku' as sumber_data")
+        ])
+        ->get();
+
+
+
+
+        // Gabungkan data menjadi satu array
+        $mergedData = collect($data1)->merge($data2);
+
+        return DataTables::of($mergedData)
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
-                // $btn = '<a href="' . route('trmpot.edit', Crypt::encrypt($row->no_sts)) . '" class="btn btn-warning btn-sm" style="margin-right:4px"><i class="fas fa-edit"></i></a>';
-                $btn = '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('setorkas.destroy', Crypt::encrypt($row->no_sts)) . '"><i class="fas fa-trash-alt"></i></button>';
-                return $btn;
+                if ($row->sumber_data === 'trhkasin_pkd') {
+                    return '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('setorkas.destroy', Crypt::encrypt($row->no_sts)) . '"><i class="fas fa-trash-alt"></i></button>';
+                }
+                return '-'; // Jika data dari trdbku, tidak ada tombol aksi
             })
             ->rawColumns(['aksi'])
             ->make(true);

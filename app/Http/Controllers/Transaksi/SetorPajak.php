@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
-
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
@@ -389,6 +389,7 @@ class SetorPajak extends Controller
     public function store(Request $request)
 {
 
+
     try {
         DB::beginTransaction();
 
@@ -437,6 +438,12 @@ class SetorPajak extends Controller
             return (float) str_replace(['Rp', '.', ','], '', $item['nilai']);
         }, $potonganData));
 
+        $ntpnArray = [];
+        foreach ($potonganData as $potongan) {
+            // Use null coalescing operator to provide a default empty string if 'ntpn' is not set
+            $ntpnArray[] = $potongan['ntpn'] ?? '';
+        }
+        $ntpnString = implode(', ', array_filter($ntpnArray));
         // Create header record
         $headerId = DB::table('trhstrpot')->insertGetId([
             'no_bukti' => $request->no_bukti,
@@ -456,7 +463,7 @@ class SetorPajak extends Controller
             'nmrekan' => $request->nmrekan,
             'pimpinan' => $request->pimpinan,
             'alamat' => $request->alamat,
-            'no_ntpn' => $request->ntpn,
+            'no_ntpn' => $ntpnString,
             'pay' => $request->pay,
             'beban' => $request->beban
         ]);
@@ -467,7 +474,7 @@ class SetorPajak extends Controller
             'uraian' => $request->ket,
             'kd_rek' => $request->kd_rek6,
             'nm_rek' => $request->nm_rek6,
-            'ntpn' => $request->ntpn,
+            'ntpn' => $ntpnString,
             'kd_skpd' => $request->kd_skpd,
             'nm_skpd' => $request->nm_skpd,
             'id_user' => auth()->user()->id,
@@ -516,7 +523,13 @@ class SetorPajak extends Controller
         $trhbppajak = DB::table('trdtrmpot')
         ->where('no_bukti', $request->no_terima)
         ->update([
-            'ntpn' => $request->ntpn,
+            'ntpn' => $potonganData['ntpn'] ?? '',
+        ]);
+
+        $status = DB::table('trhtrmpot')
+        ->where('no_bukti', $request->no_terima)
+        ->update([
+            'status' => "1",
         ]);
 
 
@@ -532,7 +545,7 @@ class SetorPajak extends Controller
                 'ebilling' => $potongan['ebilling'],
                 'rekanan' => $potongan['nmrekan'],
                 'npwp' => $potongan['npwp'],
-                'ntpn' => $request->ntpn,
+                'ntpn' => $potongan['ntpn'] ?? '',
                 'id_terima' => intval($potongan['id_trdtrmpot']),
                 'no_sp2d' => $request->no_sp2d,
             ]);
@@ -570,47 +583,71 @@ class SetorPajak extends Controller
 public function destroy($no_bukti)
 {
     try {
+        // Dekripsi hanya sekali
         $decryptedId = Crypt::decrypt($no_bukti);
+
+        // Cek apakah data ada
         $strpot = DB::table('trhstrpot')
                 ->where('no_bukti', $decryptedId)
                 ->first();
 
-            if (!$strpot) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'strpot tidak ditemukan.'
-                ], 404);
-            }
+        if (!$strpot) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan.'
+            ], 404);
+        }
 
+        // Mulai transaksi untuk memastikan data dihapus dengan benar
+        DB::beginTransaction();
 
-            $total = $strpot->nilai;
-            $kodeSkpd = auth()->user()->kd_skpd;
+        $total = $strpot->nilai;
+        $kodeSkpd = auth()->user()->kd_skpd;
+        $noTerima = $strpot->no_terima;
 
+        // Hapus data di beberapa tabel
         DB::table('trhstrpot')->where('no_bukti', $decryptedId)->delete();
         DB::table('trhbppajak')->where('no_bukti', $decryptedId)->where('no_strpot', $decryptedId)->delete();
-        $decryptedId = Crypt::decrypt($no_bukti);
         DB::table('trdstrpot')->where('no_bukti', $decryptedId)->delete();
         DB::table('trhbku')->where('no_kas', $decryptedId)->where('id_strpot', $decryptedId)->delete();
         DB::table('trdbku')->where('no_kas', $decryptedId)->where('id_strpot', $decryptedId)->delete();
 
+        // Update saldo awal
         DB::table('masterSkpd')
                 ->where('kodeSkpd', $kodeSkpd)
                 ->update([
                     'saldoawal' => DB::raw("saldoawal + $total")
                 ]);
 
+        // Update status trhtrmpot
+        DB::table('trhtrmpot')
+                ->where('kd_skpd', $kodeSkpd)
+                ->where('no_bukti', $noTerima)
+                ->update([
+                    'status' => "0"
+                ]);
+
+        // Commit transaksi jika semua berhasil
+        DB::commit();
+
         return response()->json([
             'success' => true,
-            'message' => 'subkegiatan berhasil dihapus.'
+            'message' => 'Setor Potongan berhasil dihapus.'
         ]);
     } catch (\Exception $e) {
+        // Rollback jika terjadi kesalahan
+        DB::rollBack();
+
+        // Logging error untuk debugging
+        Log::error('Gagal menghapus Setor Potongan: ' . $e->getMessage());
+
         return response()->json([
             'success' => false,
-            'message' => 'Gagal menghapus subkegiatan.'
+            'message' => 'Gagal menghapus Setor Potongan.',
+            'error' => app()->environment('local') ? $e->getMessage() : 'Terjadi kesalahan'
         ], 500);
     }
 }
-
 
 public function update(Request $request, $no_bukti)
 {

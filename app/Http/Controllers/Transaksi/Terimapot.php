@@ -45,7 +45,12 @@ class Terimapot extends Controller
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route('trmpot.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
-                $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('trmpot.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
+
+                if ($row->status != 1) {
+                    $btn .= '<a href="' . route('trmpot.ubah', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-warning btn-sm" style="margin-right:4px"><i class="fas fa-edit"></i></a>';
+                    $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('trmpot.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
+                }
+
                 return $btn;
             })
             ->rawColumns(['aksi'])
@@ -535,10 +540,40 @@ public function edit($no_bukti)
     return view('trmpot.edit', compact('trmpot','trhtransout','potonganDetails'));
 }
 
+public function ubah($no_bukti)
+{
+    // Dekripsi ID yang terenkripsi
+    $decryptedId = Crypt::decrypt($no_bukti);
+
+
+    // Ambil data pajak berdasarkan ID menggunakan Query Builder
+    $trmpot = DB::table('trhtrmpot')->where('no_bukti', $decryptedId)->first();
+    $trhtransout = DB::table('trhtransout')->where('no_bukti', $trmpot->id_trhtransout)->first();
+
+    $potonganDetails = DB::table('trdtrmpot')
+            ->where('no_bukti', $decryptedId)
+            ->select(
+                'kd_rek_trans',
+                'kd_rek6',
+                'nm_rek6',
+                'rekanan',
+                'npwp',
+                'ebilling',
+                'nilai'
+            )
+            ->get();
+    // Cek apakah data ditemukan
+    if (!$trmpot) {
+        return redirect()->route('trmpot.index')->with('message', 'Data Terima Potongan Pajak tidak ditemukan.');
+    }
+
+    // Tampilkan view untuk mengedit data
+    return view('trmpot.ubah', compact('trmpot','trhtransout','potonganDetails'));
+}
+
+
 public function update(Request $request, $no_bukti)
 {
-
-
     // Validasi input
     $validator = Validator::make($request->all(), [
         'tgl_bukti' => 'required|date',
@@ -554,18 +589,20 @@ public function update(Request $request, $no_bukti)
     ]);
 
     if ($validator->fails()) {
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
+        return response()->json([
+            'success' => false,
+            'errors' => $validator->errors()
+        ], 422);
     }
 
     // Decode JSON dan pastikan valid
     $potonganData = json_decode($request->potongan_data, true);
 
     if (!is_array($potonganData) || empty($potonganData)) {
-        return redirect()->back()
-            ->with('error', 'Data potongan tidak valid atau kosong.')
-            ->withInput();
+        return response()->json([
+            'success' => false,
+            'message' => 'Data potongan tidak valid atau kosong.'
+        ], 400);
     }
 
     // Hitung total nilai potongan dengan pengecekan yang lebih aman
@@ -580,14 +617,29 @@ public function update(Request $request, $no_bukti)
         $trmpot = DB::table('trhtrmpot')->where('no_bukti', $no_bukti)->first();
 
         if (!$trmpot) {
-            return redirect()->back()->with('error', 'Data tidak ditemukan.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan.'
+            ], 404);
+        }
+
+        $kd_skpd = $request->kd_skpd ?? $trmpot->kd_skpd;
+        $nilaiLama = (float) $trmpot->nilai;
+
+        // Update saldoawal di masterskpd jika nilai berubah
+        if ($nilaiLama !== $totalNilai) {
+            DB::table('masterSkpd')
+                ->where('kodeSkpd', $kd_skpd)
+                ->update([
+                    'saldoawal' => DB::raw("saldoawal - $nilaiLama + $totalNilai")
+                ]);
         }
 
         // Update data Trmpot
         DB::table('trhtrmpot')->where('no_bukti', $no_bukti)->update([
             'tgl_bukti' => $request->tgl_bukti,
             'ket' => $request->ket,
-            'username' => auth()->user()->username,
+            'username' => Auth()->user()->username,
             'kd_skpd' => $request->kd_skpd ?? $trmpot->kd_skpd,
             'nm_skpd' => $request->nm_skpd ?? $trmpot->nm_skpd,
             'no_sp2d' => $request->no_sp2d,

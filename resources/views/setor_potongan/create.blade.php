@@ -53,15 +53,12 @@
 
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">No Terima</label>
-                        <div class="col-sm-4">
+                        <div class="col-sm-10">
                             <select class="form-select @error('no_terima') is-invalid @enderror"
                             name="no_terima" id="no_terima" style="width: 100%">
                             </select>
                          </div>
-                        <label class="col-sm-2 col-form-label">NTPN</label>
-                        <div class="col-sm-4">
-                            <input name="ntpn" id="ntpn" class="form-control" type="text" >
-                        </div>
+
                     </div>
 
                     <div class="row mb-3">
@@ -216,7 +213,7 @@
                                     <th>NPWP</th>
                                     <th>Nilai</th>
                                     <th>NTPN</th>
-                                    <th>No Billing</th>
+                                    <th style="display: none;">No Billing</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -263,7 +260,7 @@ $('#formBpkb').on('submit', function(e) {
             nmrekan: row.find('td:eq(3)').text().trim(),
             npwp: row.find('td:eq(4)').text().trim(),
             nilai: cleanNumericValue(nilai),  // Clean the numeric value
-            ntpn: row.find('td:eq(6)').text().trim(),
+            ntpn: row.find('.ntpn-input').val().trim(),
             ebilling: row.find('td:eq(7)').text().trim(),
             id_trdtrmpot: row.data('id-trdtrmpot')
         });
@@ -402,8 +399,8 @@ $(document).ready(function() {
                                     <td>${row.rekanan}</td>
                                     <td>${row.npwp}</td>
                                    <td style="text-align: right;">${formatRupiah(row.nilai)}</td>
-                                    <td>${row.ntpn}</td>
-                                    <td>${row.ebilling}</td>
+                                    <td><input type="text" class="form-control ntpn-input" value="${row.ntpn || ''}"></td>
+                                    <td style="display: none;">${row.ebilling}</td>
                                 </tr>
                             `);
                         });

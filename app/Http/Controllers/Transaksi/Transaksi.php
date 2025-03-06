@@ -380,11 +380,11 @@ class Transaksi extends Controller
         $transaksi = DB::table('trhtransout')->where('no_bukti', $decryptedId)->first();
 
         $potonganDetails = DB::table('trdtransout')
-        ->join('ms_sumberdana', function ($join) {
+        ->leftJoin('ms_sumberdana', function ($join) {
             $join->on(
-                DB::raw('trdtransout.sumber COLLATE Latin1_General_CI_AS'),
+                DB::raw('CAST(trdtransout.sumber AS INT)'),
                 '=',
-                DB::raw('ms_sumberdana.kd_dana COLLATE Latin1_General_CI_AS')
+                'ms_sumberdana.id'
             );
         })
         ->where('trdtransout.no_bukti', $decryptedId)

@@ -53,7 +53,7 @@
 
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">No Terima</label>
-                        <div class="col-sm-4">
+                        <div class="col-sm-10">
                             <select class="form-select @error('no_terima') is-invalid @enderror"
                             name="no_terima" id="no_terima" style="width: 100%" disabled>
                             <option value="">Silahkan Pilih</option>
@@ -64,10 +64,7 @@
                             @endif
                             </select>
                          </div>
-                        <label class="col-sm-2 col-form-label">NTPN</label>
-                        <div class="col-sm-4">
-                            <input name="ntpn" id="ntpn" disabled class="form-control" value="{{ $strpot->no_ntpn }}" type="text" >
-                        </div>
+
                     </div>
 
                     <div class="row mb-3">
