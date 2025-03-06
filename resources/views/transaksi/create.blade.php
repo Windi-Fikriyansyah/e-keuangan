@@ -791,6 +791,14 @@ $(document).ready(function() {
             theme: 'bootstrap-5',
         });
 
+        $('#kd_rek').select2({
+        dropdownParent: $('#inputKegiatanModal .modal-content'),
+        placeholder: 'Pilih Rekening',
+        width: 'resolve',
+        theme: 'bootstrap-5',
+        allowClear: true
+    });
+
         // Ambil data Sub Kegiatan via AJAX
         $.ajax({
             url: "{{ route('transaksi.get-sub-kegiatan') }}",
@@ -910,43 +918,58 @@ $(document).ready(function() {
         return 'Rp. ' + number_string; // Tambahkan prefix Rp.
     }
 
-        $('#kd_rek').select2({
-            dropdownParent: $('#inputKegiatanModal .modal-content'),
-            placeholder: 'Pilih Sub Kegiatan',
-            width: 'resolve',
-            theme: 'bootstrap-5',
-        });
+    $('#kd_sub_kegiatan').on('change', function() {
+        var kd_sub_kegiatan = $(this).val();
+        var nm_sub_kegiatan = $(this).find('option:selected').data('nm_sub_kegiatan') || '';
 
-        // Ambil data Sub Kegiatan via AJAX
+        // Set nama sub kegiatan ke input yang disabled
+        $('#nm_sub_kegiatan').val(nm_sub_kegiatan);
+
+        // Reset rekening dropdown jika tidak ada sub kegiatan yang dipilih
+        if (!kd_sub_kegiatan) {
+            $('#kd_rek').empty().append('<option value="">Pilih Rekening</option>').trigger('change');
+            return;
+        }
+
+        // Ambil data rekening berdasarkan kd_sub_kegiatan yang dipilih
         $.ajax({
-    url: "{{ route('transaksi.get-rekening') }}",
-    type: 'GET',
-    success: function(response) {
-        $('#kd_rek').empty().append('<option value="">Pilih Rekening</option>');
-        $.each(response, function(index, item) {
-            $('#kd_rek').append(
-                    `<option value="${item.kd_rek}"
-                        data-nm_rek="${item.nm_rek}"
-                        data-id_sumberdana="${item.id_sumberdana}"
-                        data-anggaran-tw1="${item.anggaran_tw1}"
-                        data-anggaran-tw2="${item.anggaran_tw2}"
-                        data-anggaran-tw3="${item.anggaran_tw3}"
-                        data-anggaran-tw4="${item.anggaran_tw4}"
-                        data-anggaran="${item.anggaran_tahun}"
-                        data-status_anggaran="${item.status_anggaran}"
-                        data-status_anggaran_kas="${item.status_anggaran_kas}"
-                        ${[...Array(12)].map((_, i) => `data-rek${i+1}="${item[`rek${i+1}`] || 0}"`).join(' ')}
-                    >
-                        ${item.kd_rek} || ${item.nm_rek}
-                    </option>`
-                );
+            url: "{{ route('transaksi.get-rekening') }}",
+            type: 'GET',
+            data: { kd_sub_kegiatan: kd_sub_kegiatan },
+            success: function(response) {
+                // Reset rekening dropdown
+                $('#kd_rek').empty().append('<option value="">Pilih Rekening</option>');
+
+                // Populate rekening options
+                $.each(response, function(index, item) {
+                    $('#kd_rek').append(
+                        `<option value="${item.kd_rek}"
+                            data-nm_rek="${item.nm_rek}"
+                            data-id_sumberdana="${item.id_sumberdana}"
+                            data-anggaran-tw1="${item.anggaran_tw1}"
+                            data-anggaran-tw2="${item.anggaran_tw2}"
+                            data-anggaran-tw3="${item.anggaran_tw3}"
+                            data-anggaran-tw4="${item.anggaran_tw4}"
+                            data-anggaran="${item.anggaran_tahun}"
+                            data-status_anggaran="${item.status_anggaran}"
+                            data-status_anggaran_kas="${item.status_anggaran_kas}"
+                            ${[...Array(12)].map((_, i) => `data-rek${i+1}="${item[`rek${i+1}`] || 0}"`).join(' ')}
+                        >
+                            ${item.kd_rek} || ${item.nm_rek}
+                        </option>`
+                    );
+                });
+
+                // Refresh Select2 to show the new options
+                $('#kd_rek').trigger('change');
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching kd_rek: ", error);
+                $('#kd_rek').empty().append('<option value="">Error loading data</option>').trigger('change');
+            }
         });
-        $('#kd_rek').trigger('change');
-    },
-    error: function(xhr, status, error) {
-        console.error("Error fetching kd_rek: ", error);
-    }
-});
+    });
+
 
 $('#kd_dana').select2({
         dropdownParent: $('#inputKegiatanModal .modal-content'),

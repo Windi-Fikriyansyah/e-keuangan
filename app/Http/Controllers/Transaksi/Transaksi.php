@@ -151,30 +151,71 @@ class Transaksi extends Controller
     }
 
     public function getrekening(Request $request)
-    {
+{
     try {
-        $query = DB::table('ms_anggaran')
-            ->select('kd_rek', 'nm_rek','anggaran_tahun','anggaran_tw1','anggaran_tw2','anggaran_tw3','anggaran_tw4','rek1','rek2','rek3','rek4','rek5','rek6','rek7','rek8','rek9','rek10','rek11','rek12','status_anggaran','status_anggaran_kas','id_sumberdana');
+        // Get the selected kd_sub_kegiatan from the request
+        $kd_sub_kegiatan = $request->input('kd_sub_kegiatan');
 
-        // Search both kd_sub_kegiatan and nm_sub_kegiatan
-        if ($request->has('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('kd_rek', 'like', '%' . $request->search . '%')
-                    ->orWhere('nm_rek', 'like', '%' . $request->search . '%');
+        // Initialize query from ms_anggaran table
+        $query = DB::table('ms_anggaran');
+
+        // Filter by kd_sub_kegiatan if it's provided
+        if ($kd_sub_kegiatan) {
+            $query->where('kd_sub_kegiatan', $kd_sub_kegiatan);
+        }
+
+        // Select all the required fields
+        $query->select(
+            'kd_rek',
+            'nm_rek',
+            'anggaran_tahun',
+            'anggaran_tw1',
+            'anggaran_tw2',
+            'anggaran_tw3',
+            'anggaran_tw4',
+            'rek1',
+            'rek2',
+            'rek3',
+            'rek4',
+            'rek5',
+            'rek6',
+            'rek7',
+            'rek8',
+            'rek9',
+            'rek10',
+            'rek11',
+            'rek12',
+            'status_anggaran',
+            'status_anggaran_kas',
+            'id_sumberdana'
+        );
+
+        // Handle search functionality if search parameter is provided
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('kd_rek', 'like', '%' . $search . '%')
+                  ->orWhere('nm_rek', 'like', '%' . $search . '%');
             });
         }
-        $subKegiatan = $query->orderBy('kd_rek')
-            ->get();
 
-        return response()->json($subKegiatan);
+        // Order the results by kd_rek
+        $rekening = $query->orderBy('kd_rek')->get();
+
+        // Return the results as JSON
+        return response()->json($rekening);
+
     } catch (\Exception $e) {
+        // Log the error for debugging
+        \Log::error('Error in getrekening: ' . $e->getMessage());
 
+        // Return a proper error response
         return response()->json([
-            'error' => 'Gagal mengambil data Sumber dana',
-            'message' => 'Terjadi kesalahan dalam mengambil data'
+            'error' => 'Gagal mengambil data rekening',
+            'message' => 'Terjadi kesalahan dalam mengambil data: ' . $e->getMessage()
         ], 500);
     }
-    }
+}
 
 
 
