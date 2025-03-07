@@ -181,7 +181,6 @@
                     $rowNumber = 1;
                     $totalTerima = 0;
                     $totalKeluar = 0;
-                    $utangBelanjaItems = [];
                 @endphp
                 <tr class="saldo-lalu">
                     <td colspan="3"></td>
@@ -208,7 +207,6 @@
                         ($item->id_strpot ?? '0');
 
                         $hasUtangBelanja = false;
-                        $utangBelanjaDetails = [];
                     @endphp
                     @if (isset($detailGrouped[$key]))
                         @foreach ($detailGrouped[$key] as $detail)
@@ -220,10 +218,9 @@
                                 // Check if nm_rek6 contains "utang belanja"
                                 if (stripos($detail->nm_rek6, 'utang belanja') !== false) {
                                     $hasUtangBelanja = true;
-                                    $utangBelanjaDetails[] = $detail;
                                 }
                             @endphp
-                            <tr class="child-row">
+                            <tr class="child-row {{ stripos($detail->nm_rek6, 'utang belanja') !== false ? 'utang-belanja-child-row' : '' }}">
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -235,14 +232,28 @@
                         @endforeach
 
                         @if ($hasUtangBelanja)
-                            @php
-                                // Store the parent item and its utang belanja details for later rendering
-                                $utangBelanjaItems[] = [
-                                    'parent' => $item,
-                                    'details' => $utangBelanjaDetails,
-                                    'key' => $key
-                                ];
-                            @endphp
+                            <tr class="utang-belanja-parent">
+                                <td>{{ $rowNumber++ }}</td>
+                                <td>{{ \Carbon\Carbon::parse($item->tgl_kas)->translatedFormat('j F Y') }}</td>
+                                <td>{{ $item->no_sp2d }}</td>
+                                <td><strong>{{ $item->uraian }} (Transaksi CP)</strong></td>
+                                <td class="numbers"></td>
+                                <td class="numbers"></td>
+                                <td class="numbers"></td>
+                            </tr>
+                            @foreach ($detailGrouped[$key] as $detail)
+                                @if (stripos($detail->nm_rek6, 'utang belanja') !== false)
+                                    <tr class="utang-belanja-child-row">
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td> - {{ $detail->nm_rek6 }}</td>
+                                        <td class="numbers">Rp {{ number_format($detail->terima, 2, ',', '.') }}</td>
+                                        <td class="numbers">Rp {{ number_format($detail->keluar, 2, ',', '.') }}</td>
+                                        <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
+                                    </tr>
+                                @endif
+                            @endforeach
                         @endif
                     @elseif($item->terima != 0 || $item->keluar != 0)
                         @php
@@ -260,38 +271,6 @@
                             <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
                         </tr>
                     @endif
-                @endforeach
-
-                {{-- Render duplicated utang belanja items --}}
-                @foreach ($utangBelanjaItems as $utangItem)
-                    <tr class="utang-belanja-parent">
-                        <td>{{ $rowNumber++ }}</td>
-                        <td>{{ \Carbon\Carbon::parse($utangItem['parent']->tgl_kas)->translatedFormat('j F Y') }}</td>
-                        <td>{{ $utangItem['parent']->no_sp2d }}</td>
-                        <td><strong>{{ $utangItem['parent']->uraian }} (Transaksi CP)</strong></td>
-                        <td class="numbers"></td>
-                        <td class="numbers"></td>
-                        <td class="numbers"></td>
-                    </tr>
-
-                    @foreach ($utangItem['details'] as $detail)
-                        @php
-                            // Continue calculating the saldo from where the main section left off
-                            $saldo += $detail->terima - $detail->keluar;
-                            // Also add to the totals
-                            $totalTerima += $detail->terima;
-                            $totalKeluar += $detail->keluar;
-                        @endphp
-                        <tr class="utang-belanja-child-row">
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td> - {{ $detail->nm_rek6 }}</td>
-                            <td class="numbers">Rp {{ number_format($detail->terima, 2, ',', '.') }}</td>
-                            <td class="numbers">Rp {{ number_format($detail->keluar, 2, ',', '.') }}</td>
-                            <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
-                        </tr>
-                    @endforeach
                 @endforeach
 
                 <tr class="total-row">
