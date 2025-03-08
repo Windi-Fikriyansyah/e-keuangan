@@ -453,11 +453,14 @@ class Transaksi extends Controller
 
     public function getrealisasi(Request $request)
     {
+
         $kd_rek = $request->kd_rek;
+        $kd_sub_kegiatan = $request->kd_sub_kegiatan;
 
         $realisasi = DB::table('trdtransout')
             ->where('kd_skpd', auth()->user()->kd_skpd)
             ->where('kd_rek6', $kd_rek)
+            ->where('kd_sub_kegiatan', $kd_sub_kegiatan)
             ->where('jenis_terima_sp2d', "0")
             ->select(
                 DB::raw('SUM(nilai) as realisasi')

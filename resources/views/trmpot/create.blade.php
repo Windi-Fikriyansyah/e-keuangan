@@ -533,43 +533,59 @@ document.getElementById("btnTambahPotongan").addEventListener("click", function(
             url: "{{ route('trmpot.getsubkegiatan') }}",
             dataType: 'json',
             type: "POST",
-            delay: 250, // Menambahkan delay untuk mengurangi beban server
-            data: function(params) {
+            delay: 250,
+            data: function (params) {
                 return { q: $.trim(params.term) };
             },
-            processResults: function(data) {
-                return { results: data.map(item => ({
-                            id: item.id,
-                            text: item.text,
-                            nm_sub_kegiatan: item.nm_sub_kegiatan
-                        }))
-                     };
+            processResults: function (data) {
+                return {
+                    results: data.map(item => ({
+                        id: item.id,
+                        text: item.text,
+                        nm_sub_kegiatan: item.nm_sub_kegiatan
+                    }))
+                };
             }
         }
+    }).on('select2:select', function (e) {
+        var selectedKegiatan = e.params.data.id;
+        $('#kd_rek6').val(null).trigger('change'); // Reset Kode Rekening
+        $('#kd_rek6').select2({
+            theme: "bootstrap-5",
+            width: "100%",
+            placeholder: "Silahkan Pilih...",
+            minimumInputLength: 0,
+            ajax: {
+                url: "{{ route('trmpot.get-rekening') }}",
+                dataType: 'json',
+                type: "POST",
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: $.trim(params.term),
+                        kd_sub_kegiatan: selectedKegiatan // Kirim Kode Kegiatan yang dipilih
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.map(item => ({
+                            id: item.id,
+                            text: item.text,
+                            nm_rek6: item.nm_rek6
+                        }))
+                    };
+                }
+            }
+        });
     });
 
     $('#kd_rek6').select2({
         theme: "bootstrap-5",
         width: "100%",
         placeholder: "Silahkan Pilih...",
-        minimumInputLength: 0,
-        ajax: {
-            url: "{{ route('trmpot.get-rekening') }}",
-            dataType: 'json',
-            type: "POST",
-            delay: 250, // Menambahkan delay untuk mengurangi beban server
-            data: function(params) {
-                return { q: $.trim(params.term) };
-            },
-            processResults: function(data) {
-                return { results: data.map(item => ({
-                            id: item.id,
-                            text: item.text,
-                            nm_rek6: item.nm_rek6
-                        }))
-                     };
-            }
-        }
+        minimumInputLength: 0
+    }).on('select2:select', function (e) {
+        $('#nm_rek6').val(e.params.data.nm_rek6);
     });
 
     $('#nmrekan').select2({

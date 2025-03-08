@@ -86,13 +86,17 @@ class Terimapot extends Controller
         ->select('no_bukti', 'tgl_bukti', 'no_sp2d', 'total', 'ket')
         ->where('jenis_terima_sp2d', "1")
         ->where('kd_skpd', $kd_skpd)
-        ->whereNotIn('no_bukti', $usedNoBukti)
+        ->when(!empty($usedNoBukti), function ($query) use ($usedNoBukti) {
+            return $query->whereNotIn('no_bukti', $usedNoBukti);
+        })
         ->when(!empty($search), function ($query) use ($search) {
-            $query->where('no_bukti', 'LIKE', "%{$search}%")
-                  ->orWhere('tgl_bukti', 'LIKE', "%{$search}%")
-                  ->orWhere('no_sp2d', 'LIKE', "%{$search}%")
-                  ->orWhere('total', 'LIKE', "%{$search}%")
-                  ->orWhere('ket', 'LIKE', "%{$search}%");
+            $query->where(function ($subQuery) use ($search) {
+                $subQuery->where('no_bukti', 'LIKE', "%{$search}%")
+                         ->orWhere('tgl_bukti', 'LIKE', "%{$search}%")
+                         ->orWhere('no_sp2d', 'LIKE', "%{$search}%")
+                         ->orWhere('total', 'LIKE', "%{$search}%")
+                         ->orWhere('ket', 'LIKE', "%{$search}%");
+            });
         })
         ->limit(1000)
         ->get();
@@ -149,12 +153,16 @@ class Terimapot extends Controller
     public function getrekening(Request $request)
     {
         $search = $request->q;
+        $kd_sub_kegiatan = $request->kd_sub_kegiatan;
 
         $sertifikat = DB::table('ms_anggaran')
             ->select('kd_rek as kd_rek6','nm_rek as nm_rek6')
             ->when(!empty($search), function ($query) use ($search) {
                 $query->where('kd_rek', 'LIKE', "%{$search}%")
                       ->orWhere('nm_rek', 'LIKE', "%{$search}%");
+            })
+            ->when(!empty($kd_sub_kegiatan), function ($query) use ($kd_sub_kegiatan) {
+                $query->where('kd_sub_kegiatan', $kd_sub_kegiatan); // Filter berdasarkan kode kegiatan
             })
             ->limit(10)
             ->get();

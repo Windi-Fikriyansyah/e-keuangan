@@ -878,7 +878,8 @@ $(document).ready(function() {
         // });
 
         $('#kd_rek').change(function () {
-        var kd_rek = $(this).val(); // Ambil kode rekening yang dipilih
+        var kd_rek = $(this).val();
+        var kd_sub_kegiatan = $('#kd_sub_kegiatan').val(); // Ambil kode rekening yang dipilih
         var csrfToken = $('meta[name="csrf-token"]').attr('content'); // Ambil CSRF token
 
         if (kd_rek) {
@@ -888,7 +889,7 @@ $(document).ready(function() {
                 headers: {
                     'X-CSRF-TOKEN': csrfToken // Tambahkan CSRF token
                 },
-                data: { kd_rek: kd_rek },
+                data: { kd_rek: kd_rek, kd_sub_kegiatan: kd_sub_kegiatan },
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
