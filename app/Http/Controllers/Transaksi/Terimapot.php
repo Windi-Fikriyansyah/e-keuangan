@@ -84,7 +84,6 @@ class Terimapot extends Controller
     $kd_skpd = auth()->user()->kd_skpd;
     $sertifikat = DB::table('trhtransout')
         ->select('no_bukti', 'tgl_bukti', 'no_sp2d', 'total', 'ket')
-        ->where('jenis_terima_sp2d', "1")
         ->where('kd_skpd', $kd_skpd)
         ->when(!empty($usedNoBukti), function ($query) use ($usedNoBukti) {
             return $query->whereNotIn('no_bukti', $usedNoBukti);
