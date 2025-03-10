@@ -183,6 +183,8 @@
             <tbody>
                 @php
                     $saldo = $saldoLalu ?? 0;
+                    $totalTerima = 0;
+                    $totalKeluar = 0;
                     $rowNumber = 1;
                 @endphp
                 <tr class="saldo-lalu">
@@ -193,17 +195,25 @@
                 @foreach ($trhtransout as $item)
                     @php
                         $saldo += $item->terima - $item->keluar;
+                        $totalTerima += $item->terima;
+                        $totalKeluar += $item->keluar;
                     @endphp
                     <tr>
                         <td>{{ $rowNumber++ }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tgl_bukti)->translatedFormat('j F Y') }}</td>
-                        <td>{{ $item->no_bukti }}</td>
+                        <td>{{ $item->no_pajak }}</td>
                         <td>{{ $item->uraian }}</td>
                         <td class="numbers">Rp {{ number_format($item->terima, 2, ',', '.') }}</td>
                         <td class="numbers">Rp {{ number_format($item->keluar, 2, ',', '.') }}</td>
                         <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
                     </tr>
                 @endforeach
+                <tr>
+                    <td colspan="4" style="font-weight: bold; text-align: right;">Total</td>
+                    <td class="numbers" style="font-weight: bold;">Rp {{ number_format($totalTerima, 2, ',', '.') }}</td>
+                    <td class="numbers" style="font-weight: bold;">Rp {{ number_format($totalKeluar, 2, ',', '.') }}</td>
+                    <td></td>
+                </tr>
             </tbody>
         </table>
     </div>
