@@ -191,7 +191,7 @@
                 </tr>
                 @foreach ($trhtransout as $item)
                     <tr>
-                        <td>{{ $rowNumber++ }}</td>
+                        <td>{{ $item->no_kas }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tgl_kas)->translatedFormat('j F Y') }}</td>
                         <td>{{ $item->no_sp2d }}</td>
                         <td><strong>{{ $item->uraian }}</strong></td>
@@ -233,7 +233,7 @@
 
                         @if ($hasUtangBelanja)
                             <tr class="utang-belanja-parent">
-                                <td>{{ $rowNumber++ }}</td>
+                                <td>{{ $item->no_kas }}</td>
                                 <td>{{ \Carbon\Carbon::parse($item->tgl_kas)->translatedFormat('j F Y') }}</td>
                                 <td>{{ $item->no_sp2d }}</td>
                                 <td><strong>{{ $item->uraian }} (Transaksi CP)</strong></td>

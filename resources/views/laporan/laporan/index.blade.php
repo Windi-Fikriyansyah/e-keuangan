@@ -77,7 +77,7 @@
 
     <div class="page-content">
         <div class="row">
-            {{-- <div class="col-md-6">
+            <div class="col-md-6">
                 <div class="card card-info collapsed-card card-outline" id="spj" data-bs-toggle="modal" data-bs-target="#modalspj">
                     <div class="card-body">
                         <span>SPJ Fungsional</span>
@@ -85,7 +85,7 @@
                         <i class="fa fa-chevron-right float-end mt-2"></i>
                     </div>
                 </div>
-            </div> --}}
+            </div>
 
             <div class="col-md-6">
                 <div class="card card-info collapsed-card card-outline" id="rinciancp" data-bs-toggle="modal" data-bs-target="#modalrinciancp">

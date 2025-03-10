@@ -405,7 +405,7 @@ public function cetakdth(Request $request)
     ->where('trhstrpot.kd_skpd', $kd_skpd)
     ->whereBetween('trhstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir])
     ->where(function ($query) {
-        $query->where('trdstrpot.nm_rek6', 'LIKE', '%PPN%')
+        $query->where('trdstrpot.nm_rek6', 'LIKE', '%utang PPN%')
               ->orWhere('trdstrpot.nm_rek6', 'LIKE', '%PPH%');
     })
     ->select('trhstrpot.*', 'trhtransout.total')
@@ -517,6 +517,11 @@ public function cetakrealisasi(Request $request)
                     DB::raw("CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
                     '=',
                     DB::raw("CAST(trdtransout.kd_rek6 AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
+                )
+                ->on(
+                    DB::raw("CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
+                    '=',
+                    DB::raw("CAST(trdtransout.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
                 )
                 ->where('trdtransout.kd_skpd', '=', $kd_skpd)
                 ->where('trdtransout.jenis_terima_sp2d', '=', "0")
