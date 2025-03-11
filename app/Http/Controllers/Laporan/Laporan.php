@@ -590,7 +590,6 @@ public function cetakrealisasi(Request $request)
     }
 }
 
-
 public function cetakspj(Request $request)
 {
     $kd_skpd = $request->kd_skpd;
@@ -615,37 +614,42 @@ public function cetakspj(Request $request)
         ->where('kd_skpd', $kd_skpd)
         ->first();
 
-    // Ambil data transaksi dengan informasi sub_kegiatan
+    // Ambil data transaksi berdasarkan kd_sub_kegiatan dan kd_rek
     $trhtransout = DB::table('ms_anggaran')
         ->leftJoin('trdtransout', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
-            $join->on(
-                    DB::raw("CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
-                    '=',
-                    DB::raw("CAST(trdtransout.kd_rek6 AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
-                )
-                ->on(
-                    DB::raw("CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
-                    '=',
-                    DB::raw("CAST(trdtransout.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
-                )
+            $join->on('ms_anggaran.kd_rek', '=', 'trdtransout.kd_rek6')
+                ->on('ms_anggaran.kd_sub_kegiatan', '=', 'trdtransout.kd_sub_kegiatan')
                 ->where('trdtransout.kd_skpd', '=', $kd_skpd)
-                ->where('trdtransout.jenis_terima_sp2d', '=', "0")
                 ->whereBetween('trdtransout.tgl_bukti', [$tanggalawal, $tanggalakhir]);
         })
-        ->leftJoin('ms_sub_kegiatan', function ($join) {
-            $join->on(
-                DB::raw("CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
-                '=',
-                DB::raw("CAST(ms_sub_kegiatan.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
-            );
+        ->leftJoin('trdkasin_pkd', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+            $join->on('ms_anggaran.kd_rek', '=', 'trdkasin_pkd.kd_rek6')
+                ->on('ms_anggaran.kd_sub_kegiatan', '=', 'trdkasin_pkd.kd_sub_kegiatan')
+                ->where('trdkasin_pkd.kd_skpd', '=', $kd_skpd)
+                ->whereBetween('trdkasin_pkd.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+        })
+        ->leftJoin('trdtrmpot', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+            $join->on('ms_anggaran.kd_rek', '=', 'trdtrmpot.kd_rek6')
+                ->on('ms_anggaran.kd_sub_kegiatan', '=', 'trdtrmpot.kd_sub_kegiatan')
+                ->where('trdtrmpot.kd_skpd', '=', $kd_skpd)
+                ->whereBetween('trdtrmpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+        })
+        ->leftJoin('trdstrpot', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+            $join->on('ms_anggaran.kd_rek', '=', 'trdstrpot.kd_rek6')
+                ->on('ms_anggaran.kd_sub_kegiatan', '=', 'trdstrpot.kd_sub_kegiatan')
+                ->where('trdstrpot.kd_skpd', '=', $kd_skpd)
+                ->whereBetween('trdstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
         })
         ->select(
-            'ms_anggaran.kd_sub_kegiatan as kd_kegiatan',
-            'ms_anggaran.nm_sub_kegiatan as nm_kegiatan',
-            'ms_anggaran.kd_rek as kd_rek5',
-            'ms_anggaran.nm_rek as nm_rek5',
+            'ms_anggaran.kd_sub_kegiatan',
+            'ms_anggaran.nm_sub_kegiatan',
+            'ms_anggaran.kd_rek',
+            'ms_anggaran.nm_rek',
             'ms_anggaran.anggaran_tahun',
-            DB::raw("SUM(trdtransout.nilai) as nilai") // Menjumlahkan nilai jika kd_rek5 sama
+            DB::raw("COALESCE(SUM(CASE WHEN trdtransout.jns_beban = 'LS' THEN trdtransout.nilai ELSE 0 END), 0) as total_ls"),
+            DB::raw("COALESCE(SUM(CASE WHEN trdkasin_pkd.jns_beban = 'UP' THEN trdkasin_pkd.nilai ELSE 0 END), 0) as total_up"),
+            DB::raw("COALESCE(SUM(CASE WHEN trdtrmpot.jns_beban = 'GU' THEN trdtrmpot.nilai ELSE 0 END), 0) as total_gu"),
+            DB::raw("COALESCE(SUM(CASE WHEN trdstrpot.jns_beban = 'TU' THEN trdstrpot.nilai ELSE 0 END), 0) as total_tu")
         )
         ->groupBy(
             'ms_anggaran.kd_sub_kegiatan',
@@ -658,8 +662,7 @@ public function cetakspj(Request $request)
         ->orderBy('ms_anggaran.kd_rek')
         ->get();
 
-
-
+    // Ambil tanda tangan bendahara dan KPA
     $ttdbendahara = DB::table('masterTtd')
         ->where('kodeSkpd', $kd_skpd)
         ->where('nip', $ttdbendaharadth)
@@ -670,6 +673,7 @@ public function cetakspj(Request $request)
         ->where('nip', $ttdpa_kpa)
         ->first();
 
+    // Data yang akan dikirim ke view
     $data = [
         'dataSkpd' => $dataSkpd,
         'trhtransout' => $trhtransout,
@@ -695,6 +699,7 @@ public function cetakspj(Request $request)
         return $pdf->stream('Laporan_DTH.pdf');
     }
 }
+
 
 
 

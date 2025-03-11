@@ -104,21 +104,22 @@
                     <th rowspan="2">Kode Rekening</th>
                     <th rowspan="2">Uraian</th>
                     <th rowspan="2">Jumlah Anggaran</th>
-                    <th rowspan="2">s.d Bulan lalu</th>
-                    <th colspan="2" class="column-header">SPJ-LS Gaji</th>
+                    <th colspan="3" class="column-header">SPJ-LS Gaji</th>
                     <th colspan="3" class="column-header">SPJ-LS Barang & Jasa</th>
-                    <th colspan="2" class="column-header">SPJ UP/GU/TU</th>
+                    <th colspan="3" class="column-header">SPJ UP/GU/TU</th>
                     <th rowspan="2">Jumlah SPJ (LS+UP/GU/TU)</th>
                     <th rowspan="2">Sisa Pagu Anggaran</th>
                 </tr>
                 <tr class="subheader">
-                    <th>Bulan Ini</th>
-                    <th>s.d Bulan Ini</th>
                     <th>s.d Bulan lalu</th>
                     <th>Bulan Ini</th>
                     <th>s.d Bulan Ini</th>
                     <th>s.d Bulan lalu</th>
                     <th>Bulan Ini</th>
+                    <th>s.d Bulan Ini</th>
+                    <th>s.d Bulan lalu</th>
+                    <th>Bulan Ini</th>
+                    <th>s.d Bulan Ini</th>
                 </tr>
                 <tr>
                     <th>1</th>
@@ -162,7 +163,7 @@
                         // SPJ UP/GU/TU
                         $spjUpSdBulanLalu = 0;
                         $spjUpBulanIni = $items->sum('nilai'); // Example, adjust as needed
-
+                        $spjUpSdBulanIni = 0;
                         // Calculate totals
                         $totalSpj = $spjLsGajiSdBulanIni + $spjBarangSdBulanIni + $spjUpBulanIni;
                         $sisaPagu = $totalAnggaran - $totalSpj;
@@ -181,6 +182,7 @@
                         <td class="numbers">{{ number_format($spjBarangSdBulanIni, 2, ',', '.') }}</td>
                         <td class="numbers">{{ number_format($spjUpSdBulanLalu, 2, ',', '.') }}</td>
                         <td class="numbers">{{ number_format($spjUpBulanIni, 2, ',', '.') }}</td>
+                        <td class="numbers">{{ number_format($spjUpSdBulanIni, 2, ',', '.') }}</td>
                         <td class="numbers">{{ number_format($totalSpj, 2, ',', '.') }}</td>
                         <td class="numbers">{{ number_format($sisaPagu, 2, ',', '.') }}</td>
                     </tr>

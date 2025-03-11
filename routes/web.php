@@ -17,6 +17,8 @@ use App\Http\Controllers\Laporan\SertifikatController as LaporanSertifikatContro
 use App\Exports\SalesReportExport;
 use App\Http\Controllers\KelolaData\Ms_program;
 use App\Http\Controllers\KelolaData\Ms_sumberdana;
+use App\Http\Controllers\Transaksi\Lpj;
+use App\Http\Controllers\Transaksi\Lpj_tu;
 use App\Http\Controllers\Transaksi\SetorKas;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
@@ -132,6 +134,45 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/save', [SetorKas::class, 'saveTransaction'])->middleware('permission:41');
         Route::get('/riwayat-SetorKas', [SetorKas::class, 'showTransactionHistory'])->middleware('permission:41')->name('riwayat');
     });
+
+    Route::prefix('lpj')->as('lpj.')
+        ->group(function () {
+        Route::get('', [Lpj::class, 'index'])->middleware('permission:44')->name('index');
+        Route::post('/load', [Lpj::class, 'load'])->middleware('permission:44')->name('load');
+        Route::get('/create', [Lpj::class, 'create'])->middleware('permission:44')->name('create');
+        Route::get('/lpj/get-data', [Lpj::class, 'getData'])->middleware('permission:44')->name('getData');
+        Route::delete('/lpj_tabel/{id}', [Lpj::class, 'hapus_tabel'])->middleware('permission:44')->name('hapus_tabel');
+        Route::post('store', [Lpj::class, 'store'])->middleware('permission:44')->name('store');
+        Route::delete('/lpj/{no_lpj}', [Lpj::class, 'destroy'])->middleware('permission:44')->name('destroy');
+        Route::get('edit/{no_bukti}', [Lpj::class, 'edit'])->middleware('permission:44')->name('edit');
+        Route::get('ubah/{no_bukti}', [Lpj::class, 'ubah'])->middleware('permission:44')->name('ubah');
+        Route::post('update/{no_bukti}', [Lpj::class, 'update'])->middleware('permission:44')->name('update');
+        Route::post('/lpj/get-sp2d', [Lpj::class, 'getSp2d'])->middleware('permission:44')->name('get-sp2d');
+        Route::post('/lpj/print', [Lpj::class, 'print'])->middleware('permission:44')->name('print');
+        Route::post('tandaTangan', [Lpj::class, 'tandaTangan'])->name('tandaTangan');
+        Route::post('tandaTanganPa', [Lpj::class, 'tandaTanganPa'])->name('tandaTanganPa');
+
+    });
+
+    Route::prefix('lpj_tu')->as('lpj_tu.')
+    ->group(function () {
+    Route::get('', [Lpj_tu::class, 'index'])->middleware('permission:45')->name('index');
+    Route::post('/load', [Lpj_tu::class, 'load'])->middleware('permission:45')->name('load');
+    Route::get('/create', [Lpj_tu::class, 'create'])->middleware('permission:45')->name('create');
+    Route::get('/lpj_tu/get-data', [Lpj_tu::class, 'getData'])->middleware('permission:45')->name('getData');
+    // Route::delete('/lpj_tu/{id}', [Lpj_tu::class, 'hapus_tabel'])->middleware('permission:45')->name('hapus_tabel');
+    Route::post('store', [Lpj_tu::class, 'store'])->middleware('permission:45')->name('store');
+    Route::get('edit/{no_bukti}', [Lpj_tu::class, 'edit'])->middleware('permission:45')->name('edit');
+    Route::get('ubah/{no_bukti}', [Lpj_tu::class, 'ubah'])->middleware('permission:45')->name('ubah');
+    Route::delete('/lpj_tu/{no_lpj}', [Lpj_tu::class, 'destroy'])->middleware('permission:45')->name('destroy');
+    Route::post('/get_nosp2d', [Lpj_tu::class, 'get_nosp2d'])->middleware('permission:45')->name('get_nosp2d');
+
+    Route::get('lpj/getDataByNoBukti', [Lpj_tu::class, 'getDataByNoBukti'])->name('getDataByNoBukti');
+    Route::post('/Lpj_tu/get-sp2d', [Lpj_tu::class, 'getSp2d'])->middleware('permission:45')->name('get-sp2d');
+        Route::post('/Lpj_tu/print', [Lpj_tu::class, 'print'])->middleware('permission:45')->name('print');
+        Route::post('tandaTangan', [Lpj_tu::class, 'tandaTangan'])->name('tandaTangan');
+        Route::post('tandaTanganPa', [Lpj_tu::class, 'tandaTanganPa'])->name('tandaTanganPa');
+});
 });
 
 Route::middleware(['auth'])->group(function () {
