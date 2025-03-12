@@ -254,6 +254,7 @@ class Transaksi extends Controller
     {
         $details = json_decode($request->input('details'), true) ?? [];
         $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
+        $perlimpahan = $request->has('jenis_perlimpahan') ? 1 : 0;
 
         $validator = Validator::make([
             'tgl_bukti' => $request->tgl_bukti,
@@ -290,6 +291,7 @@ class Transaksi extends Controller
                 'total' => $request->total_belanja, // Now a clean decimal value
                 'jenis_beban' => $request->jenis_beban,
                 'jenis_terima_sp2d' => $jenis_terima_sp2d,
+                'perlimpahan' => $perlimpahan,
                 'username' => auth()->user()->kd_skpd,
                 'tgl_update' => now(),
             ]);
@@ -343,11 +345,13 @@ class Transaksi extends Controller
 
             $detailInserts = array_map(function($detail) use ($request) {
                 $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
+                $perlimpahan = $request->has('jenis_perlimpahan') ? 1 : 0;
                 return [
                     'no_bukti' => $request->no_bukti,
                     'tgl_bukti' => $request->tgl_bukti,
                     'kd_skpd' => auth()->user()->kd_skpd,
                     'jenis_terima_sp2d' => $jenis_terima_sp2d,
+                    'perlimpahan' => $perlimpahan,
                     'kd_sub_kegiatan' => $detail['kd_sub_kegiatan'],
                     'nm_sub_kegiatan' => $detail['nm_sub_kegiatan'],
                     'kd_rek6' => $detail['kd_rek'],
