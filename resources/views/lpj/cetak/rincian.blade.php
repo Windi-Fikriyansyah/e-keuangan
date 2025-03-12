@@ -74,10 +74,29 @@
                 @endforeach
             @endforeach
 
+
+            @php
+                $uang_persediaan_akhir = $persediaan->total_up - $total;
+            @endphp
+
             <tr>
-                <td colspan="3" style="text-align: right"><b>Total</b></td>
+                <td></td>
+                <td></td>
+                <td style="text-align: right"><b>Uang Persediaan Awal Periode</b></td>
+                <td style="text-align: right"><b>{{ number_format($persediaan->total_up, 2, ',', '.') }}</b></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td style="text-align: right"><b>Total</b></td>
                 <td style="text-align: right"><b>{{ number_format($total, 2, ',', '.') }}</b></td>
             </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td style="text-align: right"><b>Uang Persediaan Akhir Periode</b></td>
+                    <td style="text-align: right"><b>{{ number_format($uang_persediaan_akhir, 2, ',', '.') }}</b></td>
+                </tr>
         </tbody>
     </table>
     <br>

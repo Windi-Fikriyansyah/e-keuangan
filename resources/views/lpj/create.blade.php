@@ -156,7 +156,6 @@
                                     <th>Rekening</th>
                                     <th>Nama Rekening</th>
                                     <th>Nilai</th>
-                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelPotonganBody">
@@ -347,13 +346,7 @@ document.getElementById("formBpkb").addEventListener("submit", function(e) {
                                     <td>${item.kd_rek6 || ''}</td>
                                     <td>${item.nm_rek6 || ''}</td>
                                     <td class="text-end">${formatRupiah(nilaiValue)}</td>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-danger btn-hapus"
-                                                data-id="${item.no_bukti || ''}"
-                                                data-no-bukti="${item.no_bukti || ''}">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </td>
+
                                 </tr>
                             `);
                         });

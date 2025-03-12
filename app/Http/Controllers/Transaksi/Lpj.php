@@ -107,6 +107,10 @@ public function print(Request $request)
         ->where('no_lpj', $noLpj)
         ->first();
 
+    $persediaan = DB::table('masterSkpd')
+        ->where('kodeSkpd', $kd_skpd)
+        ->first();
+
     $data_lpj = DB::table('trlpj')
         ->select(
             'trlpj.kd_sub_kegiatan',
@@ -125,7 +129,7 @@ public function print(Request $request)
     if ($printType === 'sptb') {
         return view('lpj.cetak.sptb', compact('kd_skpd', 'nm_skpd', 'jumlah_belanja', 'bendahara', 'tanggal_ttd'));
     } else{
-        return view('lpj.cetak.rincian', compact('kd_skpd', 'nm_skpd', 'jumlah_belanja', 'bendahara', 'tanggal_ttd','lpj','data_lpj','pa_kpa'));
+        return view('lpj.cetak.rincian', compact('kd_skpd','persediaan', 'nm_skpd', 'jumlah_belanja', 'bendahara', 'tanggal_ttd','lpj','data_lpj','pa_kpa'));
     }
 
     return back()->with('message', 'Dokumen berhasil dicetak.');
