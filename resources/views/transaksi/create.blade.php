@@ -1270,6 +1270,11 @@ $('#kd_dana').select2({
     // Ambil anggaran sesuai bulan yang dipilih
     let anggaranBulan = parseFloat(selectedOption.data(`rek${selectedMonth}`)) || 0;
 
+    let totalAnggaranKas = 0;
+    for (let i = 1; i <= selectedMonth; i++) {
+        totalAnggaranKas += parseFloat(selectedOption.data(`rek${i}`)) || 0;
+    }
+
     let totalAnggaranSebelumnya = 0;
     for (let i = 1; i < selectedMonth; i++) {
         totalAnggaranSebelumnya += parseFloat(selectedOption.data(`rek${i}`)) || 0;
@@ -1288,7 +1293,6 @@ $('#kd_dana').select2({
         kd_rek: kd_rek
     }).done(function(response) {
         let totalNilai = parseFloat(response.total_nilai) || 0;
-        let totalAnggaranKas = (selectedMonth === 1) ? anggaranBulan : anggaranBulan + (totalAnggaranSebelumnya - totalNilai);
         let totalSPDFinal = (selectedTriwulan === 1) ? totalSPD : totalSPD + (totalspdsebelumnya - totalNilai);
 
         $('#nm_rek').val(nmrek);
