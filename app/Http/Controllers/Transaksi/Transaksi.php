@@ -77,6 +77,77 @@ class Transaksi extends Controller
         return view('transaksi.create', compact('kd_skpd','nm_skpd','newNoBukti','rek_pengeluaran','kd_sub_kegiatan','saldo_awal'));
     }
 
+    public function getno_transaksi(Request $request)
+    {
+        $search = $request->q;
+        $kd_skpd = auth()->user()->kd_skpd;
+
+
+        $sertifikat = DB::table('trhtransout')
+            ->join('trdtransout', 'trhtransout.no_bukti', '=', 'trdtransout.no_bukti')
+            ->select(
+                'trhtransout.no_bukti',
+                'trhtransout.tgl_bukti',
+                'trhtransout.ket',
+            )
+            ->where('trhtransout.kd_skpd', $kd_skpd)
+            ->where('trhtransout.jenis_terima_sp2d', "1")
+            ->where(function($query) {
+                $query->where('trhtransout.jenis_beban', 'GAJI')
+                      ->orWhere('trhtransout.jenis_beban', 'Barang & Jasa');
+            })
+            ->when(!empty($search), function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('trhtransout.no_bukti', 'LIKE', "%{$search}%")
+                    ->orWhere('trhtransout.tgl_bukti', 'LIKE', "%{$search}%")
+                    ->orWhere('trhtransout.ket', 'LIKE', "%{$search}%");
+                });
+            })
+            ->groupBy(
+                'trhtransout.no_bukti',
+                'trhtransout.tgl_bukti',
+                'trhtransout.ket',
+
+            )
+            ->limit(1000)
+            ->get();
+
+        $data = $sertifikat->map(function ($item) {
+            return [
+                'id' => $item->no_bukti,
+                'text' => "{$item->no_bukti} | {$item->tgl_bukti} | {$item->ket}",
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    public function getpotongandata(Request $request)
+    {
+        $no_transaksi = $request->no_transaksi;
+
+
+
+        // Ambil data dari trdtrmpot berdasarkan no_bukti yang sesuai
+        $trdtrmpot = DB::table('trdtransout')
+        ->join('ms_sumberdana', 'trdtransout.sumber', '=', 'ms_sumberdana.id')
+        ->where('trdtransout.no_bukti', $no_transaksi)
+        ->select(
+            'trdtransout.*', // Ambil semua kolom dari trdtransout
+            'ms_sumberdana.sumber_dana as nm_dana',
+            'ms_sumberdana.id as id_dana' // Ambil nama sumber dana dari ms_sumberdana
+        )
+        ->get();
+
+
+        return response()->json([
+            'success' => true,
+            'trdtrmpot' => $trdtrmpot
+        ]);
+    }
+
+
+
     public function getSubKegiatan(Request $request)
     {
     try {
@@ -252,6 +323,7 @@ class Transaksi extends Controller
 
     public function store(Request $request)
     {
+
         $details = json_decode($request->input('details'), true) ?? [];
         $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
         $perlimpahan = $request->has('jenis_perlimpahan') ? 1 : 0;
@@ -264,7 +336,8 @@ class Transaksi extends Controller
         ], [
             'tgl_bukti' => 'required|date',
             'jenis_beban' => 'required',
-            'details' => 'required|array|min:1'
+            'details' => 'required|array|min:1',
+            'ket' => 'required',
         ]);
 
         if ($validator->fails()) {

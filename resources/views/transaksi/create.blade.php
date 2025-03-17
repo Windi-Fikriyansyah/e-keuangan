@@ -30,6 +30,7 @@
                 <form method="POST"action="{{ route('transaksi.store') }}" id="formBpkb">
                     @csrf
                     <input type="hidden" name="details" id="hiddenDetails">
+
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Kode OPD/UNIT</label>
                         <div class="col-sm-10">
@@ -90,6 +91,22 @@
                             @enderror
                         </div>
                     </div>
+                    <div class="row mb-3 sp2d-checkbox" style="display: none;">
+                        <label class="col-sm-2 col-form-label"></label>
+                        <div class="col-sm-10">
+                            <input type="checkbox" id="sp2d_langsung" name="sp2d_langsung" value="1" class='form-check-input'>
+                            <label for="sp2d_langsung">Tarik Otomatis Terima Sp2d</label>
+                        </div>
+                    </div>
+                    <div class="row mb-3" id="no_transaksi_wrapper" style="display: none;">
+                        <label class="col-sm-2 col-form-label">No Transaksi</label>
+                        <div class="col-sm-10">
+                            <select class="form-select @error('no_transaksi') is-invalid @enderror"
+                                name="no_transaksi" id="no_transaksi_input" style="width: 100%" disabled>
+                            </select>
+                        </div>
+                    </div>
+
 
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label"></label>
@@ -172,7 +189,7 @@
                                     <th>Nama Rekening</th>
                                     <th>Nilai</th>
                                     <th>Sumber</th>
-                                    <th>Aksi</th>
+                                    <th id="aksiColumn">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -454,6 +471,92 @@
     </style>
 
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const jenisBeban = document.querySelector("select[name='jenis_beban']");
+    const terimaSp2d = document.getElementById("terima_sp2d");
+    const sp2dCheckboxContainer = document.querySelector(".sp2d-checkbox");
+
+    // Fungsi untuk menampilkan atau menyembunyikan checkbox SP2D langsung
+    function toggleSp2dCheckbox() {
+        const selectedBeban = jenisBeban.value;
+        const isTerimaSp2dChecked = terimaSp2d.checked;
+
+        // Tampilkan checkbox SP2D langsung jika jenis beban adalah GAJI atau Barang & Jasa
+        // DAN checkbox "Terima SP2D" tidak dicentang
+        if ((selectedBeban === "GAJI" || selectedBeban === "Barang & Jasa") && !isTerimaSp2dChecked) {
+            sp2dCheckboxContainer.style.display = "flex"; // Tampilkan
+        } else {
+            sp2dCheckboxContainer.style.display = "none"; // Sembunyikan
+        }
+    }
+
+    // Jalankan fungsi saat jenis beban atau checkbox "Terima SP2D" berubah
+    jenisBeban.addEventListener("change", toggleSp2dCheckbox);
+    terimaSp2d.addEventListener("change", toggleSp2dCheckbox);
+
+
+        toggleSp2dCheckbox();
+
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const sp2dLangsungCheckbox = document.getElementById("sp2d_langsung");
+    const noTransaksiWrapper = document.getElementById("no_transaksi_wrapper");
+    const noTransaksiInput = document.getElementById("no_transaksi_input");
+    const aksiColumn = document.getElementById("aksiColumn");
+
+    // Selecting the button with the specific selectors
+    const tambahButton = document.querySelector("button[data-bs-target='#inputKegiatanModal']");
+
+    // Make sure we have a consistent function to toggle the button visibility
+    function updateButtonVisibility() {
+        if (sp2dLangsungCheckbox.checked) {
+            if (tambahButton) {
+                tambahButton.style.display = "none";
+                // Add !important to the style to override any CSS rules
+                tambahButton.setAttribute("style", "display: none !important");
+                aksiColumn.style.display = "none";
+            }
+        } else {
+            if (tambahButton) {
+                tambahButton.style.display = "flex";
+                tambahButton.setAttribute("style", "display: flex !important");
+                aksiColumn.style.display = "table-cell";
+            }
+        }
+    }
+
+    // Function to handle checkbox change
+    function toggleNoTransaksi() {
+        if (sp2dLangsungCheckbox.checked) {
+            noTransaksiInput.disabled = false;
+            noTransaksiWrapper.style.display = "flex";
+        } else {
+            noTransaksiInput.disabled = true;
+            noTransaksiWrapper.style.display = "none";
+        }
+
+        // Update button visibility
+        updateButtonVisibility();
+    }
+
+    // Add event listener for checkbox change
+    sp2dLangsungCheckbox.addEventListener("change", toggleNoTransaksi);
+
+    // Initial setup
+    toggleNoTransaksi();
+
+    // Add an additional event listener for when the page is fully loaded
+    window.addEventListener('load', function() {
+        // Wait a bit to ensure all scripts have run
+        setTimeout(updateButtonVisibility, 100);
+    });
+
+    // Check periodically if the button visibility matches the checkbox state
+    setInterval(updateButtonVisibility, 500);
+});
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
     const jenisBeban = document.querySelector("select[name='jenis_beban']");
@@ -684,6 +787,108 @@ function hitungSisa(totalId, realisasiId, sisaId) {
         }).format(sisa).replace("Rp", "").trim();
     }
 $(document).ready(function() {
+
+    function formatRupiah5(number) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(number);
+    }
+    $('#no_transaksi_input').select2({
+        theme: "bootstrap-5",
+        width: "100%",
+        placeholder: "Silahkan Pilih...", // Pastikan placeholder ada di luar ajax
+        allowClear: true, // Tambahkan agar placeholder tetap terlihat
+        ajax: {
+            url: "{{ route('transaksi.getno_transaksi') }}",
+            dataType: 'json',
+            type: "POST",
+            delay: 250,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // Tambahkan CSRF token
+            },
+            processResults: function(data) {
+                return {
+                    results: $.map(data, function(item) {
+                        return {
+                            id: item.id,
+                            text: item.text
+                        };
+                    })
+                };
+            },
+            cache: true
+        }
+    });
+
+    // Event ketika no_transaksi dipilih
+    // Event ketika no_transaksi dipilih
+$('#no_transaksi_input').change(function() {
+    let noTransaksi = $(this).val();
+
+    if (noTransaksi) {
+        $.ajax({
+            url: "{{ route('transaksi.getpotongandata') }}",
+            type: "POST",
+            data: { no_transaksi: noTransaksi },
+            dataType: "json",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Clear the existing dataSementara array
+                    dataSementara = [];
+
+                    $.each(response.trdtrmpot, function(index, row) {
+                        // Add each row to dataSementara with the required structure
+                        dataSementara.push({
+                            kd_sub_kegiatan: row.kd_sub_kegiatan || '',
+                            nm_sub_kegiatan: row.nm_sub_kegiatan || '',
+                            no_sp2d: row.no_sp2d || '',
+                            kd_rek: row.kd_rek6 || '',
+                            nm_rek: row.nm_rek6 || '',
+                            kd_dana: row.id_dana || '',
+                            nm_dana: row.nm_dana || '',
+                            nilai: formatRupiah5(row.nilai).replace('Rp', '').trim(),
+                            volume: row.volume || null,
+                            satuan: row.satuan || null,
+                            total: row.total || null,
+                            totalSPD: row.totalSPD || 0,
+                            realisasiSPD: row.realisasiSPD || 0,
+                            sisaSPD: row.sisaSPD || 0,
+                            totalAnggaranKas: row.totalAnggaranKas || 0,
+                            realisasiAnggaranKas: row.realisasiAnggaranKas || 0,
+                            sisaAnggaranKas: row.sisaAnggaranKas || 0,
+                            anggaran: row.anggaran || 0,
+                            realisasiAnggaran: row.realisasiAnggaran || 0,
+                            sisaAnggaran: row.sisaAnggaran || 0,
+                            rencanaPergeseranAnggaran: row.rencanaPergeseranAnggaran || 0,
+                            realisasiPergeseranAnggaran: row.realisasiPergeseranAnggaran || 0,
+                            sisaPergeseranAnggaran: row.sisaPergeseranAnggaran || 0,
+                            nilaisumberdana: row.nilaisumberdana || 0,
+                            realisasinilaisumberdana: row.realisasinilaisumberdana || 0,
+                            sisanilaisumberdana: row.sisanilaisumberdana || 0
+                        });
+                    });
+
+                    // Update the table with new data
+                    updateTable();
+                } else {
+                    alert('Data tidak ditemukan!');
+                }
+            },
+            error: function(xhr) {
+                console.log(xhr.responseText);
+                alert('Terjadi kesalahan saat mengambil data.');
+            }
+        });
+    }
+});
+
+
     $('#inputKegiatanModal').on('show.bs.modal', function (e) {
 
     let tglBukti = $('input[name="tgl_bukti"]').val();
