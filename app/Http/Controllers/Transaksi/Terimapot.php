@@ -665,8 +665,36 @@ public function update(Request $request, $no_bukti)
             'id_trhtransout' => $request->id_trhtransout,
         ]);
 
+        DB::table('trhbppajak')->where('no_bukti', $no_bukti)->where('no_trmpot', $no_bukti)->update([
+            'tgl_bukti' => $request->tgl_bukti,
+            'uraian' => $request->ket,
+            'kd_rek' => $request->kd_rek6,
+            'nm_rek' => $request->nm_rek6,
+            'ebilling' => $request->ebilling,
+            'kd_skpd' => $request->kd_skpd ?? $trmpot->kd_skpd,
+            'nm_skpd' => $request->nm_skpd ?? $trmpot->nm_skpd,
+            'id_user' => Auth()->user()->id,
+            'terima' => $totalNilai,
+            'no_sp2d' => $request->no_sp2d,
+            'created_at' => Carbon::now('Asia/Jakarta'),
+        ]);
+
+        DB::table('trhbku')->where('no_kas', $no_bukti)->where('id_trmpot', $no_bukti)->update([
+            'tgl_kas' => $request->tgl_bukti,
+            'uraian' => $request->ket,
+            'no_sp2d' => $request->no_sp2d,
+            'kd_skpd' => $request->kd_skpd ?? $trmpot->kd_skpd,
+            'nm_skpd' => $request->nm_skpd ?? $trmpot->nm_skpd,
+            'id_user' => auth()->user()->id,
+            'terima' => $totalNilai,
+            'created_at' => Carbon::now('Asia/Jakarta'),
+        ]);
+
+
+
         // Hapus potongan details lama
         DB::table('trdtrmpot')->where('no_bukti', $no_bukti)->delete();
+        DB::table('trdbku')->where('no_kas', $no_bukti)->where('id_trmpot', $no_bukti)->delete();
 
         // Simpan potongan details baru
         $potonganInsertData = array_map(function ($detail) use ($request, $no_bukti, $trmpot) {
@@ -685,6 +713,24 @@ public function update(Request $request, $no_bukti)
         }, $potonganData);
 
         DB::table('trdtrmpot')->insert($potonganInsertData);
+
+
+        $potonganInsertData1 = array_map(function ($detail) use ($request, $no_bukti, $trmpot) {
+            return [
+                'no_kas' => $no_bukti,
+                'kd_sub_kegiatan' => $request->kd_sub_kegiatan,
+                'nm_sub_kegiatan' => $request->nm_sub_kegiatan,
+                'kd_rek6' => $detail['kdrekpot'],
+                'nm_rek6' => $detail['nmrekpot'],
+                'terima' => str_replace(['Rp', '.', ','], '', $detail['nilai']),
+                'kd_skpd' => $request->kd_skpd ?? $trmpot->kd_skpd,
+                'id_trmpot' => $no_bukti,
+
+
+            ];
+        }, $potonganData);
+
+        DB::table('trdbku')->insert($potonganInsertData1);
 
         DB::commit();
         return response()->json([
