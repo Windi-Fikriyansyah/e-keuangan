@@ -51,19 +51,29 @@
             @endphp
 
             @foreach ($data_lpj as $kd_sub_kegiatan => $items)
-                @php $no_kegiatan++; @endphp
+                @php
+                    $no_kegiatan++;
+                    $subtotal = 0; // Reset subtotal for each sub-kegiatan
+
+                    // Calculate subtotal for this sub-kegiatan
+                    foreach ($items as $item) {
+                        $subtotal += $item->nilai;
+                    }
+
+                    // Add this subtotal to the grand total
+                    $total += $subtotal;
+                @endphp
                 <tr>
                     <td style="text-align: center"><b>{{ $no_kegiatan }}</b></td>
                     <td><b>{{ $kd_sub_kegiatan }}</b></td>
                     <td><b>{{ $items->first()->nm_sub_kegiatan }}</b></td>
-                    <td></td>
+                    <td style="text-align: right"><b>{{ number_format($subtotal, 2, ',', '.') }}</b></td>
                 </tr>
 
                 @php $no_rekening = 0; @endphp
                 @foreach ($items as $item)
                     @php
                         $no_rekening++;
-                        $total += $item->nilai;
                     @endphp
                     <tr>
                         <td></td>
@@ -74,11 +84,9 @@
                 @endforeach
             @endforeach
 
-
             @php
                 $uang_persediaan_akhir = $persediaan->total_up - $total;
             @endphp
-
 
             <tr>
                 <td></td>
@@ -93,12 +101,12 @@
                 <td style="text-align: right"><b>{{ number_format($persediaan->total_up, 2, ',', '.') }}</b></td>
             </tr>
 
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td style="text-align: right"><b>Uang Persediaan Akhir Periode</b></td>
-                    <td style="text-align: right"><b>{{ number_format($uang_persediaan_akhir, 2, ',', '.') }}</b></td>
-                </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td style="text-align: right"><b>Uang Persediaan Akhir Periode</b></td>
+                <td style="text-align: right"><b>{{ number_format($uang_persediaan_akhir, 2, ',', '.') }}</b></td>
+            </tr>
         </tbody>
     </table>
     <br>

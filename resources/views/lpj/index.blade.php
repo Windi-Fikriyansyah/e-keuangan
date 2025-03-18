@@ -100,7 +100,10 @@
                 </form>
             </div>
             <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-primary" id="submitPrint">Layar</button>
+                <button type="button" class="btn btn-danger btn-md submitPrint" data-jenis="pdf">PDF</button>
+                        <button type="button" class="btn btn-dark btn-md submitPrint" data-jenis="layar">Layar</button>
+                        <button type="button" class="btn btn-dark btn-md submitPrint" data-jenis="excel">Excel</button>
+                        <button type="button" class="btn btn-secondary btn-md" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -338,19 +341,51 @@ $(document).on('click', '.print-btn', function() {
     });
 });
 
-// Handle print form submission
-$(document).on('click', '#submitPrint', function() {
-    if ($('#tgl_ttd').val() === '') {
-        Swal.fire(
-            'Error!',
-            'Tanggal tanda tangan harus diisi.',
-            'error'
-        );
+
+// Replace your existing $('.submitPrint').on('click', function () {...}) code with this:
+$('.submitPrint').on('click', function() {
+    let tgl_ttd = $('#tgl_ttd').val();
+    let ttdbendahara = $('#ttdbendaharabku').val();
+    let ttdpa_kpa = $('#ttdpaka').val();
+    let jenis_print = $(this).data("jenis");
+    let no_lpj = $('#no_lpj_modal').val();
+    let no_sp2d = $('#no_sp2d_modal').val();
+    let print_type = $('input[name="print_type"]:checked').val();
+
+    // Validate required fields
+    if (!tgl_ttd) {
+        Swal.fire({
+            title: "Peringatan!",
+            text: "Silakan pilih Tanggal TTD!",
+            icon: "warning"
+        });
         return;
     }
+
+    if (!ttdbendahara) {
+        Swal.fire({
+            title: "Peringatan!",
+            text: "Silakan pilih bendahara!",
+            icon: "warning"
+        });
+        return;
+    }
+
+    if (!ttdpa_kpa) {
+        Swal.fire({
+            title: "Peringatan!",
+            text: "Silakan pilih pa kpa!",
+            icon: "warning"
+        });
+        return;
+    }
+
+    // Add all form values to the form
+    $('#printForm').append('<input type="hidden" name="jenis_print" value="' + jenis_print + '">');
 
     // Submit the form
     $('#printForm').submit();
 });
+
     </script>
 @endpush

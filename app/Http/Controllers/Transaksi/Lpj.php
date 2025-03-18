@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
+use PDF;
 
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
@@ -79,7 +80,6 @@ public function getSp2d(Request $request)
 
 public function print(Request $request)
 {
-
     $noLpj = $request->no_lpj;
     $noSp2d = $request->no_sp2d;
     $tanggal_ttd = $request->tgl_ttd;
@@ -88,16 +88,18 @@ public function print(Request $request)
     $ttdPaKa = $request->ttdpaka;
     $kd_skpd = auth()->user()->kd_skpd;
     $nm_skpd = auth()->user()->name;
+    $jenis_print = $request->jenis_print;
+
     // Ambil data dari database sesuai kebutuhan
     $bendahara = DB::table('masterTtd')
-    ->where('kodeSkpd', $kd_skpd)
-    ->where('nip', $ttdBendahara)
-    ->first();
+        ->where('kodeSkpd', $kd_skpd)
+        ->where('nip', $ttdBendahara)
+        ->first();
 
     $pa_kpa = DB::table('masterTtd')
-    ->where('kodeSkpd', $kd_skpd)
-    ->where('nip', $ttdPaKa)
-    ->first();
+        ->where('kodeSkpd', $kd_skpd)
+        ->where('nip', $ttdPaKa)
+        ->first();
 
     $jumlah_belanja = DB::table('trlpj')
         ->where('no_lpj', $noLpj)
@@ -126,10 +128,29 @@ public function print(Request $request)
         ->get()
         ->groupBy('kd_sub_kegiatan');
 
+    // Prepare the view based on print type
     if ($printType === 'sptb') {
-        return view('lpj.cetak.sptb', compact('kd_skpd', 'nm_skpd', 'jumlah_belanja', 'bendahara', 'tanggal_ttd'));
-    } else{
-        return view('lpj.cetak.rincian', compact('kd_skpd','persediaan', 'nm_skpd', 'jumlah_belanja', 'bendahara', 'tanggal_ttd','lpj','data_lpj','pa_kpa'));
+        $view = view('lpj.cetak.sptb', compact('kd_skpd', 'nm_skpd', 'jumlah_belanja', 'bendahara', 'tanggal_ttd'));
+    } else {
+        $view = view('lpj.cetak.rincian', compact('kd_skpd', 'persediaan', 'nm_skpd', 'jumlah_belanja', 'bendahara', 'tanggal_ttd', 'lpj', 'data_lpj', 'pa_kpa'));
+    }
+
+    // Output based on jenis_print
+    if ($jenis_print == 'layar') {
+        return $view;
+    } elseif ($jenis_print == 'pdf') {
+        $pdf = PDF::loadHtml($view->render())
+            ->setPaper('legal')
+            ->setOrientation('landscape')
+            ->setOption('margin-left', 15)
+            ->setOption('margin-right', 15);
+
+        return $pdf->stream('LPJ_UPGU.pdf');
+    } elseif ($jenis_print == 'excel') {
+        header("Cache-Control: no-cache, no-store, must-revalidate");
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=LPJ_UPGU.xls");
+        return $view;
     }
 
     return back()->with('message', 'Dokumen berhasil dicetak.');

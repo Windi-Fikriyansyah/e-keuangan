@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Laporan;
 
+use App\Exports\BPPajakExport;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -159,6 +160,11 @@ class Laporan extends Controller
                 ->setOption('margin-right', 15);
 
             return $pdf->stream('Laporan_BKU.pdf');
+        }else if ($jenis_print == 'excel') {
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=laporan_BKU.xls");
+            return $view;
         }
     }
 
@@ -272,8 +278,14 @@ public function cetakbpp(Request $request)
             ->setOption('margin-right', 15);
 
         return $pdf->stream('Laporan_BPPajak.pdf');
+    } else if ($jenis_print == 'excel') {
+        header("Cache-Control: no-cache, no-store, must-revalidate");
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=laporan_buku_pembantu_pajak.xls");
+        return $view;
     }
 }
+
 
 public function cetakbpbank(Request $request)
 {
@@ -366,6 +378,11 @@ public function cetakbpbank(Request $request)
             ->setOption('margin-right', 15);
 
         return $pdf->stream('Laporan_BPBANK.pdf');
+    }else if ($jenis_print == 'excel') {
+        header("Cache-Control: no-cache, no-store, must-revalidate");
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=laporan_buku_pembantu_bank.xls");
+        return $view;
     }
 }
 
@@ -484,6 +501,11 @@ public function cetakdth(Request $request)
             ->setOption('margin-right', 15);
 
         return $pdf->stream('Laporan_DTH.pdf');
+    }else if ($jenis_print == 'excel') {
+        header("Cache-Control: no-cache, no-store, must-revalidate");
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=laporan_DTH.xls");
+        return $view;
     }
 }
 
@@ -587,6 +609,11 @@ public function cetakrealisasi(Request $request)
             ->setOption('margin-right', 15);
 
         return $pdf->stream('Laporan_DTH.pdf');
+    }else if ($jenis_print == 'excel') {
+        header("Cache-Control: no-cache, no-store, must-revalidate");
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=laporan_realisasi.xls");
+        return $view;
     }
 }
 
@@ -697,6 +724,11 @@ public function cetakspj(Request $request)
             ->setOption('margin-right', 15);
 
         return $pdf->stream('Laporan_DTH.pdf');
+    }else if ($jenis_print == 'excel') {
+        header("Cache-Control: no-cache, no-store, must-revalidate");
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=laporan_SPJ.xls");
+        return $view;
     }
 }
 
@@ -805,6 +837,11 @@ public function cetakobjek(Request $request)
             ->setOption('margin-right', 15);
 
         return $pdf->stream('Laporan_rincian_objek.pdf');
+    }else if ($jenis_print == 'excel') {
+        header("Cache-Control: no-cache, no-store, must-revalidate");
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=laporan_rincian_objek.xls");
+        return $view;
     }
 }
 
