@@ -739,6 +739,7 @@ public function cetakobjek(Request $request)
     ->first();
     $jumlah = DB::table('ms_anggaran')
     ->where('kd_rek', $akun_belanja)
+    ->where('kd_sub_kegiatan', $sub_kegiatan)
     ->select('*')
     ->first();
 
