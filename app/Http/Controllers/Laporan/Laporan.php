@@ -756,7 +756,7 @@ public function cetakobjek(Request $request)
     $kd_dana_list = $trhtransout->pluck('sumber')->unique()->filter();
 
     $sumber = DB::table('ms_sumberdana')
-    ->where('id', $kd_dana_list)
+    ->whereIn('id', $kd_dana_list->toArray())
     ->get()
     ->keyBy('id');
 
