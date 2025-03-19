@@ -178,6 +178,8 @@
             <tbody>
                 @php
                     $saldo = $saldoLalu ?? 0;
+                    $totalPenerimaan = 0;
+                    $totalPengeluaran = 0;
                 @endphp
                 <tr class="saldo-lalu">
                     <td colspan="2"></td>
@@ -189,6 +191,8 @@
                 @foreach ($trhtransout as $item)
                     @php
                         $saldo += $item->terima - $item->keluar;
+                        $totalPenerimaan += $item->terima;
+                        $totalPengeluaran += $item->keluar;
                     @endphp
                     <tr>
                         <td>{{ \Carbon\Carbon::parse($item->tgl_kas)->translatedFormat('j F Y') }}</td>
@@ -199,6 +203,12 @@
                         <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
                     </tr>
                 @endforeach
+                <tr class="total-row">
+                    <td colspan="3" style="text-align: right; font-weight: bold;">TOTAL</td>
+                    <td class="numbers">Rp {{ number_format($totalPenerimaan, 2, ',', '.') }}</td>
+                    <td class="numbers">Rp {{ number_format($totalPengeluaran, 2, ',', '.') }}</td>
+                    <td class="numbers">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
+                </tr>
             </tbody>
         </table>
     </div>
