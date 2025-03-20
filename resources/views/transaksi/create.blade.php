@@ -680,6 +680,14 @@ function validateNilai() {
         });
         return false;
     }
+    if (nilai > sisaSPD || nilai > sisaAnggaranKas || nilai > sisaAnggaran || nilai > sisanilaisumberdana) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan',
+            text: 'Nilai tidak boleh lebih besar dari sisa saldo yang tersedia!',
+        });
+        return false;
+    }
 
     return true;
 }
