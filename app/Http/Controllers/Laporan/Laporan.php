@@ -641,31 +641,54 @@ public function cetakspj(Request $request)
         ->where('kd_skpd', $kd_skpd)
         ->first();
 
-    // Ambil data transaksi berdasarkan kd_sub_kegiatan dan kd_rek
-    $trhtransout = DB::table('ms_anggaran')
-        ->leftJoin('trdtransout', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
-            $join->on('ms_anggaran.kd_rek', '=', 'trdtransout.kd_rek6')
-                ->on('ms_anggaran.kd_sub_kegiatan', '=', 'trdtransout.kd_sub_kegiatan')
+        $trhtransout = DB::table('ms_anggaran')
+        ->leftJoin(DB::raw('trdtransout WITH (NOLOCK)'), function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+            $join->on(DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                       DB::raw('CAST(trdtransout.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
+                ->on(DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                     DB::raw('CAST(trdtransout.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
                 ->where('trdtransout.kd_skpd', '=', $kd_skpd)
                 ->whereBetween('trdtransout.tgl_bukti', [$tanggalawal, $tanggalakhir]);
         })
-        ->leftJoin('trdkasin_pkd', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
-            $join->on('ms_anggaran.kd_rek', '=', 'trdkasin_pkd.kd_rek6')
-                ->on('ms_anggaran.kd_sub_kegiatan', '=', 'trdkasin_pkd.kd_sub_kegiatan')
-                ->where('trdkasin_pkd.kd_skpd', '=', $kd_skpd)
-                ->whereBetween('trdkasin_pkd.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+        ->leftJoin(DB::raw('trhtransout WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
+            $join->on(DB::raw('CAST(trdtransout.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                       DB::raw('CAST(trhtransout.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'));
         })
-        ->leftJoin('trdtrmpot', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
-            $join->on('ms_anggaran.kd_rek', '=', 'trdtrmpot.kd_rek6')
-                ->on('ms_anggaran.kd_sub_kegiatan', '=', 'trdtrmpot.kd_sub_kegiatan')
-                ->where('trdtrmpot.kd_skpd', '=', $kd_skpd)
-                ->whereBetween('trdtrmpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+        ->leftJoin(DB::raw('trdkasin_pkd WITH (NOLOCK)'), function ($join) use ($kd_skpd) {
+            $join->on(DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                       DB::raw('CAST(trdkasin_pkd.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
+                ->on(DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                     DB::raw('CAST(trdkasin_pkd.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
+                ->where('trdkasin_pkd.kd_skpd', '=', $kd_skpd);
         })
-        ->leftJoin('trdstrpot', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
-            $join->on('ms_anggaran.kd_rek', '=', 'trdstrpot.kd_rek6')
-                ->on('ms_anggaran.kd_sub_kegiatan', '=', 'trdstrpot.kd_sub_kegiatan')
-                ->where('trdstrpot.kd_skpd', '=', $kd_skpd)
-                ->whereBetween('trdstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+        ->leftJoin(DB::raw('trhkasin_pkd WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
+            $join->on(DB::raw('CAST(trdkasin_pkd.no_sts AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                       DB::raw('CAST(trhkasin_pkd.no_sts AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
+                ->whereBetween('trhkasin_pkd.tgl_sts', [$tanggalawal, $tanggalakhir]);
+        })
+        ->leftJoin(DB::raw('trhtrmpot WITH (NOLOCK)'), function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+            $join->on(DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                       DB::raw('CAST(trhtrmpot.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
+                ->on(DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                     DB::raw('CAST(trhtrmpot.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
+                ->where('trhtrmpot.kd_skpd', '=', $kd_skpd)
+                ->whereBetween('trhtrmpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+        })
+        ->leftJoin(DB::raw('trdtrmpot WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
+            $join->on(DB::raw('CAST(trhtrmpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                       DB::raw('CAST(trdtrmpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'));
+        })
+        ->leftJoin(DB::raw('trhstrpot WITH (NOLOCK)'), function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+            $join->on(DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                       DB::raw('CAST(trhstrpot.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
+                ->on(DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                     DB::raw('CAST(trhstrpot.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
+                ->where('trhstrpot.kd_skpd', '=', $kd_skpd)
+                ->whereBetween('trhstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+        })
+        ->leftJoin(DB::raw('trdstrpot WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
+            $join->on(DB::raw('CAST(trhstrpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
+                       DB::raw('CAST(trdstrpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'));
         })
         ->select(
             'ms_anggaran.kd_sub_kegiatan',
@@ -673,10 +696,54 @@ public function cetakspj(Request $request)
             'ms_anggaran.kd_rek',
             'ms_anggaran.nm_rek',
             'ms_anggaran.anggaran_tahun',
-            DB::raw("COALESCE(SUM(CASE WHEN trdtransout.jns_beban = 'LS' THEN trdtransout.nilai ELSE 0 END), 0) as total_ls"),
-            DB::raw("COALESCE(SUM(CASE WHEN trdkasin_pkd.jns_beban = 'UP' THEN trdkasin_pkd.nilai ELSE 0 END), 0) as total_up"),
-            DB::raw("COALESCE(SUM(CASE WHEN trdtrmpot.jns_beban = 'GU' THEN trdtrmpot.nilai ELSE 0 END), 0) as total_gu"),
-            DB::raw("COALESCE(SUM(CASE WHEN trdstrpot.jns_beban = 'TU' THEN trdstrpot.nilai ELSE 0 END), 0) as total_tu")
+
+            // SPJ-LS Gaji (s.d Bulan lalu)
+            DB::raw("COALESCE(SUM(CASE
+                WHEN (trhtransout.jenis_beban = 'GAJI'  AND trhtransout.tgl_bukti < '$tanggalawal') THEN trdtransout.nilai
+                WHEN (trhkasin_pkd.jns_cp = 'GAJI' AND trhkasin_pkd.tgl_sts < '$tanggalawal') THEN trdkasin_pkd.rupiah
+                WHEN (trhtrmpot.beban = 'GAJI' AND trhtrmpot.tgl_bukti < '$tanggalawal') THEN trdtrmpot.nilai
+                WHEN (trhstrpot.beban = 'GAJI' AND trhstrpot.tgl_bukti < '$tanggalawal') THEN trdstrpot.nilai
+                ELSE 0 END), 0) as spj_ls_gaji_sd_bulan_lalu"),
+
+            // SPJ-LS Gaji (Bulan ini)
+            DB::raw("COALESCE(SUM(CASE
+                WHEN (trhtransout.jenis_beban = 'GAJI'  AND trhtransout.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtransout.nilai
+                WHEN (trhkasin_pkd.jns_cp = 'GAJI' AND trhkasin_pkd.tgl_sts BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdkasin_pkd.rupiah
+                WHEN (trhtrmpot.beban = 'GAJI'  AND trhtrmpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtrmpot.nilai
+                WHEN (trhstrpot.beban = 'GAJI' AND trhstrpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdstrpot.nilai
+                ELSE 0 END), 0) as spj_ls_gaji_bulan_ini"),
+
+            // SPJ-LS Barang & Jasa (s.d Bulan lalu)
+            DB::raw("COALESCE(SUM(CASE
+                WHEN (trhtransout.jenis_beban = 'Barang & Jasa' AND trhtransout.tgl_bukti < '$tanggalawal') THEN trdtransout.nilai
+                WHEN (trhkasin_pkd.jns_cp = 'Barang & Jasa' AND trhkasin_pkd.tgl_sts < '$tanggalawal') THEN trdkasin_pkd.rupiah
+                WHEN (trhtrmpot.beban = 'Barang & Jasa' AND trhtrmpot.tgl_bukti < '$tanggalawal') THEN trdtrmpot.nilai
+                WHEN (trhstrpot.beban = 'Barang & Jasa' AND trhstrpot.tgl_bukti < '$tanggalawal') THEN trdstrpot.nilai
+                ELSE 0 END), 0) as spj_ls_barang_sd_bulan_lalu"),
+
+            // SPJ-LS Barang & Jasa (Bulan ini)
+            DB::raw("COALESCE(SUM(CASE
+                WHEN (trhtransout.jenis_beban = 'Barang & Jasa'  AND trhtransout.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtransout.nilai
+                WHEN (trhkasin_pkd.jns_cp = 'Barang & Jasa' AND trhkasin_pkd.tgl_sts BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdkasin_pkd.rupiah
+                WHEN (trhtrmpot.beban = 'Barang & Jasa' AND trhtrmpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtrmpot.nilai
+                WHEN (trhstrpot.beban = 'Barang & Jasa' AND trhstrpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdstrpot.nilai
+                ELSE 0 END), 0) as spj_ls_barang_bulan_ini"),
+
+            // SPJ UP/GU/TU (s.d Bulan lalu)
+            DB::raw("COALESCE(SUM(CASE
+                WHEN (trhtransout.jenis_beban IN ('UP', 'GU', 'TU') AND trhtransout.tgl_bukti < '$tanggalawal') THEN trdtransout.nilai
+                WHEN (trhkasin_pkd.jns_cp IN ('UP', 'GU', 'TU') AND trhkasin_pkd.tgl_sts < '$tanggalawal') THEN trdkasin_pkd.rupiah
+                WHEN (trhtrmpot.beban IN ('UP', 'GU', 'TU') AND trhtrmpot.tgl_bukti < '$tanggalawal') THEN trdtrmpot.nilai
+                WHEN (trhstrpot.beban IN ('UP', 'GU', 'TU') AND trhstrpot.tgl_bukti < '$tanggalawal') THEN trdstrpot.nilai
+                ELSE 0 END), 0) as spj_up_gu_tu_sd_bulan_lalu"),
+
+            // SPJ UP/GU/TU (Bulan ini)
+            DB::raw("COALESCE(SUM(CASE
+                WHEN (trhtransout.jenis_beban IN ('UP', 'GU', 'TU') AND trhtransout.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtransout.nilai
+                WHEN (trhkasin_pkd.jns_cp IN ('UP', 'GU', 'TU') AND trhkasin_pkd.tgl_sts BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdkasin_pkd.rupiah
+                WHEN (trhtrmpot.beban IN ('UP', 'GU', 'TU') AND trhtrmpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtrmpot.nilai
+                WHEN (trhstrpot.beban IN ('UP', 'GU', 'TU') AND trhstrpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdstrpot.nilai
+                ELSE 0 END), 0) as spj_up_gu_tu_bulan_ini")
         )
         ->groupBy(
             'ms_anggaran.kd_sub_kegiatan',
@@ -688,7 +755,6 @@ public function cetakspj(Request $request)
         ->orderBy('ms_anggaran.kd_sub_kegiatan')
         ->orderBy('ms_anggaran.kd_rek')
         ->get();
-
     // Ambil tanda tangan bendahara dan KPA
     $ttdbendahara = DB::table('masterTtd')
         ->where('kodeSkpd', $kd_skpd)

@@ -104,8 +104,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/getpotongandata', [SetorPajak::class, 'getpotongandata'])->middleware('permission:36')->name('getpotongandata');
         Route::delete('/trmpot/{no_bukti}', [SetorPajak::class, 'destroy'])->middleware('permission:36')->name('destroy');
         Route::get('edit/{no_bukti}', [SetorPajak::class, 'edit'])->middleware('permission:36')->name('edit');
-        Route::post('update/{no_bukti}', [SetorPajak::class, 'update'])->middleware('permission:36')->name('update');
         Route::post('/getTransactionDetails', [SetorPajak::class, 'getTransactionDetails'])->middleware('permission:36')->name('getTransactionDetails');
+        Route::get('ubah/{no_bukti}', [SetorPajak::class, 'ubah'])->middleware('permission:36')->name('ubah');
+        Route::post('update/{no_bukti}', [SetorPajak::class, 'update'])->middleware('permission:36')->name('update');
 
         Route::get('/cariData', [SetorPajak::class, 'cariData'])->middleware('permission:36')->name('cariData');
         Route::get('/products/search', [SetorPajak::class, 'search'])->middleware('permission:36')->name('search');

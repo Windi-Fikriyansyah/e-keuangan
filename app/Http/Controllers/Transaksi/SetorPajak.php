@@ -45,6 +45,7 @@ class SetorPajak extends Controller
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route('strpot.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
+                $btn .= '<a href="' . route('strpot.ubah', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-warning btn-sm" style="margin-right:4px"><i class="fas fa-edit"></i></a>';
                 $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('strpot.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
                 return $btn;
             })
@@ -649,38 +650,58 @@ public function destroy($no_bukti)
     }
 }
 
-public function update(Request $request, $no_bukti)
+public function ubah($no_bukti)
 {
 
+    // Dekripsi ID yang terenkripsi
+    $decryptedId = Crypt::decrypt($no_bukti);
 
-    // Validasi input
-    $validator = Validator::make($request->all(), [
-        'tgl_bukti' => 'required|date',
-        'id_trhtransout' => 'nullable|exists:trhtransout,no_bukti',
-        'no_sp2d' => 'required',
-        'pay' => 'required',
-        'kd_sub_kegiatan' => 'required',
-        'kd_rek6' => 'required',
-        'nmrekan' => 'required',
-        'beban' => 'required',
-        'alamat' => 'nullable',
-        'ket' => 'nullable',
-    ]);
 
-    if ($validator->fails()) {
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
+    // Ambil data pajak berdasarkan ID menggunakan Query Builder
+    $strpot = DB::table('trhstrpot')->where('no_bukti', $decryptedId)->first();
+
+    $potonganDetails = DB::table('trdstrpot')
+            ->where('no_bukti', $decryptedId)
+            ->select(
+                'id',
+                'kd_rek6',
+                    'nm_rek6',
+                    'rekanan',
+                    'npwp',
+                    'ntpn',
+                    'ebilling',
+                    'nilai'
+            )
+            ->get();
+    // Cek apakah data ditemukan
+    if (!$strpot) {
+        return redirect()->route('strpot.index')->with('message', 'Data Terima Potongan Pajak tidak ditemukan.');
     }
 
-    // Decode JSON dan pastikan valid
+    // Tampilkan view untuk mengedit data
+    return view('setor_potongan.ubah', compact('strpot','potonganDetails'));
+}
+
+public function update(Request $request, $no_bukti)
+{
+    // Remove the dd() that interrupts the JSON response
+    // dd($request->all());
+
     $potonganData = json_decode($request->potongan_data, true);
 
     if (!is_array($potonganData) || empty($potonganData)) {
-        return redirect()->back()
-            ->with('error', 'Data potongan tidak valid atau kosong.')
-            ->withInput();
+        return response()->json([
+            'success' => false,
+            'message' => 'Data potongan tidak valid atau kosong.'
+        ], 400);
     }
+
+    $ntpnArray = [];
+    foreach ($potonganData as $potongan) {
+        // Use null coalescing operator to provide a default empty string if 'ntpn' is not set
+        $ntpnArray[] = $potongan['ntpn'] ?? '';
+    }
+    $ntpnString = implode(', ', array_filter($ntpnArray));
 
     // Hitung total nilai potongan dengan pengecekan yang lebih aman
     $totalNilai = array_reduce($potonganData, function ($carry, $item) {
@@ -690,62 +711,42 @@ public function update(Request $request, $no_bukti)
 
     DB::beginTransaction();
     try {
-        // Ambil data lama dari `trhstrpot`
-        $trmpot = DB::table('trhstrpot')->where('no_bukti', $no_bukti)->first();
+        // Ambil data lama dari `trhtrmpot`
+        $strpot = DB::table('trhstrpot')->where('no_bukti', $no_bukti)->first();
 
-        if (!$trmpot) {
-            return redirect()->back()->with('error', 'Data tidak ditemukan.');
+        if (!$strpot) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan.'
+            ], 404);
         }
+
+        $kd_skpd = $request->kd_skpd ?? $strpot->kd_skpd;
+        $nilaiLama = (float) $strpot->nilai;
 
         // Update data Trmpot
         DB::table('trhstrpot')->where('no_bukti', $no_bukti)->update([
-            'tgl_bukti' => $request->tgl_bukti,
-            'ket' => $request->ket,
-            'username' => auth()->user()->username,
-            'kd_skpd' => $request->kd_skpd ?? $trmpot->kd_skpd,
-            'nm_skpd' => $request->nm_skpd ?? $trmpot->nm_skpd,
-            'no_sp2d' => $request->no_sp2d,
-            'nilai' => $totalNilai,
-            'npwp' => $request->npwp,
-            'kd_sub_kegiatan' => $request->kd_sub_kegiatan,
-            'nm_sub_kegiatan' => $request->nm_sub_kegiatan,
-            'kd_rek6' => $request->kd_rek6,
-            'nm_rek6' => $request->nm_rek6,
-            'nmrekan' => $request->nmrekan,
-            'pimpinan' => $request->pimpinan,
-            'alamat' => $request->alamat,
-            'no_kas' => $no_bukti,
-            'pay' => $request->pay,
-            'ebilling' => $request->ebilling,
-            'id_trhtransout' => $request->id_trhtransout,
+            'no_ntpn' => $ntpnString,
         ]);
 
-        // Hapus potongan details lama
-        DB::table('trdtrmpot')->where('no_bukti', $no_bukti)->delete();
+        DB::table('trhbppajak')->where('no_strpot', $no_bukti)->update([
+            'ntpn' => $ntpnString,
+        ]);
 
-        // Simpan potongan details baru
-        $potonganInsertData = array_map(function ($detail) use ($request, $no_bukti, $trmpot) {
-            return [
-                'kd_skpd' => $request->kd_skpd ?? $trmpot->kd_skpd,
-                'no_bukti' => $no_bukti,
-                'kd_rek_trans' => $request->kd_rek6,
-                'kd_rek6' => $detail['kdrekpot'],
-                'nm_rek6' => $detail['nmrekpot'],
-                'rekanan' => $detail['nmrekan'],
-                'ntpn' => $detail['ntpn'] ?? null,
-                'npwp' => $detail['npwp'],
-                'ebilling' => $detail['ebilling'],
-                'nilai' => str_replace(['Rp', '.', ','], '', $detail['nilai']),
-            ];
-        }, $potonganData);
-
-        DB::table('trdtrmpot')->insert($potonganInsertData);
+        foreach ($potonganData as $potongan) {
+            DB::table('trdstrpot')
+                ->where('no_bukti', $no_bukti)
+                ->where('id', $potongan['id']) // Gunakan id untuk mengidentifikasi baris yang akan diupdate
+                ->update([
+                    'ntpn' => $potongan['ntpn'] ?? '', // Update NTPN untuk setiap potongan
+                ]);
+        }
 
         DB::commit();
         return response()->json([
             'success' => true,
             'message' => 'Data berhasil disimpan',
-            'redirect' => route('trmpot.index')
+            'redirect' => route('strpot.index')
         ]);
 
     } catch (Exception $e) {

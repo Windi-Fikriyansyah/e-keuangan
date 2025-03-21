@@ -140,95 +140,98 @@
             </thead>
             <tbody>
                 @php
-                    $groupedData = $trhtransout->groupBy('kd_kegiatan')->sortKeys();
+                    $groupedData = $trhtransout->groupBy('kd_sub_kegiatan')->sortKeys();
                 @endphp
 
-                @foreach ($groupedData as $kd_kegiatan => $items)
-                    @php
-                        $firstItem = $items->first();
+@foreach ($groupedData as $kd_sub_kegiatan => $items)
+@php
+    $firstItem = $items->first();
 
-                        // Calculate totals
-                        $totalAnggaran = $items->sum('anggaran_tahun');
-                        $sdBulanLalu = 0; // This would come from your data
+    // Calculate totals
+    $totalAnggaran = $items->sum('anggaran_tahun');
 
-                        // SPJ-LS Gaji
-                        $spjLsGajiBulanIni = 0; // These values would come from your data
-                        $spjLsGajiSdBulanIni = 0;
+    // SPJ-LS Gaji
+    $spjLsGajiSdBulanLalu = $items->sum('spj_ls_gaji_sd_bulan_lalu');
+    $spjLsGajiBulanIni = $items->sum('spj_ls_gaji_bulan_ini');
+    $spjLsGajiSdBulanIni = $spjLsGajiSdBulanLalu + $spjLsGajiBulanIni;
 
-                        // SPJ-LS Barang & Jasa
-                        $spjBarangSdBulanLalu = 0;
-                        $spjBarangBulanIni = 0;
-                        $spjBarangSdBulanIni = 0;
+    // SPJ-LS Barang & Jasa
+    $spjBarangSdBulanLalu = $items->sum('spj_ls_barang_sd_bulan_lalu');
+    $spjBarangBulanIni = $items->sum('spj_ls_barang_bulan_ini');
+    $spjBarangSdBulanIni = $spjBarangSdBulanLalu + $spjBarangBulanIni;
 
-                        // SPJ UP/GU/TU
-                        $spjUpSdBulanLalu = 0;
-                        $spjUpBulanIni = $items->sum('nilai'); // Example, adjust as needed
-                        $spjUpSdBulanIni = 0;
-                        // Calculate totals
-                        $totalSpj = $spjLsGajiSdBulanIni + $spjBarangSdBulanIni + $spjUpBulanIni;
-                        $sisaPagu = $totalAnggaran - $totalSpj;
-                    @endphp
+    // SPJ UP/GU/TU
+    $spjUpSdBulanLalu = $items->sum('spj_up_gu_tu_sd_bulan_lalu');
+    $spjUpBulanIni = $items->sum('spj_up_gu_tu_bulan_ini');
+    $spjUpSdBulanIni = $spjUpSdBulanLalu + $spjUpBulanIni;
 
-                    <!-- Row untuk Parent -->
-                    <tr class="parent-row">
-                        <td class="text-center">{{ $firstItem->kd_kegiatan }}</td>
-                        <td class="text-left"><strong>{{ $firstItem->nm_kegiatan }}</strong></td>
-                        <td class="numbers">{{ number_format($totalAnggaran, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($sdBulanLalu, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($spjLsGajiBulanIni, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($spjLsGajiSdBulanIni, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($spjBarangSdBulanLalu, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($spjBarangBulanIni, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($spjBarangSdBulanIni, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($spjUpSdBulanLalu, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($spjUpBulanIni, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($spjUpSdBulanIni, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($totalSpj, 2, ',', '.') }}</td>
-                        <td class="numbers">{{ number_format($sisaPagu, 2, ',', '.') }}</td>
-                    </tr>
+    // Calculate totals
+    $totalSpj = $spjLsGajiSdBulanIni + $spjBarangSdBulanIni + $spjUpSdBulanIni;
+    $sisaPagu = $totalAnggaran - $totalSpj;
+@endphp
 
-                    <!-- Row untuk Sub-Item -->
-                    @foreach ($items->sortBy('kd_rek6') as $sub)
-                        @continue(empty($sub->kd_rek6)) <!-- Pastikan nilainya tidak kosong -->
-                        @php
-                            // Calculate values for sub items
-                            $subAnggaran = $sub->anggaran_tahun ?? 0;
-                            $subSdBulanLalu = 0;
+<!-- Row untuk Parent -->
+<tr class="parent-row">
+    <td class="text-center">{{ $firstItem->kd_sub_kegiatan }}</td>
+    <td class="text-left"><strong>{{ $firstItem->nm_sub_kegiatan }}</strong></td>
+    <td class="numbers">{{ number_format($totalAnggaran, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($spjLsGajiSdBulanLalu, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($spjLsGajiBulanIni, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($spjLsGajiSdBulanIni, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($spjBarangSdBulanLalu, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($spjBarangBulanIni, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($spjBarangSdBulanIni, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($spjUpSdBulanLalu, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($spjUpBulanIni, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($spjUpSdBulanIni, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($totalSpj, 2, ',', '.') }}</td>
+    <td class="numbers">{{ number_format($sisaPagu, 2, ',', '.') }}</td>
+</tr>
 
-                            // SPJ-LS Gaji - sub
-                            $subSpjLsGajiBulanIni = 0;
-                            $subSpjLsGajiSdBulanIni = 0;
+<!-- Row untuk Sub-Item -->
+@foreach ($items->sortBy('kd_rek') as $sub)
+    @continue(empty($sub->kd_rek)) <!-- Pastikan nilainya tidak kosong -->
+    @php
+        // Calculate values for sub items
+        $subAnggaran = $sub->anggaran_tahun ?? 0;
 
-                            // SPJ-LS Barang & Jasa - sub
-                            $subSpjBarangSdBulanLalu = 0;
-                            $subSpjBarangBulanIni = 0;
-                            $subSpjBarangSdBulanIni = 0;
+        // SPJ-LS Gaji - sub
+        $subSpjLsGajiSdBulanLalu = $sub->spj_ls_gaji_sd_bulan_lalu ?? 0;
+        $subSpjLsGajiBulanIni = $sub->spj_ls_gaji_bulan_ini ?? 0;
+        $subSpjLsGajiSdBulanIni = $subSpjLsGajiSdBulanLalu + $subSpjLsGajiBulanIni;
 
-                            // SPJ UP/GU/TU - sub
-                            $subSpjUpSdBulanLalu = 0;
-                            $subSpjUpBulanIni = $sub->nilai ?? 0;
+        // SPJ-LS Barang & Jasa - sub
+        $subSpjBarangSdBulanLalu = $sub->spj_ls_barang_sd_bulan_lalu ?? 0;
+        $subSpjBarangBulanIni = $sub->spj_ls_barang_bulan_ini ?? 0;
+        $subSpjBarangSdBulanIni = $subSpjBarangSdBulanLalu + $subSpjBarangBulanIni;
 
-                            // Calculate totals for sub
-                            $subTotalSpj = $subSpjLsGajiSdBulanIni + $subSpjBarangSdBulanIni + $subSpjUpBulanIni;
-                            $subSisaPagu = $subAnggaran - $subTotalSpj;
-                        @endphp
-                        <tr>
-                            <td class="text-center">{{ $sub->kd_kegiatan }}.{{ $sub->kd_rek6 }}</td>
-                            <td class="text-left" style="padding-left: 20px;">└ {{ $sub->nm_rek6 ?? 'Tidak Ada Nama' }}</td>
-                            <td class="numbers">{{ number_format($subAnggaran, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subSdBulanLalu, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subSpjLsGajiBulanIni, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subSpjLsGajiSdBulanIni, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subSpjBarangSdBulanLalu, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subSpjBarangBulanIni, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subSpjBarangSdBulanIni, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subSpjUpSdBulanLalu, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subSpjUpBulanIni, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subTotalSpj, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format($subSisaPagu, 2, ',', '.') }}</td>
-                        </tr>
-                    @endforeach
-                @endforeach
+        // SPJ UP/GU/TU - sub
+        $subSpjUpSdBulanLalu = $sub->spj_up_gu_tu_sd_bulan_lalu ?? 0;
+        $subSpjUpBulanIni = $sub->spj_up_gu_tu_bulan_ini ?? 0;
+        $subSpjUpSdBulanIni = $subSpjUpSdBulanLalu + $subSpjUpBulanIni;
+
+        // Calculate totals for sub
+        $subTotalSpj = $subSpjLsGajiSdBulanIni + $subSpjBarangSdBulanIni + $subSpjUpSdBulanIni;
+        $subSisaPagu = $subAnggaran - $subTotalSpj;
+    @endphp
+    <tr>
+        <td class="text-center">{{ $sub->kd_sub_kegiatan }}.{{ $sub->kd_rek }}</td>
+        <td class="text-left" style="padding-left: 20px;">└ {{ $sub->nm_rek ?? 'Tidak Ada Nama' }}</td>
+        <td class="numbers">{{ number_format($subAnggaran, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSpjLsGajiSdBulanLalu, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSpjLsGajiBulanIni, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSpjLsGajiSdBulanIni, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSpjBarangSdBulanLalu, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSpjBarangBulanIni, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSpjBarangSdBulanIni, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSpjUpSdBulanLalu, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSpjUpBulanIni, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSpjUpSdBulanIni, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subTotalSpj, 2, ',', '.') }}</td>
+        <td class="numbers">{{ number_format($subSisaPagu, 2, ',', '.') }}</td>
+    </tr>
+@endforeach
+@endforeach
             </tbody>
         </table>
     </div>
