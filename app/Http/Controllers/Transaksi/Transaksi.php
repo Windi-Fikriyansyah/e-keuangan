@@ -324,7 +324,9 @@ class Transaksi extends Controller
     public function store(Request $request)
     {
 
+
         $details = json_decode($request->input('details'), true) ?? [];
+        $details_tujuan = json_decode($request->input('details_tujuan'), true) ?? [];
         $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
         $perlimpahan = $request->has('jenis_perlimpahan') ? 1 : 0;
 
@@ -351,6 +353,10 @@ class Transaksi extends Controller
             $total = array_sum(array_map(function($detail) {
                 return str_replace(['Rp', '.', ' '], '', $detail['total'] ?? $detail['nilai']);
             }, $details));
+
+            $nilai_transfer = array_sum(array_map(function($detail_tujuan) {
+                return str_replace(['Rp', '.', ' '], '', $detail_tujuan['nilai_transfer']);
+            }, $details_tujuan));
 
             $transaksiId = DB::table('trhtransout')->insertGetId([
                 'no_kas' => $request->no_bukti,
@@ -383,6 +389,9 @@ class Transaksi extends Controller
                 'created_at' => Carbon::now('Asia/Jakarta'),
                 'id_trhtransout' => $request->no_bukti,
             ]);
+
+
+
 
 
 
@@ -475,6 +484,26 @@ class Transaksi extends Controller
             }
 
 
+            $detailInserts3 = array_map(function($details_tujuan) use ($request) {
+                return [
+                    'no_voucher' => $request->no_bukti,
+                    'tgl_voucher' => $request->tgl_bukti,
+                    'rekening_awal' => $request->rek_pengeluaran,
+                    'nm_rekening_tujuan' => $details_tujuan['nm_rekening'],
+                    'rekening_tujuan' => $details_tujuan['rekeningtujuan'],
+                    'bank_tujuan' => $details_tujuan['bank'],
+                    'kd_skpd' => auth()->user()->kd_skpd,
+                    'nilai' =>str_replace(['Rp', '.', ' '], '', $details_tujuan['nilai_transfer']),
+
+
+                ];
+            }, $details_tujuan);
+            if (!empty($detailInserts3)) {
+                DB::table('trdtransout_transfercms')->insert($detailInserts3);
+            }
+
+
+
             DB::commit();
             return redirect()->route('transaksi.index')
                 ->with('success', 'Transaksi berhasil disimpan');
@@ -485,6 +514,42 @@ class Transaksi extends Controller
                 ->with('message', 'Gagal menyimpan transaksi: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+
+    public function getrekeningtujuan(Request $request)
+    {
+        $search = $request->q;
+        $kd_skpd = auth()->user()->kd_skpd;
+
+        $sertifikat = DB::table('ms_rekening_bank_online')
+            ->select('*')
+            ->when(!empty($search), function ($query) use ($search) {
+                $query->where('rekening', 'LIKE', "%{$search}%")
+                      ->orWhere('nm_rekening', 'LIKE', "%{$search}%");
+            })
+            ->when(!empty($kd_skpd), function ($query) use ($kd_skpd) {
+                $query->where('kd_skpd', $kd_skpd); // Filter berdasarkan kode kegiatan
+            })
+            ->limit(10)
+            ->get();
+
+        $data = $sertifikat->map(function ($item) {
+            return [
+                'id' => $item->rekening,
+                'text' => implode(' | ', [
+                    $item->rekening,
+                    $item->nm_rekening,
+
+                ]),
+                'nm_rekening' => $item->nm_rekening,
+                'nm_bank' => $item->nm_bank,
+                'bank' => $item->bank
+            ];
+        });
+
+        return response()->json($data);
+
     }
 
 

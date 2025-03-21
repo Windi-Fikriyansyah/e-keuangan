@@ -15,8 +15,10 @@ use App\Http\Controllers\Laporan\Laporan;
 use App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Laporan\SertifikatController as LaporanSertifikatController;
 use App\Exports\SalesReportExport;
+use App\Http\Controllers\KelolaData\Ms_bank;
 use App\Http\Controllers\KelolaData\Ms_program;
 use App\Http\Controllers\KelolaData\Ms_sumberdana;
+use App\Http\Controllers\KelolaData\Penerima;
 use App\Http\Controllers\Transaksi\Lpj;
 use App\Http\Controllers\Transaksi\Lpj_tu;
 use App\Http\Controllers\Transaksi\SetorKas;
@@ -60,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/get-total-nilai', [Transaksi::class, 'gettotalnilai'])->middleware('permission:14')->name('get-total-nilai');
         Route::post('/getno_transaksi', [Transaksi::class, 'getno_transaksi'])->middleware('permission:14')->name('getno_transaksi');
         Route::post('/getpotongandata', [Transaksi::class, 'getpotongandata'])->middleware('permission:14')->name('getpotongandata');
+        Route::post('/getrekeningtujuan', [Transaksi::class, 'getrekeningtujuan'])->middleware('permission:14')->name('getrekeningtujuan');
 
         Route::get('edit/{no_bukti}', [Transaksi::class, 'edit'])->middleware('permission:14')->name('edit');
         Route::get('/cariData', [Transaksi::class, 'cariData'])->middleware('permission:14')->name('cariData');
@@ -255,6 +258,39 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/download-format', [Ms_anggaran::class, 'downloadFormat'])->middleware('permission:39')->name('download_format');
                 Route::post('/getsubkegiatan', [Ms_anggaran::class, 'getsubkegiatan'])->middleware('permission:39')->name('getsubkegiatan');
                 Route::post('/getsumberdana', [Ms_anggaran::class, 'getsumberdana'])->middleware('permission:39')->name('getsumberdana');
+
+
+            });
+
+        Route::prefix('penerima')->as('penerima.')
+            ->group(function () {
+                Route::get('', [Penerima::class, 'index'])->middleware('permission:46')->name('index');
+                Route::post('load', [Penerima::class, 'load'])->middleware('permission:46')->name('load');
+                Route::get('create', [Penerima::class, 'create'])->middleware('permission:46')->name('create');
+                Route::get('edit/{id}', [Penerima::class, 'edit'])->middleware('permission:46')->name('edit');
+                Route::delete('/penerima/{id}', [Penerima::class, 'destroy'])->middleware('permission:46')->name('destroy');
+                Route::post('update/{id}', [Penerima::class, 'update'])->middleware('permission:46')->name('update');
+                Route::get('/search-product', [Penerima::class, 'searchProduct'])->middleware('permission:46')->name('search');
+                Route::get('/product/barcode/{barcode}', [Penerima::class, 'getProductByBarcode'])->middleware('permission:46')->name('getByBarcode');
+                Route::post('store', [Penerima::class, 'store'])->middleware('permission:46')->name('store');
+                Route::post('/penerima/upload', [Penerima::class, 'upload'])->middleware('permission:46')->name('upload');
+                Route::get('/download-format', [Penerima::class, 'downloadFormat'])->middleware('permission:46')->name('download_format');
+                Route::post('/getsubkegiatan', [Penerima::class, 'getsubkegiatan'])->middleware('permission:46')->name('getsubkegiatan');
+                Route::post('/getsumberdana', [Penerima::class, 'getsumberdana'])->middleware('permission:46')->name('getsumberdana');
+                Route::post('/getbank', [Penerima::class, 'getbank'])->middleware('permission:46')->name('getbank');
+
+            });
+
+        Route::prefix('ms_bank')->as('ms_bank.')
+            ->group(function () {
+                Route::get('', [Ms_bank::class, 'index'])->middleware('permission:47')->name('index');
+                Route::post('load', [Ms_bank::class, 'load'])->middleware('permission:47')->name('load');
+                Route::get('create', [Ms_bank::class, 'create'])->middleware('permission:47')->name('create');
+                Route::get('edit/{kode}', [Ms_bank::class, 'edit'])->middleware('permission:47')->name('edit');
+                Route::delete('/Ms_bank/{kode}', [Ms_bank::class, 'destroy'])->middleware('permission:47')->name('destroy');
+                Route::post('update/{kode}', [Ms_bank::class, 'update'])->middleware('permission:47')->name('update');
+                Route::get('/search-product', [Ms_bank::class, 'searchProduct'])->middleware('permission:47')->name('search');
+                Route::post('store', [Ms_bank::class, 'store'])->middleware('permission:47')->name('store');
 
 
             });

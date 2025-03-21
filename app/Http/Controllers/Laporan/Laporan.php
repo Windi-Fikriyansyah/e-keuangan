@@ -533,46 +533,69 @@ public function cetakrealisasi(Request $request)
         ->where('kd_skpd', $kd_skpd)
         ->first();
 
-        $trhtransout = DB::table('ms_anggaran')
-        ->leftJoin('trdtransout', function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
-            $join->on(
-                    DB::raw("CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
+        $trhtransout = DB::table(
+            DB::raw("(
+                SELECT
+                    kd_sub_kegiatan,
+                    nm_sub_kegiatan,
+                    kd_rek,
+                    nm_rek,
+                    SUM(anggaran_tahun) as anggaran_tahun
+                FROM
+                    ms_anggaran
+                GROUP BY
+                    kd_sub_kegiatan,
+                    nm_sub_kegiatan,
+                    kd_rek,
+                    nm_rek
+            ) as anggaran")
+        )
+        ->leftJoin(
+            DB::raw("(
+                SELECT
+                    kd_rek6,
+                    kd_sub_kegiatan,
+                    SUM(nilai) as total_nilai
+                FROM
+                    trdtransout
+                WHERE
+                    kd_skpd = '$kd_skpd'
+                    AND jenis_terima_sp2d = '0'
+                    AND tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir'
+                GROUP BY
+                    kd_rek6,
+                    kd_sub_kegiatan
+            ) as trdtransout"),
+            function ($join) {
+                $join->on(
+                    DB::raw("CAST(anggaran.kd_rek AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
                     '=',
                     DB::raw("CAST(trdtransout.kd_rek6 AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
                 )
                 ->on(
-                    DB::raw("CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
+                    DB::raw("CAST(anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
                     '=',
                     DB::raw("CAST(trdtransout.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
-                )
-                ->where('trdtransout.kd_skpd', '=', $kd_skpd)
-                ->where('trdtransout.jenis_terima_sp2d', '=', "0")
-                ->whereBetween('trdtransout.tgl_bukti', [$tanggalawal, $tanggalakhir]);
-        })
+                );
+            }
+        )
         ->leftJoin('ms_sub_kegiatan', function ($join) {
             $join->on(
-                DB::raw("CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
+                DB::raw("CAST(anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
                 '=',
                 DB::raw("CAST(ms_sub_kegiatan.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
             );
         })
         ->select(
-            'ms_anggaran.kd_sub_kegiatan as kd_kegiatan',
-            'ms_anggaran.nm_sub_kegiatan as nm_kegiatan',
-            'ms_anggaran.kd_rek as kd_rek5',
-            'ms_anggaran.nm_rek as nm_rek5',
-            'ms_anggaran.anggaran_tahun',
-            DB::raw("SUM(trdtransout.nilai) as nilai") // Menjumlahkan nilai jika kd_rek5 sama
+            'anggaran.kd_sub_kegiatan as kd_kegiatan',
+            'anggaran.nm_sub_kegiatan as nm_kegiatan',
+            'anggaran.kd_rek as kd_rek5',
+            'anggaran.nm_rek as nm_rek5',
+            'anggaran.anggaran_tahun',
+            DB::raw("COALESCE(trdtransout.total_nilai, 0) as nilai")
         )
-        ->groupBy(
-            'ms_anggaran.kd_sub_kegiatan',
-            'ms_anggaran.nm_sub_kegiatan',
-            'ms_anggaran.kd_rek',
-            'ms_anggaran.nm_rek',
-            'ms_anggaran.anggaran_tahun'
-        )
-        ->orderBy('ms_anggaran.kd_sub_kegiatan')
-        ->orderBy('ms_anggaran.kd_rek')
+        ->orderBy('anggaran.kd_sub_kegiatan')
+        ->orderBy('anggaran.kd_rek')
         ->get();
 
 

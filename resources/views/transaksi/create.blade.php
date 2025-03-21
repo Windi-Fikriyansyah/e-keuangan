@@ -30,6 +30,7 @@
                 <form method="POST"action="{{ route('transaksi.store') }}" id="formBpkb">
                     @csrf
                     <input type="hidden" name="details" id="hiddenDetails">
+                    <input type="hidden" name="details_tujuan" id="hiddenDetailsTujuan">
 
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label">Kode OPD/UNIT</label>
@@ -73,8 +74,8 @@
                         </div>
                         <label class="col-sm-2 col-form-label">Rekening Bank Bend</label>
                         <div class="col-sm-4">
-                            <input class="form-control @error('rek_pengeluaran') is-invalid @enderror" type="text"
-                                 name="rek_pengeluaran" disabled value="{{ $rek_pengeluaran }}">
+                            <input class="form-control readonlyInput @error('rek_pengeluaran') is-invalid @enderror" type="text"
+                                 name="rek_pengeluaran" readonly value="{{ $rek_pengeluaran }}">
                             @error('rek_pengeluaran')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -128,6 +129,7 @@
 
                     <div class="mb-3 text-end">
                         <input type="hidden" name="total_belanja" id="hiddenTotalBelanja">
+                        <input type="hidden" name="totalTransfer" id="hiddenTotalTransfer">
                         <button class="btn btn-primary" type="submit">Simpan</button>
                         <a href="{{ route('transaksi.index') }}" class="btn btn-warning">Kembali</a>
                     </div>
@@ -198,6 +200,76 @@
                     </div>
                     <p id="totalBelanja" name="totalBelanja" style="text-align: right; margin-top: 10px; font-size: 16px; font-weight: bold;">
                         <strong>Total belanja:</strong> Rp 0
+                    </p>
+                    <p id="totalPotongan" name="totalPotongan" style="text-align: right; margin-top: 10px; font-size: 16px; font-weight: bold;">
+                        <strong>Total Potongan:</strong> Rp 0
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="page-content">
+
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        @if (session('message'))
+            <div class="alert alert-danger border-0 bg-danger alert-dismissible fade show py-2">
+                <div class="d-flex align-items-center">
+                    <div class="font-35 text-white"><i class='bx bxs-message-square-x'></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="mb-0 text-white">Error</h6>
+                        <div class="text-white">{{ session('message') }}</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        <div class="card shadow-sm p-3 rounded" style="background-color: #f8f9fa; border-radius: 50px 50px; margin-bottom: -1rem;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 fw-bold text-primary">Rekening Tujuan</h5>
+
+                <div class="d-flex gap-2">
+
+                    <button class="btn btn-success d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#inputKegiatanModal1">
+                        Tambah
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+
+            <div class="card-body">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" id="tabeltujuan" style="width: 100%">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama</th>
+                                    <th>Rek.Tujuan</th>
+                                    <th>Nilai</th>
+                                    <th id="aksiColumn">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="totalTransfer" name="totalTransfer" style="text-align: right; margin-top: 10px; font-size: 16px; font-weight: bold;">
+                        <strong>Total Transfer:</strong> Rp 0
                     </p>
                 </div>
 
@@ -408,6 +480,69 @@
 
 
 
+
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="inputKegiatanModal1" tabindex="-1" aria-labelledby="inputKegiatanModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inputKegiatanModalLabel">Input Rekening Tujuan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formInputTujuan">
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="nilai_potongan" class="form-label me-5" style="min-width: 120px;">Nilai Potongan</label>
+                            <input type="text" class="form-control" id="nilai_potongan" name="nilai_potongan" oninput="formatRupiah(this);" required>
+
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="kd_rek" class="form-label me-5" style="min-width: 120px;">Rekening Tujuan</label>
+                            <select
+                                id="rekeningtujuan"
+                                name="rekeningtujuan"
+                                class="form-select me-2 custom-border select2 @error('rekeningtujuan') is-invalid @enderror"
+                                style="width: 100%;"
+                                data-placeholder="Pilih Rekening"
+                                required
+                            >
+                                <option></option> <!-- Agar placeholder muncul -->
+                                <!-- Options will be populated dynamically -->
+                            </select>
+
+                        </div>
+
+
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="nm_rekening" class="form-label me-5" style="min-width: 120px;">A.N. Rekening</label>
+                            <input type="text" class="form-control readonlyInput" id="nm_rekening" name="nm_rekening" required readonly>
+
+                        </div>
+
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="nm_bank" class="form-label me-5" style="min-width: 120px;">Bank</label>
+                            <input type="text" class="form-control readonlyInput" id="nm_bank" name="nm_bank" required readonly>
+                            <input type="hidden" class="form-control readonlyInput" id="bank" name="bank" required readonly>
+
+                        </div>
+
+
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="nilai_transfer" class="form-label me-5" style="min-width: 120px;">Nilai Transfer</label>
+                            <input type="text" class="form-control" id="nilai_transfer" name="nilai_transfer" oninput="formatRupiah(this);" required>
+
+                        </div>
 
                         <div class="text-end">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -637,6 +772,58 @@ function hitungTotalBelanja() {
 
 }
 
+let nilaiPotongan = 0;
+function updateTotalPotongan() {
+    let totalPotongan = 0;
+
+    // Loop through the dataSementara1 array to sum the "nilai_potongan" field
+    dataSementara1.forEach(item => {
+        totalPotongan += parseFloat(item.nilai_potongan.replace(/\D/g, "")) || 0;
+    });
+
+    // Format the total as currency (Rupiah)
+    let formattedTotal = new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0
+    }).format(totalPotongan);
+
+    // Update the "Total Potongan" field
+    document.getElementById("totalPotongan").innerHTML = `<strong>Total Potongan:</strong> ${formattedTotal}`;
+
+    if (dataSementara1.length === 0) {
+        // Aktifkan kembali input nilai_potongan
+        $("#nilai_potongan").prop("disabled", false);
+    }
+}
+
+function hitungTotalTransfer1() {
+    let totalTransfer = 0;
+
+    // Loop through the dataSementara array to sum the "nilai" field
+    dataSementara1.forEach(item => {
+        totalTransfer += parseFloat(item.nilai_transfer.replace(/\D/g, "")) || 0;
+    });
+
+    // Format the total as currency (Rupiah)
+    let formattedTotal = new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0
+    }).format(totalTransfer);
+
+    // Update the "Total Belanja" field
+    document.getElementById("totalTransfer").innerHTML = `<strong>Total Transfer:</strong> ${formattedTotal}`;
+    document.getElementById("hiddenTotalTransfer").value = totalTransfer;
+
+
+    updateTotalPotongan();
+    if (dataSementara1.length === 0) {
+        // Aktifkan kembali input nilai_potongan
+        $("#nilai_potongan").prop("disabled", false);
+    }
+}
+
 function validateNilai() {
     // Cek apakah checkbox "Terima SP2D" dicentang
     let isChecked = document.getElementById('terima_sp2d').checked;
@@ -732,14 +919,49 @@ function prepareSubmit() {
             sisanilaisumberdana : item.sisanilaisumberdana
     }));
 
+    let details_tujuan = dataSementara1.map(item => ({
+        nm_rekening: item.nm_rekening,
+        rekeningtujuan: item.rekeningtujuan,
+        bank: item.bank,
+        nilai_transfer: item.nilai_transfer,
+    }));
+
+
     // Set the hidden input value
     document.getElementById('hiddenDetails').value = JSON.stringify(details);
+
+    document.getElementById('hiddenDetailsTujuan').value = JSON.stringify(details_tujuan);
 
     // Return true to allow form submission
     return true;
 }
 
 document.getElementById('formBpkb').onsubmit = function(event) {
+    // Hitung total belanja dan total potongan
+    hitungTotalBelanja();
+    updateTotalPotongan();
+
+    // Ambil nilai total belanja dan total potongan
+    let totalBelanja = parseFloat(document.getElementById('hiddenTotalBelanja').value) || 0;
+    let totalPotongan = parseFloat(document.getElementById('totalPotongan').innerText.replace(/\D/g, "")) || 0;
+
+    // Hitung batas maksimal transfer
+    let maksimalTransfer = totalBelanja - totalPotongan;
+
+    // Ambil nilai total transfer
+    let totalTransfer = parseFloat(document.getElementById('hiddenTotalTransfer').value) || 0;
+
+    // Validasi nilai transfer
+    if (totalTransfer > maksimalTransfer) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan',
+            text: 'Nilai transfer tidak boleh lebih besar dari total belanja dikurangi total potongan!',
+        });
+        return false; // Hentikan proses submit
+    }
+
+    // Lanjutkan dengan proses submit jika validasi berhasil
     return prepareSubmit();
 };
 
@@ -768,10 +990,47 @@ document.getElementById('formBpkb').onsubmit = function(event) {
     hitungTotalBelanja();
 }
 
+let dataSementara1 = [];
+    function updateTable1() {
+    let tbody = $("#tabeltujuan tbody");
+    tbody.empty(); // Kosongkan isi tabel sebelum memperbarui
+
+    dataSementara1.forEach((item, index) => {
+        let row = `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${item.nm_rekening}</td>
+                <td>${item.rekeningtujuan}</td>
+                <td>${item.nilai_transfer}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="hapusData1(${index})"><i class="fa fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+
+    if (dataSementara1.length === 0) {
+        // Aktifkan kembali input nilai_potongan
+        $("#nilai_potongan").prop("disabled", false);
+    }
+    hitungTotalTransfer1();
+}
+
 // Fungsi untuk menghapus data dari array dan memperbarui tabel
 function hapusData(index) {
     dataSementara.splice(index, 1);
     updateTable();
+}
+
+function hapusData1(index) {
+    dataSementara1.splice(index, 1);
+    updateTable1();
+    if (dataSementara1.length === 0) {
+        // Aktifkan kembali input nilai_potongan
+        $("#nilai_potongan").prop("disabled", false);
+    }
+    updateTotalPotongan();
 }
 function formatRupiah(input) {
         let angka = input.value.replace(/\D/g, ""); // Hanya angka
@@ -913,6 +1172,26 @@ $('#no_transaksi_input').change(function() {
     }
 });
 
+$('#inputKegiatanModal1').on('show.bs.modal', function (e) {
+
+    if (dataSementara1.length === 0) {
+        // Aktifkan kembali input nilai_potongan
+        $("#nilai_potongan").prop("disabled", false);
+    }
+let tglBukti = $('input[name="tgl_bukti"]').val();
+let jenisBeban = $('select[name="jenis_beban"]').val();
+
+if (!tglBukti || !jenisBeban) {
+
+    e.preventDefault(); // Cegah modal dari Bootstrap
+    Swal.fire({
+        icon: 'warning',
+        title: 'Peringatan',
+        text: 'Harap isi Tanggal Transaksi dan Jenis Beban sebelum melanjutkan!',
+    });
+}
+});
+
 
 
     $("#formInputKegiatan").submit(function (e) {
@@ -993,6 +1272,89 @@ $('#no_transaksi_input').change(function() {
         $("#formInputKegiatan")[0].reset();
     });
 
+    $("#formInputTujuan").submit(function (e) {
+        e.preventDefault(); // Mencegah form submit secara default
+
+
+        if (!validateNilai()) {
+            return false; // Jika tidak valid, jangan lanjutkan submit
+        }
+        // Ambil data dari input modal
+        let nilai_potongan = $("#nilai_potongan").val();
+        let rekeningtujuan = $("#rekeningtujuan").val();
+        let nm_rekening = $("#nm_rekening").val();
+        let nm_bank = $("#nm_bank").val();
+        let bank = $("#bank").val();
+        let nilai_transfer = $("#nilai_transfer").val();
+
+        // Simpan data ke array sementara
+        dataSementara1.push({
+            nilai_potongan,
+            rekeningtujuan,
+            nm_rekening,
+            nm_bank,
+            bank,
+            nilai_transfer,
+
+        });
+
+        // Perbarui tabel dengan data terbaru
+        updateTable1();
+
+        if (dataSementara1.length > 0) {
+        $("#nilai_potongan").prop("disabled", true);
+    }
+        // Tutup modal setelah simpan
+        $("#inputKegiatanModal1").modal("hide");
+
+        // Reset form setelah simpan
+        $("#formInputTujuan")[0].reset();
+
+        updateTotalPotongan();
+    });
+
+
+
+
+    $('#rekeningtujuan').select2({
+    theme: "bootstrap-5",
+    width: "100%",
+    placeholder: "Silahkan Pilih...",
+    minimumInputLength: 0,
+    dropdownParent: $('#inputKegiatanModal1'),
+    ajax: {
+        url: "{{ route('transaksi.getrekeningtujuan') }}",
+        dataType: 'json',
+        type: "POST",
+        delay: 250,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        data: function(params) {
+            return {
+                q: $.trim(params.term),
+                nm_rekening: $('#nm_rekening').val(),
+                nm_bank: $('#nm_bank').val(),
+                bank: $('#bank').val(),
+            };
+        },
+        processResults: function(data) {
+            return {
+                results: data
+            };
+        }
+    },
+});
+
+    $('#rekeningtujuan').on('select2:select', function(e) {
+        var data = e.params.data;
+        var nm_rekening = data.nm_rekening;
+        var nm_bank = data.nm_bank;
+        var bank = data.bank;
+        $('#nm_rekening').val(nm_rekening);
+        $('#nm_bank').val(nm_bank);
+        $('#bank').val(bank); // Isi input total dengan saldo dalam format Rupiah
+    });
 
 
     $('#inputKegiatanModal').on('shown.bs.modal', function () {

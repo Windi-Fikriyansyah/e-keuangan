@@ -98,18 +98,18 @@
                 @php
                     $groupedData = $trhtransout->groupBy('kd_kegiatan')->sortKeys();
                     $grandTotalAnggaran = 0;
-                $grandTotalRealisasi = 0; // Mengelompokkan data berdasarkan kd_kegiatan
+                    $grandTotalRealisasi = 0;
                 @endphp
 
                 @foreach ($groupedData as $kd_kegiatan => $items)
                     @php
-                        $firstItem = $items->first(); // Ambil item pertama untuk menampilkan parent
-                        $totalRealisasi = $items->sum('nilai'); // Total realisasi per parent
-                        $totalAnggaran = $items->sum('anggaran_tahun'); // Total anggaran per parent
-                        $sisaAnggaran = $totalAnggaran - $totalRealisasi; // Hitung sisa anggaran
+                        $firstItem = $items->first();
+                        $totalAnggaran = $items->sum('anggaran_tahun');
+                        $totalRealisasi = $items->sum('nilai');
+                        $sisaAnggaran = $totalAnggaran - $totalRealisasi;
                         $persentase = $totalAnggaran > 0 ? ($totalRealisasi / $totalAnggaran) * 100 : 0;
                         $grandTotalAnggaran += $totalAnggaran;
-                    $grandTotalRealisasi += $totalRealisasi; // Persentase
+                        $grandTotalRealisasi += $totalRealisasi;
                     @endphp
 
                     <!-- Row untuk Parent -->
@@ -124,22 +124,24 @@
 
                     <!-- Row untuk Sub-Item -->
                     @foreach ($items->sortBy('kd_rek5') as $sub)
+                        @php
+                            $subSisaAnggaran = ($sub->anggaran_tahun ?? 0) - ($sub->nilai ?? 0);
+                            $subPersentase = ($sub->anggaran_tahun ?? 0) > 0 ? (($sub->nilai ?? 0) / $sub->anggaran_tahun) * 100 : 0;
+                        @endphp
                         <tr>
                             <td>{{ $kd_kegiatan }}.{{ $sub->kd_rek5 ?? '-' }}</td>
                             <td style="padding-left: 20px;"> {{ $sub->nm_rek5 ?? 'Tidak Ada Nama' }}</td>
                             <td class="numbers">{{ number_format($sub->anggaran_tahun ?? 0, 2, ',', '.') }}</td>
                             <td class="numbers">{{ number_format($sub->nilai ?? 0, 2, ',', '.') }}</td>
-                            <td class="numbers">{{ number_format(($sub->anggaran_tahun ?? 0) - ($sub->nilai ?? 0), 2, ',', '.') }}</td>
-                            <td class="numbers">
-                                {{ ($sub->anggaran_tahun ?? 0) > 0 ? number_format(($sub->nilai / $sub->anggaran_tahun) * 100, 2, ',', '.') : '0,00' }}%
-                            </td>
+                            <td class="numbers">{{ number_format($subSisaAnggaran, 2, ',', '.') }}</td>
+                            <td class="numbers">{{ number_format($subPersentase, 2, ',', '.') }}%</td>
                         </tr>
                     @endforeach
                 @endforeach
 
                 @php
-                $grandSisaAnggaran = $grandTotalAnggaran - $grandTotalRealisasi;
-                $grandPersentase = $grandTotalAnggaran > 0 ? ($grandTotalRealisasi / $grandTotalAnggaran) * 100 : 0;
+                    $grandSisaAnggaran = $grandTotalAnggaran - $grandTotalRealisasi;
+                    $grandPersentase = $grandTotalAnggaran > 0 ? ($grandTotalRealisasi / $grandTotalAnggaran) * 100 : 0;
                 @endphp
 
                 <!-- Baris Total Keseluruhan -->
@@ -152,8 +154,6 @@
                 </tr>
             </tbody>
         </table>
-
-
     </div>
 
     <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">
