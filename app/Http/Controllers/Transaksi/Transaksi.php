@@ -45,6 +45,7 @@ class Transaksi extends Controller
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route('transaksi.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
+                $btn .= '<button class="btn btn-sm btn-success print-btn" data-no-lpj="' . $row->no_bukti . '"><i class="fas fa-print"></i></button>';
                 $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('transaksi.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
                 return $btn;
             })
@@ -226,13 +227,17 @@ class Transaksi extends Controller
     try {
         // Get the selected kd_sub_kegiatan from the request
         $kd_sub_kegiatan = $request->input('kd_sub_kegiatan');
-
+        $jenis_pergeseran = $request->input('jenis_pergeseran');
         // Initialize query from ms_anggaran table
         $query = DB::table('ms_anggaran');
 
         // Filter by kd_sub_kegiatan if it's provided
         if ($kd_sub_kegiatan) {
             $query->where('kd_sub_kegiatan', $kd_sub_kegiatan);
+        }
+
+        if ($jenis_pergeseran) {
+            $query->where('jenis_pergeseran', $jenis_pergeseran);
         }
 
         // Select all the required fields
@@ -492,6 +497,7 @@ class Transaksi extends Controller
                     'nm_rekening_tujuan' => $details_tujuan['nm_rekening'],
                     'rekening_tujuan' => $details_tujuan['rekeningtujuan'],
                     'bank_tujuan' => $details_tujuan['bank'],
+                    'ket_tpp' => $details_tujuan['ket_tpp'],
                     'kd_skpd' => auth()->user()->kd_skpd,
                     'nilai' =>str_replace(['Rp', '.', ' '], '', $details_tujuan['nilai_transfer']),
 
@@ -551,6 +557,92 @@ class Transaksi extends Controller
         return response()->json($data);
 
     }
+
+    public function print(Request $request)
+{
+
+    $no_bukti = $request->no_bukti;
+    $jenis_cetak = $request->jenis_cetak;
+    $jenis = $request->jenis_print;
+
+    $data_lpj = DB::table('trdtransout_transfercms')
+        ->select(
+            'trdtransout_transfercms.*',
+            'ms_bank.nama',
+        )
+        ->leftJoin('ms_bank', 'trdtransout_transfercms.bank_tujuan', '=', 'ms_bank.kode')
+        ->where('trdtransout_transfercms.no_voucher', $no_bukti);
+
+    // Filter berdasarkan jenis cetak
+    if ($jenis_cetak == 'OB') {
+        // Untuk OB, tampilkan hanya data yang mengandung kata "kalbar" atau "kalimantan barat"
+        $data_lpj = $data_lpj->where(function($query) {
+            $query->whereRaw('LOWER(ms_bank.nama) LIKE ?', ['%kalbar%']);
+        });
+    } elseif ($jenis_cetak == 'SKN') {
+        // Untuk SKN, tampilkan data yang TIDAK mengandung kata "kalbar" atau "kalimantan barat"
+        $data_lpj = $data_lpj->where(function($query) {
+            $query->whereRaw('LOWER(ms_bank.nama) NOT LIKE ?', ['%kalbar%']);
+        });
+    }
+
+    $data = $data_lpj->get();
+
+    if ($data->isEmpty()) {
+        return back()->with('error', 'Data tidak ditemukan.');
+    }
+    $firstData = $data->first();
+    $ket_tpp = $firstData->ket_tpp;
+
+    // Format tanggal hari ini
+    $tanggal = date('dmY'); // Format: tglbulantahun (misal: 25102023)
+
+    // Ambil atau inisialisasi no_urut dari session
+    $no_urut = $request->session()->get('print_count', 0) + 1;
+    $request->session()->put('print_count', $no_urut);
+
+    // Format no_urut menjadi 3 digit (001, 002, dst)
+    $no_urut_formatted = str_pad($no_urut, 3, '0', STR_PAD_LEFT);
+
+    // Buat nama file sesuai format
+    $filename = "{$jenis_cetak}_DINKESKB_{$tanggal}_{$no_urut_formatted}_{$ket_tpp}.xls";
+
+    // View berdasarkan jenis cetak
+    if ($jenis_cetak == 'OB') {
+        $view = view('transaksi.print.ob', [
+            'data' => $data,
+            'jenis_cetak' => $jenis_cetak
+        ]);
+    } elseif ($jenis_cetak == 'SKN') {
+        $view = view('transaksi.print.skn', [
+            'data' => $data,
+            'jenis_cetak' => $jenis_cetak
+        ]);
+    } else {
+        return back()->with('error', 'Jenis cetakan tidak valid.');
+    }
+
+    // Output berdasarkan jenis (excel, pdf, atau layar)
+    if ($jenis == 'layar') {
+        return $view;
+    } elseif ($jenis == 'pdf') {
+        $pdf = PDF::loadHtml($view->render())
+            ->setPaper('legal')
+            ->setOrientation('landscape')
+            ->setOption('margin-left', 15)
+            ->setOption('margin-right', 15);
+
+        $filename = $jenis_cetak . '_' . date('Ymd_His') . '.pdf';
+        return $pdf->stream($filename);
+    } elseif ($jenis == 'excel') {
+        return response($view->render())
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', 'attachment; filename=' . $filename);
+    }
+
+    return back()->with('message', 'Dokumen berhasil dicetak.');
+}
 
 
     public function edit($no_bukti)
@@ -645,6 +737,7 @@ class Transaksi extends Controller
             // Hapus data dari tabel terkait
             DB::table('trhtransout')->where('no_bukti', $decryptedId)->delete();
             DB::table('trdtransout')->where('no_bukti', $decryptedId)->delete();
+            DB::table('trdtransout_transfercms')->where('no_voucher', $decryptedId)->delete();
             DB::table('trhbku')->where('no_kas', $decryptedId)->where('id_trhtransout', $decryptedId)->delete();
             DB::table('trdbku')->where('no_kas', $decryptedId)->where('id_trhtransout', $decryptedId)->delete();
 

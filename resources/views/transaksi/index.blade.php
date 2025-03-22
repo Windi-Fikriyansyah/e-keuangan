@@ -10,6 +10,15 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
+
+        @if (session('error'))
+        <div class="card bg-danger text-white border-0">
+            <div class="card-body">
+                {{ session('error') }}
+            </div>
+        </div>
+    @endif
+
         <div class="card radius-10">
             <div class="card-header">
                 <div class="d-flex align-items-center">
@@ -41,6 +50,38 @@
             </div>
         </div>
     </div>
+
+
+    <!-- Print Modal -->
+<div class="modal fade" id="printModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="printModalLabel">Cetakan Rekening Tujuan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="printForm" action="{{ route('transaksi.print') }}" method="POST" target="_blank">
+                    @csrf
+
+
+                    <div class="mb-3">
+                        <label for="jenis_cetak" class="form-label">Jenis Cetakan</label>
+                        <select class="form-control" name ="jenis_cetak" id="jenis_cetak">
+                            <option value="" disabled selected>Silahkan Pilih</option>
+                            <option value="OB" selected>OB</option>
+                            <option value="SKN" selected>SKN</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-dark btn-md submitPrint" data-jenis="excel">Excel</button>
+                        <button type="button" class="btn btn-secondary btn-md" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('js')
@@ -173,6 +214,43 @@
                     }
                 });
             });
+
+$(document).on('click', '.print-btn', function() {
+        // Ambil no_bukti dari data atribut
+        var noBukti = $(this).data('no-lpj');
+
+        // Tambahkan input hidden untuk no_bukti di dalam form
+        $('#printForm').find('input[name="no_bukti"]').remove(); // Hapus jika sudah ada
+        $('#printForm').append('<input type="hidden" name="no_bukti" value="' + noBukti + '">');
+
+        // Reset select option jenis_cetak
+        $('#jenis_cetak').val('');
+
+        // Tampilkan modal
+        $('#printModal').modal('show');
+    });
+
+
+// Replace your existing $('.submitPrint').on('click', function () {...}) code with this:
+$('.submitPrint').on('click', function() {
+    let jenis_cetak = $('#jenis_cetak').val();
+    let jenis_print = $(this).data("jenis");
+
+    // Validate required fields
+    if (!jenis_cetak) {
+        Swal.fire({
+            title: "Peringatan!",
+            text: "Silakan pilih Jenis Cetakan!",
+            icon: "warning"
+        });
+        return;
+    }
+    // Add all form values to the form
+    $('#printForm').append('<input type="hidden" name="jenis_print" value="' + jenis_print + '">');
+
+    // Submit the form
+    $('#printForm').submit();
+});
 
     </script>
 @endpush

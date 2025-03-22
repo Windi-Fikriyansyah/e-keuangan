@@ -63,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/getno_transaksi', [Transaksi::class, 'getno_transaksi'])->middleware('permission:14')->name('getno_transaksi');
         Route::post('/getpotongandata', [Transaksi::class, 'getpotongandata'])->middleware('permission:14')->name('getpotongandata');
         Route::post('/getrekeningtujuan', [Transaksi::class, 'getrekeningtujuan'])->middleware('permission:14')->name('getrekeningtujuan');
+        Route::post('/lpj/print', [Transaksi::class, 'print'])->middleware('permission:14')->name('print');
 
         Route::get('edit/{no_bukti}', [Transaksi::class, 'edit'])->middleware('permission:14')->name('edit');
         Route::get('/cariData', [Transaksi::class, 'cariData'])->middleware('permission:14')->name('cariData');

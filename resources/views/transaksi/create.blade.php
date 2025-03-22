@@ -287,6 +287,19 @@
                 <div class="modal-body">
                     <form id="formInputKegiatan">
                         <div class="mb-3 d-flex align-items-center">
+                            <div class="col-sm-12 d-flex flex-wrap align-items-center">
+                                <input type="checkbox" id="pergeseran1" name="jenis_pergeseran[]" value="1" class="form-check-input me-2">
+                                <label for="pergeseran1" class="me-3">Pergeseran I</label>
+
+                                <input type="checkbox" id="pergeseran2" name="jenis_pergeseran[]" value="2" class="form-check-input me-2">
+                                <label for="pergeseran2" class="me-3">Pergeseran II</label>
+
+                                <input type="checkbox" id="pergeseran3" name="jenis_pergeseran[]" value="3" class="form-check-input me-2">
+                                <label for="pergeseran3">Pergeseran III</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-flex align-items-center">
                             <label for="kd_sub_kegiatan" class="form-label me-5" style="min-width: 120px;">Sub Kegiatan</label>
                             <select
                                 id="kd_sub_kegiatan"
@@ -541,6 +554,12 @@
                         <div class="mb-3 d-flex align-items-center">
                             <label for="nilai_transfer" class="form-label me-5" style="min-width: 120px;">Nilai Transfer</label>
                             <input type="text" class="form-control" id="nilai_transfer" name="nilai_transfer" oninput="formatRupiah(this);" required>
+
+                        </div>
+
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="ket_tpp" class="form-label me-5" style="min-width: 120px;">Keterangan TPP</label>
+                            <input type="text" class="form-control" id="ket_tpp" name="ket_tpp" required>
 
                         </div>
 
@@ -924,6 +943,7 @@ function prepareSubmit() {
         rekeningtujuan: item.rekeningtujuan,
         bank: item.bank,
         nilai_transfer: item.nilai_transfer,
+        ket_tpp: item.ket_tpp,
     }));
 
 
@@ -1286,6 +1306,7 @@ if (!tglBukti || !jenisBeban) {
         let nm_bank = $("#nm_bank").val();
         let bank = $("#bank").val();
         let nilai_transfer = $("#nilai_transfer").val();
+        let ket_tpp = $("#ket_tpp").val();
 
         // Simpan data ke array sementara
         dataSementara1.push({
@@ -1295,6 +1316,7 @@ if (!tglBukti || !jenisBeban) {
             nm_bank,
             bank,
             nilai_transfer,
+            ket_tpp
 
         });
 
@@ -1494,10 +1516,21 @@ if (!tglBukti || !jenisBeban) {
         return 'Rp. ' + number_string; // Tambahkan prefix Rp.
     }
 
+    $('input[name="jenis_pergeseran[]"]').on('change', function() {
+    // If there's already a selected sub-kegiatan, trigger its change event to refresh data
+    var selectedSubKegiatan = $('#kd_sub_kegiatan').val();
+    if (selectedSubKegiatan) {
+        $('#kd_sub_kegiatan').trigger('change');
+    }
+});
     $('#kd_sub_kegiatan').on('change', function() {
         var kd_sub_kegiatan = $(this).val();
         var nm_sub_kegiatan = $(this).find('option:selected').data('nm_sub_kegiatan') || '';
 
+        var checkedPergeseran = [];
+        $('input[name="jenis_pergeseran[]"]:checked').each(function() {
+        checkedPergeseran.push($(this).val());
+    });
         // Set nama sub kegiatan ke input yang disabled
         $('#nm_sub_kegiatan').val(nm_sub_kegiatan);
 
@@ -1511,7 +1544,7 @@ if (!tglBukti || !jenisBeban) {
         $.ajax({
             url: "{{ route('transaksi.get-rekening') }}",
             type: 'GET',
-            data: { kd_sub_kegiatan: kd_sub_kegiatan },
+            data: { kd_sub_kegiatan: kd_sub_kegiatan, jenis_pergeseran: checkedPergeseran },
             success: function(response) {
                 // Reset rekening dropdown
                 $('#kd_rek').empty().append('<option value="">Pilih Rekening</option>');
