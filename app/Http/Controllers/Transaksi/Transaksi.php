@@ -237,7 +237,7 @@ class Transaksi extends Controller
         }
 
         if ($jenis_pergeseran) {
-            $query->where('jenis_pergeseran', $jenis_pergeseran);
+            $query->where('jenis_anggaran', $jenis_pergeseran);
         }
 
         // Select all the required fields
