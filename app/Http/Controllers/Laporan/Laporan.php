@@ -520,6 +520,7 @@ public function cetakrealisasi(Request $request)
     $jenis_print = $request->jenis_print;
     $jenis_anggaran = $request->jenis_anggaran;
 
+    dd($jenis_anggaran);
 
     if ($kd_skpd == 'null' || empty($kd_skpd)) {
         $kd_skpd = '4.01.2.10.0.00.01.0000';
