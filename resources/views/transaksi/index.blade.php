@@ -110,98 +110,131 @@
 
 <script>
     $(document).ready(function() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    // Array untuk menyimpan ID yang dicentang
+    var selectedIds = [];
+
+    var table = $('#pbk').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ route('transaksi.load') }}",
+            type: "POST",
+            data: function(data) {
+                data.search = data.search.value;
             }
-        });
-
-        $('#pbk').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('transaksi.load') }}",
-                type: "POST",
-                data: function(data) {
-                    data.search = data.search.value;
-                }
+        },
+        pageLength: 10,
+        searching: true,
+        columns: [
+            {
+                data: 'DT_RowIndex',
+                name: 'DT_RowIndex',
+                orderable: false,
+                searchable: false,
+                className: 'text-center'
             },
-            pageLength: 10,
-            searching: true,
-            columns: [
-
-                {
-                    data: 'DT_RowIndex',
-                    name: 'DT_RowIndex',
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-center'
-                },
-                {
+            {
                 data: 'no_bukti',
                 name: 'no_bukti',
                 orderable: false,
                 searchable: false,
                 className: 'text-center',
                 render: function(data, type, row) {
-                    return `<input type="checkbox" class="select-checkbox" data-id="${row.no_bukti}">`;
+                    var isChecked = selectedIds.includes(row.no_bukti) ? 'checked' : '';
+                    return `<input type="checkbox" class="select-checkbox" data-id="${row.no_bukti}" ${isChecked}>`;
                 }
             },
-                {
-                    data: 'no_bukti',
-                    name: 'no_bukti'
-                },
-                {
-                    data: 'tgl_bukti',
-                    name: 'tgl_bukti'
-                },
-                {
-                    data: 'nm_skpd',
-                    name: 'nm_skpd'
-                },
-                {
-                    data: 'ket',
-                    name: 'ket'
-                },
-                {
-                    data: 'aksi',
-                    name: 'aksi',
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-center',
-                    render: function(data, type, row) {
-                        return `<div class="aksi-container">${data}</div>`;
-                    }
-                }
-            ]
-        });
-
-        $('#select-all').on('click', function() {
-        var rows = $('#pbk').DataTable().rows({ 'search': 'applied' }).nodes();
-        $('input[type="checkbox"]', rows).prop('checked', this.checked);
-        });
-
-        // Handle individual checkbox click
-        $('#pbk tbody').on('change', 'input[type="checkbox"]', function() {
-            if (!this.checked) {
-                var el = $('#select-all').get(0);
-                if (el && el.checked && ('indeterminate' in el)) {
-                    el.indeterminate = true;
+            {
+                data: 'no_bukti',
+                name: 'no_bukti'
+            },
+            {
+                data: 'tgl_bukti',
+                name: 'tgl_bukti'
+            },
+            {
+                data: 'nm_skpd',
+                name: 'nm_skpd'
+            },
+            {
+                data: 'ket',
+                name: 'ket'
+            },
+            {
+                data: 'aksi',
+                name: 'aksi',
+                orderable: false,
+                searchable: false,
+                className: 'text-center',
+                render: function(data, type, row) {
+                    return `<div class="aksi-container">${data}</div>`;
                 }
             }
-        });
+        ],
+        drawCallback: function(settings) {
+            // Pulihkan status ceklis setelah tabel dimuat ulang
+            $('.select-checkbox').each(function() {
+                var id = $(this).data('id');
+                if (selectedIds.includes(id)) {
+                    $(this).prop('checked', true);
+                }
+            });
+        }
+    });
 
+    $('#select-all').on('click', function() {
+        var rows = table.rows({ 'search': 'applied' }).nodes();
+        $('input[type="checkbox"]', rows).prop('checked', this.checked);
 
-        $('#cetak').on('click', function(e) {
+        // Tambah atau hapus semua ID ke/dari selectedIds
+        if (this.checked) {
+            $('.select-checkbox', rows).each(function() {
+                var id = $(this).data('id');
+                if (!selectedIds.includes(id)) {
+                    selectedIds.push(id);
+                }
+            });
+        } else {
+            $('.select-checkbox', rows).each(function() {
+                var id = $(this).data('id');
+                selectedIds = selectedIds.filter(function(item) {
+                    return item !== id;
+                });
+            });
+        }
+    });
+
+    // Handle individual checkbox click
+    $('#pbk tbody').on('change', 'input[type="checkbox"]', function() {
+        var id = $(this).data('id');
+        if (this.checked) {
+            if (!selectedIds.includes(id)) {
+                selectedIds.push(id);
+            }
+        } else {
+            selectedIds = selectedIds.filter(function(item) {
+                return item !== id;
+            });
+        }
+
+        if (!this.checked) {
+            var el = $('#select-all').get(0);
+            if (el && el.checked && ('indeterminate' in el)) {
+                el.indeterminate = true;
+            }
+        }
+    });
+
+    $('#cetak').on('click', function(e) {
         e.preventDefault();
 
-        // Collect selected no_bukti
-        var selected = [];
-        $('.select-checkbox:checked').each(function() {
-            selected.push($(this).data('id'));
-        });
-
-        if (selected.length === 0) {
+        if (selectedIds.length === 0) {
             Swal.fire({
                 title: "Peringatan!",
                 text: "Silakan pilih setidaknya satu transaksi untuk dicetak!",
@@ -214,7 +247,7 @@
         $('#printForm').find('input[name="no_bukti[]"]').remove();
 
         // Add selected no_bukti to form
-        selected.forEach(function(no_bukti) {
+        selectedIds.forEach(function(no_bukti) {
             $('#printForm').append('<input type="hidden" name="no_bukti[]" value="' + no_bukti + '">');
         });
 
@@ -227,7 +260,6 @@
         let jenis_cetak = $('#jenis_cetak').val();
         let jenis_print = $(this).data("jenis");
 
-        // Validate required fields
         if (!jenis_cetak) {
             Swal.fire({
                 title: "Peringatan!",
@@ -237,63 +269,59 @@
             return;
         }
 
-        // Add jenis_print to form
         $('#printForm').append('<input type="hidden" name="jenis_print" value="' + jenis_print + '">');
-
-        // Submit the form
         $('#printForm').submit();
     });
+});
 
-    });
+$(document).on('click', '.delete-btn', function(e) {
+    e.preventDefault();
+    var deleteUrl = $(this).data('url');
 
-    $(document).on('click', '.delete-btn', function(e) {
-                e.preventDefault();
-                var deleteUrl = $(this).data('url');
-
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: "Transaksi ini akan dihapus!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: deleteUrl,
-                            type: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    Swal.fire(
-                                        'Terhapus!',
-                                        'Transaksi berhasil dihapus.',
-                                        'success'
-                                    );
-                                    $('#pbk').DataTable().ajax.reload();
-                                } else {
-                                    Swal.fire(
-                                        'Error!',
-                                        'Gagal menghapus Transaksi.',
-                                        'error'
-                                    );
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                Swal.fire(
-                                    'Error!',
-                                    'Gagal menghapus Transaksi.',
-                                    'error'
-                                );
-                            }
-                        });
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Transaksi ini akan dihapus!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: deleteUrl,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire(
+                            'Terhapus!',
+                            'Transaksi berhasil dihapus.',
+                            'success'
+                        );
+                        $('#pbk').DataTable().ajax.reload();
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'Gagal menghapus Transaksi.',
+                            'error'
+                        );
                     }
-                });
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire(
+                        'Error!',
+                        'Gagal menghapus Transaksi.',
+                        'error'
+                    );
+                }
             });
+        }
+    });
+});
 
 
     </script>
