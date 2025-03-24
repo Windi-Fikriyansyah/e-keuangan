@@ -488,23 +488,24 @@ class Transaksi extends Controller
             }
 
 
-            $detailInserts3 = array_map(function($details_tujuan) use ($request) {
-                return [
-                    'no_voucher' => $request->no_bukti,
-                    'tgl_voucher' => $request->tgl_bukti,
-                    'rekening_awal' => $request->rek_pengeluaran,
-                    'nm_rekening_tujuan' => $details_tujuan['nm_rekening'],
-                    'rekening_tujuan' => $details_tujuan['rekeningtujuan'],
-                    'bank_tujuan' => $details_tujuan['bank'],
-                    'ket_tpp' => $details_tujuan['ket_tpp'],
-                    'kd_skpd' => auth()->user()->kd_skpd,
-                    'nilai' =>str_replace(['Rp', '.', ' '], '', $details_tujuan['nilai_transfer']),
+            if (!empty($details_tujuan)) {
+                $detailInserts3 = array_map(function($details_tujuan) use ($request) {
+                    return [
+                        'no_voucher' => $request->no_bukti,
+                        'tgl_voucher' => $request->tgl_bukti,
+                        'rekening_awal' => $request->rek_pengeluaran,
+                        'nm_rekening_tujuan' => $details_tujuan['nm_rekening'],
+                        'rekening_tujuan' => $details_tujuan['rekeningtujuan'],
+                        'bank_tujuan' => $details_tujuan['bank'],
+                        'ket_tpp' => $details_tujuan['ket_tpp'],
+                        'kd_skpd' => auth()->user()->kd_skpd,
+                        'nilai' =>str_replace(['Rp', '.', ' '], '', $details_tujuan['nilai_transfer']),
+                    ];
+                }, $details_tujuan);
 
-
-                ];
-            }, $details_tujuan);
-            if (!empty($detailInserts3)) {
-                DB::table('trdtransout_transfercms')->insert($detailInserts3);
+                if (!empty($detailInserts3)) {
+                    DB::table('trdtransout_transfercms')->insert($detailInserts3);
+                }
             }
 
 
