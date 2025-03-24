@@ -428,7 +428,19 @@
                                 <option value="" disabled selected>Silahkan Pilih</option>
                             </select>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Jenis Anggaran</label>
+                            <select class="form-control" name="jenis_anggaran" id="jenis_anggaran">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                                <option value="0" selected>Penyusunan</option>
+                                <option value="1" selected>Pergeseran I</option>
+                                <option value="2" selected>Pergeseran II</option>
+                                <option value="3" selected>Pergeseran III</option>
+                            </select>
+                        </div>
                     </div>
+
+
 
                     <div class="mb-3 text-center">
                         <button type="button" class="btn btn-danger btn-md cetakrealisasi" data-jenis="pdf">PDF</button>
@@ -1524,12 +1536,22 @@ $('#akun_belanja').select2({
             let tanggalTtd = $('#tanggalTtdrekaprealisasi').val();
             let ttdbendahara = $('#ttdbendahararealisasi').val(); // Pastikan ID ini sesuai
             let ttdpa_kpa = $('#ttdrealisasi').val();
+            let jenis_anggaran = $('#jenis_anggaran').val();
             let jenis_print = $(this).data("jenis");
 
             if (!kd_skpd) {
                 Swal.fire({
                     title: "Peringatan!",
                     text: "Silakan pilih SKPD!",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            if (!jenis_anggaran) {
+                Swal.fire({
+                    title: "Peringatan!",
+                    text: "Silakan pilih Jenis Anggaran!",
                     icon: "warning"
                 });
                 return;
@@ -1578,6 +1600,7 @@ $('#akun_belanja').select2({
             url.searchParams.append("tanggalTtd", tanggalTtd);
             url.searchParams.append("ttdbendaharadth", ttdbendahara); // Pastikan cocok dengan request controller
             url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
+            url.searchParams.append("jenis_anggaran", jenis_anggaran);
             url.searchParams.append("jenis_print", jenis_print);
 
             window.open(url.toString(), "_blank");

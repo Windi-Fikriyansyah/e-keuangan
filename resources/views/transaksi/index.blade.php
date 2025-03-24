@@ -26,6 +26,7 @@
                         <h5 class="card-title">List Transaksi Pemindahbukuan Bank</h5>
                     </div>
                     <div class="dropdown ms-auto">
+                        <a href="" class="btn btn-primary" id="cetak">Cetak</a>
                         <a href="{{ route('transaksi.create') }}" class="btn btn-success">Tambah</a>
                     </div>
                 </div>
@@ -35,7 +36,9 @@
                     <table class="table align-middle mb-0" id="pbk" style="width: 100%">
                         <thead>
                             <tr>
+
                                 <th>No</th>
+                                <th><input type="checkbox" id="select-all"></th>
                                 <th>Nomor Bukti</th>
                                 <th>Tanggal Bukti</th>
                                 <th>Skpd</th>
@@ -52,36 +55,33 @@
     </div>
 
 
-    <!-- Print Modal -->
-<div class="modal fade" id="printModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="printModalLabel">Cetakan Rekening Tujuan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="printForm" action="{{ route('transaksi.print') }}" method="POST" target="_blank">
-                    @csrf
-
-
-                    <div class="mb-3">
-                        <label for="jenis_cetak" class="form-label">Jenis Cetakan</label>
-                        <select class="form-control" name ="jenis_cetak" id="jenis_cetak">
-                            <option value="" disabled selected>Silahkan Pilih</option>
-                            <option value="OB" selected>OB</option>
-                            <option value="SKN" selected>SKN</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-center">
-                        <button type="button" class="btn btn-dark btn-md submitPrint" data-jenis="excel">Excel</button>
-                        <button type="button" class="btn btn-secondary btn-md" data-bs-dismiss="modal">Tutup</button>
+    <div class="modal fade" id="printModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="printModalLabel">Cetakan Rekening Tujuan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="printForm" action="{{ route('transaksi.print') }}" method="POST" target="_blank">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="jenis_cetak" class="form-label">Jenis Cetakan</label>
+                            <select class="form-control" name="jenis_cetak" id="jenis_cetak">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                                <option value="OB">OB</option>
+                                <option value="SKN">SKN</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dark btn-md submitPrint" data-jenis="excel">Excel</button>
+                    <button type="button" class="btn btn-secondary btn-md" data-bs-dismiss="modal">Tutup</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 @endsection
 
 @push('js')
@@ -129,6 +129,7 @@
             pageLength: 10,
             searching: true,
             columns: [
+
                 {
                     data: 'DT_RowIndex',
                     name: 'DT_RowIndex',
@@ -136,6 +137,16 @@
                     searchable: false,
                     className: 'text-center'
                 },
+                {
+                data: 'no_bukti',
+                name: 'no_bukti',
+                orderable: false,
+                searchable: false,
+                className: 'text-center',
+                render: function(data, type, row) {
+                    return `<input type="checkbox" class="select-checkbox" data-id="${row.no_bukti}">`;
+                }
+            },
                 {
                     data: 'no_bukti',
                     name: 'no_bukti'
@@ -164,6 +175,75 @@
                 }
             ]
         });
+
+        $('#select-all').on('click', function() {
+        var rows = $('#pbk').DataTable().rows({ 'search': 'applied' }).nodes();
+        $('input[type="checkbox"]', rows).prop('checked', this.checked);
+        });
+
+        // Handle individual checkbox click
+        $('#pbk tbody').on('change', 'input[type="checkbox"]', function() {
+            if (!this.checked) {
+                var el = $('#select-all').get(0);
+                if (el && el.checked && ('indeterminate' in el)) {
+                    el.indeterminate = true;
+                }
+            }
+        });
+
+
+        $('#cetak').on('click', function(e) {
+        e.preventDefault();
+
+        // Collect selected no_bukti
+        var selected = [];
+        $('.select-checkbox:checked').each(function() {
+            selected.push($(this).data('id'));
+        });
+
+        if (selected.length === 0) {
+            Swal.fire({
+                title: "Peringatan!",
+                text: "Silakan pilih setidaknya satu transaksi untuk dicetak!",
+                icon: "warning"
+            });
+            return;
+        }
+
+        // Clear previous input
+        $('#printForm').find('input[name="no_bukti[]"]').remove();
+
+        // Add selected no_bukti to form
+        selected.forEach(function(no_bukti) {
+            $('#printForm').append('<input type="hidden" name="no_bukti[]" value="' + no_bukti + '">');
+        });
+
+        // Show modal
+        $('#printModal').modal('show');
+    });
+
+    // Handle print form submission
+    $('.submitPrint').on('click', function() {
+        let jenis_cetak = $('#jenis_cetak').val();
+        let jenis_print = $(this).data("jenis");
+
+        // Validate required fields
+        if (!jenis_cetak) {
+            Swal.fire({
+                title: "Peringatan!",
+                text: "Silakan pilih Jenis Cetakan!",
+                icon: "warning"
+            });
+            return;
+        }
+
+        // Add jenis_print to form
+        $('#printForm').append('<input type="hidden" name="jenis_print" value="' + jenis_print + '">');
+
+        // Submit the form
+        $('#printForm').submit();
+    });
+
     });
 
     $(document).on('click', '.delete-btn', function(e) {
@@ -215,42 +295,6 @@
                 });
             });
 
-$(document).on('click', '.print-btn', function() {
-        // Ambil no_bukti dari data atribut
-        var noBukti = $(this).data('no-lpj');
-
-        // Tambahkan input hidden untuk no_bukti di dalam form
-        $('#printForm').find('input[name="no_bukti"]').remove(); // Hapus jika sudah ada
-        $('#printForm').append('<input type="hidden" name="no_bukti" value="' + noBukti + '">');
-
-        // Reset select option jenis_cetak
-        $('#jenis_cetak').val('');
-
-        // Tampilkan modal
-        $('#printModal').modal('show');
-    });
-
-
-// Replace your existing $('.submitPrint').on('click', function () {...}) code with this:
-$('.submitPrint').on('click', function() {
-    let jenis_cetak = $('#jenis_cetak').val();
-    let jenis_print = $(this).data("jenis");
-
-    // Validate required fields
-    if (!jenis_cetak) {
-        Swal.fire({
-            title: "Peringatan!",
-            text: "Silakan pilih Jenis Cetakan!",
-            icon: "warning"
-        });
-        return;
-    }
-    // Add all form values to the form
-    $('#printForm').append('<input type="hidden" name="jenis_print" value="' + jenis_print + '">');
-
-    // Submit the form
-    $('#printForm').submit();
-});
 
     </script>
 @endpush

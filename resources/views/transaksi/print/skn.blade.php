@@ -21,7 +21,7 @@
                 <td>{{ $item->rekening_awal }}</td>
                 <td>{{ $item->nm_rekening_tujuan }}</td>
                 <td>{{ $item->rekening_tujuan }}</td>
-                <td>{{ $item->nilai }}</td>
+                <td>Rp {{ number_format($item->nilai, 2, ',', '.') }}</td>
                 <td>{{ $item->ket_tpp }}</td>
             </tr>
             @endforeach

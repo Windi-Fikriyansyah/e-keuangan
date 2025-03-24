@@ -45,7 +45,6 @@ class Transaksi extends Controller
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route('transaksi.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
-                $btn .= '<button class="btn btn-sm btn-success print-btn" data-no-lpj="' . $row->no_bukti . '"><i class="fas fa-print"></i></button>';
                 $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('transaksi.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
                 return $btn;
             })
@@ -560,18 +559,24 @@ class Transaksi extends Controller
 
     public function print(Request $request)
 {
-
-    $no_bukti = $request->no_bukti;
+    // Ambil data dari request
+    $no_bukti = $request->no_bukti; // Ini adalah array
     $jenis_cetak = $request->jenis_cetak;
     $jenis = $request->jenis_print;
 
+    // Validasi jika tidak ada no_bukti yang dipilih
+    if (empty($no_bukti)) {
+        return back()->with('error', 'Tidak ada data yang dipilih untuk dicetak.');
+    }
+
+    // Query data berdasarkan no_bukti yang dipilih
     $data_lpj = DB::table('trdtransout_transfercms')
         ->select(
             'trdtransout_transfercms.*',
             'ms_bank.nama',
         )
         ->leftJoin('ms_bank', 'trdtransout_transfercms.bank_tujuan', '=', 'ms_bank.kode')
-        ->where('trdtransout_transfercms.no_voucher', $no_bukti);
+        ->whereIn('trdtransout_transfercms.no_voucher', $no_bukti); // Gunakan whereIn untuk array
 
     // Filter berdasarkan jenis cetak
     if ($jenis_cetak == 'OB') {
@@ -586,11 +591,15 @@ class Transaksi extends Controller
         });
     }
 
+    // Ambil data
     $data = $data_lpj->get();
 
+    // Validasi jika data kosong
     if ($data->isEmpty()) {
         return back()->with('error', 'Data tidak ditemukan.');
     }
+
+    // Ambil keterangan dari data pertama
     $firstData = $data->first();
     $ket_tpp = $firstData->ket_tpp;
 
@@ -622,7 +631,7 @@ class Transaksi extends Controller
         return back()->with('error', 'Jenis cetakan tidak valid.');
     }
 
-    // Output berdasarkan jenis (excel, pdf, atau layar)
+    // Output berdasarkan jenis (layar, pdf, atau excel)
     if ($jenis == 'layar') {
         return $view;
     } elseif ($jenis == 'pdf') {
