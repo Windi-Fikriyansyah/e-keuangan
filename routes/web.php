@@ -64,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/getpotongandata', [Transaksi::class, 'getpotongandata'])->middleware('permission:14')->name('getpotongandata');
         Route::post('/getrekeningtujuan', [Transaksi::class, 'getrekeningtujuan'])->middleware('permission:14')->name('getrekeningtujuan');
         Route::post('/lpj/print', [Transaksi::class, 'print'])->middleware('permission:14')->name('print');
+        Route::get('ubah/{no_bukti}', [Transaksi::class, 'ubah'])->middleware('permission:14')->name('ubah');
 
         Route::get('edit/{no_bukti}', [Transaksi::class, 'edit'])->middleware('permission:14')->name('edit');
         Route::get('/cariData', [Transaksi::class, 'cariData'])->middleware('permission:14')->name('cariData');
@@ -153,7 +154,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/lpj/{no_lpj}', [Lpj::class, 'destroy'])->middleware('permission:44')->name('destroy');
         Route::get('edit/{no_bukti}', [Lpj::class, 'edit'])->middleware('permission:44')->name('edit');
         Route::get('ubah/{no_bukti}', [Lpj::class, 'ubah'])->middleware('permission:44')->name('ubah');
-        Route::post('update/{no_bukti}', [Lpj::class, 'update'])->middleware('permission:44')->name('update');
+        Route::put('/lpj/{no_lpj}', [Lpj::class, 'update'])->middleware('permission:44')->name('update');
         Route::post('/lpj/get-sp2d', [Lpj::class, 'getSp2d'])->middleware('permission:44')->name('get-sp2d');
         Route::post('/lpj/print', [Lpj::class, 'print'])->middleware('permission:44')->name('print');
         Route::post('tandaTangan', [Lpj::class, 'tandaTangan'])->name('tandaTangan');

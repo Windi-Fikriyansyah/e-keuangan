@@ -624,28 +624,34 @@ public function edit($no_bukti)
 
 
     // Ambil data pajak berdasarkan ID menggunakan Query Builder
-    $lpj = DB::table('trhlpj')->where('no_bukti', $decryptedId)->first();
-    $trhtransout = DB::table('trhtransout')->where('no_bukti', $lpj->id_trhtransout)->first();
+    $lpj = DB::table('trhlpj')
+    ->join('masterSkpd', 'trhlpj.kd_skpd', '=', 'masterSkpd.kodeSkpd')
+    ->where('trhlpj.no_lpj', $decryptedId)
+    ->select('trhlpj.*', 'masterSkpd.namaSkpd',)
+    ->first();
+    $potonganDetails = DB::table('trlpj')
+    ->leftJoin('masterSkpd', 'trlpj.kd_skpd', '=', 'masterSkpd.kodeSkpd')
+    ->leftJoin('ms_sub_kegiatan', 'trlpj.kd_sub_kegiatan', '=', 'ms_sub_kegiatan.kd_sub_kegiatan')
+    ->where('trlpj.no_lpj', $decryptedId)
+    ->select(
+        'trlpj.kd_skpd',
+        'trlpj.no_bukti',
+        'trlpj.kd_sub_kegiatan',
+        'trlpj.kd_rek6',
+        'trlpj.nm_rek6',
+        'trlpj.nilai',
+        'masterSkpd.namaSkpd', // Contoh: mengambil nama SKPD dari tabel master_skpd
+        'ms_sub_kegiatan.nm_sub_kegiatan' // Contoh: mengambil nama sub kegiatan dari tabel ms_subkegiatan
+    )
+    ->get();
 
-    $potonganDetails = DB::table('trdlpj')
-            ->where('no_bukti', $decryptedId)
-            ->select(
-                'kd_rek_trans',
-                'kd_rek6',
-                'nm_rek6',
-                'rekanan',
-                'npwp',
-                'ebilling',
-                'nilai'
-            )
-            ->get();
     // Cek apakah data ditemukan
     if (!$lpj) {
         return redirect()->route('lpj.index')->with('message', 'Data Terima Potongan Pajak tidak ditemukan.');
     }
 
     // Tampilkan view untuk mengedit data
-    return view('lpj.edit', compact('lpj','trhtransout','potonganDetails'));
+    return view('lpj.edit', compact('lpj','potonganDetails'));
 }
 
 public function ubah($no_bukti)
@@ -679,21 +685,12 @@ public function ubah($no_bukti)
     return view('lpj.ubah', compact('lpj','trhtransout','potonganDetails'));
 }
 
-
-public function update(Request $request, $no_bukti)
+public function update(Request $request, $no_lpj)
 {
-    // Validasi input
+    $id = Crypt::decrypt($no_lpj);
     $validator = Validator::make($request->all(), [
-        'tgl_bukti' => 'required|date',
-        'id_trhtransout' => 'nullable|exists:trhtransout,no_bukti',
-        'no_sp2d' => 'required',
-        'pay' => 'required',
-        'kd_sub_kegiatan' => 'required',
-        'kd_rek6' => 'required',
-        'nmrekan' => 'required',
-        'beban' => 'required',
-        'alamat' => 'nullable',
-        'ket' => 'nullable',
+        'tgl_lpj' => 'required',
+        'keterangan' => 'required',
     ]);
 
     if ($validator->fails()) {
@@ -703,107 +700,32 @@ public function update(Request $request, $no_bukti)
         ], 422);
     }
 
-    // Decode JSON dan pastikan valid
-    $potonganData = json_decode($request->potongan_data, true);
-
-    if (!is_array($potonganData) || empty($potonganData)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Data potongan tidak valid atau kosong.'
-        ], 400);
-    }
-
-    // Hitung total nilai potongan dengan pengecekan yang lebih aman
-    $totalNilai = array_reduce($potonganData, function ($carry, $item) {
-        $nilai = isset($item['nilai']) ? str_replace(['Rp', '.', ','], '', $item['nilai']) : 0;
-        return $carry + (float) $nilai;
-    }, 0);
-
     DB::beginTransaction();
     try {
-        // Ambil data lama dari `trhlpj`
-        $lpj = DB::table('trhlpj')->where('no_bukti', $no_bukti)->first();
-
-        if (!$lpj) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data tidak ditemukan.'
-            ], 404);
-        }
-
-        $kd_skpd = $request->kd_skpd ?? $lpj->kd_skpd;
-        $nilaiLama = (float) $lpj->nilai;
-
-        // Update saldoawal di masterskpd jika nilai berubah
-        if ($nilaiLama !== $totalNilai) {
-            DB::table('masterSkpd')
-                ->where('kodeSkpd', $kd_skpd)
-                ->update([
-                    'saldoawal' => DB::raw("saldoawal - $nilaiLama + $totalNilai")
-                ]);
-        }
-
-        // Update data lpj
-        DB::table('trhlpj')->where('no_bukti', $no_bukti)->update([
-            'tgl_bukti' => $request->tgl_bukti,
-            'ket' => $request->ket,
-            'username' => Auth()->user()->username,
-            'kd_skpd' => $request->kd_skpd ?? $lpj->kd_skpd,
-            'nm_skpd' => $request->nm_skpd ?? $lpj->nm_skpd,
-            'no_sp2d' => $request->no_sp2d,
-            'nilai' => $totalNilai,
-            'npwp' => $request->npwp,
-            'kd_sub_kegiatan' => $request->kd_sub_kegiatan,
-            'nm_sub_kegiatan' => $request->nm_sub_kegiatan,
-            'kd_rek6' => $request->kd_rek6,
-            'nm_rek6' => $request->nm_rek6,
-            'nmrekan' => $request->nmrekan,
-            'pimpinan' => $request->pimpinan,
-            'alamat' => $request->alamat,
-            'no_kas' => $no_bukti,
-            'pay' => $request->pay,
-            'ebilling' => $request->ebilling,
-            'id_trhtransout' => $request->id_trhtransout,
+        $updated = DB::table('trhlpj')->where('no_lpj', $id)->update([
+            'tgl_lpj' => $request->input('tgl_lpj'),
+            'keterangan' => $request->input('keterangan'),
         ]);
 
-        // Hapus potongan details lama
-        DB::table('trdlpj')->where('no_bukti', $no_bukti)->delete();
 
-        // Simpan potongan details baru
-        $potonganInsertData = array_map(function ($detail) use ($request, $no_bukti, $lpj) {
-            return [
-                'kd_skpd' => $request->kd_skpd ?? $lpj->kd_skpd,
-                'no_bukti' => $no_bukti,
-                'kd_rek_trans' => $request->kd_rek6,
-                'kd_rek6' => $detail['kdrekpot'],
-                'nm_rek6' => $detail['nmrekpot'],
-                'rekanan' => $detail['nmrekan'],
-                'ntpn' => $detail['ntpn'] ?? null,
-                'npwp' => $detail['npwp'],
-                'ebilling' => $detail['ebilling'],
-                'nilai' => str_replace(['Rp', '.', ','], '', $detail['nilai']),
-            ];
-        }, $potonganData);
-
-        DB::table('trdlpj')->insert($potonganInsertData);
+        if (!$updated) {
+            throw new Exception('Data tidak ditemukan atau gagal diperbarui');
+        }
 
         DB::commit();
         return response()->json([
             'success' => true,
-            'message' => 'Data berhasil disimpan',
-            'redirect' => route('lpj.index')
+            'message' => 'Data berhasil diperbarui',
+            'redirect_url' => route('lpj.index') // Ubah key 'redirect' menjadi 'redirect_url' untuk lebih eksplisit
         ]);
-
     } catch (Exception $e) {
         DB::rollBack();
-
         return response()->json([
             'success' => false,
-            'message' => 'Gagal menyimpan data: ' . $e->getMessage()
+            'message' => 'Gagal memperbarui data: ' . $e->getMessage()
         ], 500);
     }
 }
-
 
 
 

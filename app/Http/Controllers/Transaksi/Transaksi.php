@@ -45,6 +45,7 @@ class Transaksi extends Controller
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
                 $btn = '<a href="' . route('transaksi.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
+                $btn .= '<a href="' . route('transaksi.ubah', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-warning btn-sm" style="margin-right:4px"><i class="fas fa-edit"></i></a>';
                 $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('transaksi.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
                 return $btn;
             })
@@ -75,6 +76,45 @@ class Transaksi extends Controller
 
 
         return view('transaksi.create', compact('kd_skpd','nm_skpd','newNoBukti','rek_pengeluaran','kd_sub_kegiatan','saldo_awal'));
+    }
+
+    public function ubah($no_bukti)
+    {
+        // Dekripsi ID yang terenkripsi
+        $decryptedId = Crypt::decrypt($no_bukti);
+
+
+        $transaksi = DB::table('trhtransout')->where('no_bukti', $decryptedId)->first();
+
+        $potonganDetails = DB::table('trdtransout')
+        ->leftJoin('ms_sumberdana', function ($join) {
+            $join->on(
+                DB::raw('CAST(trdtransout.sumber AS INT)'),
+                '=',
+                'ms_sumberdana.id'
+            );
+        })
+        ->where('trdtransout.no_bukti', $decryptedId)
+        ->select(
+            'trdtransout.nm_sub_kegiatan',
+            'trdtransout.kd_rek6',
+            'trdtransout.nm_rek6',
+            'trdtransout.sumber',
+            'trdtransout.nilai',
+            'ms_sumberdana.nm_dana'
+        )
+        ->distinct() // Tambahkan ini
+        ->get();
+
+
+        // Cek apakah data ditemukan
+        if (!$transaksi) {
+            return redirect()->route('transaksi.index')->with('message', 'Data Terima Potongan Pajak tidak ditemukan.');
+        }
+        $rek_pengeluaran = Auth::user()->rek_pengeluaran;
+
+        // Tampilkan view untuk mengedit data
+        return view('transaksi.ubah', compact('transaksi','potonganDetails','rek_pengeluaran'));
     }
 
     public function getno_transaksi(Request $request)

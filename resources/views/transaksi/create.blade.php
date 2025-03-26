@@ -856,6 +856,8 @@ function validateNilai() {
         return parseFloat(value.replace(/[^\d,-]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
     }
 
+    let isCheckedPerlimpahan = document.getElementById('perlimpahan').checked;
+
     // Ambil nilai input dan bersihkan dari karakter yang tidak diinginkan
     let sisaSPD = cleanNumber($("#sisaSPD").val());
     let sisaAnggaranKas = cleanNumber($("#sisaAnggaranKas").val());
@@ -886,7 +888,15 @@ function validateNilai() {
         });
         return false;
     }
-    if (nilai > sisaSPD || nilai > sisaAnggaranKas || nilai > sisaAnggaran || nilai > sisanilaisumberdana) {
+
+
+
+    if (!isCheckedPerlimpahan && (
+        nilai > sisaSPD ||
+        nilai > sisaAnggaranKas ||
+        nilai > sisaAnggaran ||
+        nilai > sisanilaisumberdana
+    )) {
         Swal.fire({
             icon: 'error',
             title: 'Kesalahan',
