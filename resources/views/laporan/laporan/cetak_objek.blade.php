@@ -75,16 +75,16 @@
 <body>
     <div class="header">
         <h1>BUKU PEMBANTU SUB RINCIAN OBYEK BELANJA<br>
-            PERIODE {{ \Carbon\Carbon::parse($tanggalawal)->translatedFormat('j F Y') }} -
-            {{ \Carbon\Carbon::parse($tanggalakhir)->translatedFormat('j F Y') }}
+            PERIODE {{ isset($tanggalawal) ? \Carbon\Carbon::parse($tanggalawal)->translatedFormat('j F Y') : '' }} -
+            {{ isset($tanggalakhir) ? \Carbon\Carbon::parse($tanggalakhir)->translatedFormat('j F Y') : '' }}
         </h1>
     </div>
 
     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
         <div>
-            <strong>Nama Sub Kegiatan :</strong> {{$kegiatan->kd_sub_kegiatan}} - {{$kegiatan->nm_sub_kegiatan}}<br><br>
-            <strong>Nama Rekening :</strong> {{$jumlah_anggaran->kd_rek}} - {{$jumlah_anggaran->nm_rek}}<br><br>
-            <strong>Jumlah Anggaran :</strong> Rp {{ number_format($jumlah_anggaran->anggaran_tahun, 2, ',', '.') }}
+            <strong>Nama Sub Kegiatan :</strong> {{ isset($kegiatan->kd_sub_kegiatan) ? $kegiatan->kd_sub_kegiatan : '' }} - {{ isset($kegiatan->nm_sub_kegiatan) ? $kegiatan->nm_sub_kegiatan : '' }}<br><br>
+            <strong>Nama Rekening :</strong> {{ isset($jumlah_anggaran->kd_rek) ? $jumlah_anggaran->kd_rek : '' }} - {{ isset($jumlah_anggaran->nm_rek) ? $jumlah_anggaran->nm_rek : '' }}<br><br>
+            <strong>Jumlah Anggaran :</strong> Rp {{ isset($jumlah_anggaran->anggaran_tahun) ? number_format($jumlah_anggaran->anggaran_tahun, 2, ',', '.') : '0,00' }}
         </div>
     </div>
 
@@ -101,25 +101,33 @@
             </thead>
             <tbody>
                 @php $totalInputan = 0; @endphp
-                @foreach ($trhtransout as $item)
-                    @php $totalInputan += $item->nilai; @endphp
+                @if(isset($trhtransout) && count($trhtransout) > 0)
+                    @foreach ($trhtransout as $item)
+                        @php $totalInputan += isset($item->nilai) ? $item->nilai : 0; @endphp
+                        <tr>
+                            <td>
+                                @if(isset($item->no_sp2d) && !empty($item->no_sp2d) && strpos($item->no_sp2d, 'LS') !== false)
+                                    {{ $item->no_sp2d }}
+                                @else
+                                    {{ isset($item->no_bukti) ? $item->no_bukti : '' }}
+                                @endif
+                            </td>
+                            <td>{{ isset($item->tgl_bukti) ? \Carbon\Carbon::parse($item->tgl_bukti)->translatedFormat('j F Y') : '' }}</td>
+                            <td>{{ isset($item->ket) ? $item->ket : '' }}</td>
+                            <td>{{ isset($item->sumber_dana) ? $item->sumber_dana : 'Tidak Ada Sumber Dana' }}</td>
+                            <td class="numbers">Rp {{ isset($item->nilai) ? number_format($item->nilai, 2, ',', '.') : '0,00' }}</td>
+                        </tr>
+                    @endforeach
+                @else
                     <tr>
-                        <td>@if(isset($item->no_sp2d) && !empty($item->no_sp2d) && strpos($item->no_sp2d, 'LS') !== false)
-                            {{ $item->no_sp2d }}
-                        @else
-                            {{ $item->no_bukti }}
-                        @endif</td>
-                        <td>{{ \Carbon\Carbon::parse($item->tgl_bukti)->translatedFormat('j F Y') }}</td>
-                        <td>{{ $item->ket }}</td>
-                        <td>{{ $item->sumber_dana ?? 'Tidak Ada Sumber Dana' }}</td>
-                        <td class="numbers">Rp {{ number_format($item->nilai, 2, ',', '.') }}</td>
+                        <td colspan="5" style="text-align: center;">Tidak ada data transaksi</td>
                     </tr>
-                @endforeach
+                @endif
             </tbody>
             <tfoot>
                 <tr>
                     <th colspan="4">Jumlah Anggaran</th>
-                    <th class="numbers">Rp {{ number_format($jumlah_anggaran->anggaran_tahun, 2, ',', '.') }}</th>
+                    <th class="numbers">Rp {{ isset($jumlah_anggaran->anggaran_tahun) ? number_format($jumlah_anggaran->anggaran_tahun, 2, ',', '.') : '0,00' }}</th>
                 </tr>
                 <tr>
                     <th colspan="4">Total Inputan</th>
@@ -127,7 +135,13 @@
                 </tr>
                 <tr>
                     <th colspan="4">Sisa Anggaran</th>
-                    <th class="numbers">Rp {{ number_format($jumlah_anggaran->anggaran_tahun - $totalInputan, 2, ',', '.') }}</th>
+                    <th class="numbers">
+                        Rp {{
+                            isset($jumlah_anggaran->anggaran_tahun)
+                            ? number_format($jumlah_anggaran->anggaran_tahun - $totalInputan, 2, ',', '.')
+                            : number_format(0 - $totalInputan, 2, ',', '.')
+                        }}
+                    </th>
                 </tr>
             </tfoot>
         </table>
@@ -135,25 +149,25 @@
 
     <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">
         <div class="signature" style="flex: 1; text-align: center;">
-            <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $pa_kpa->jabatan}}</div>
+            <div>Pontianak, {{ isset($tanggalTtd) ? \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') : '' }}</div>
+            <div>{{ isset($pa_kpa->jabatan) ? $pa_kpa->jabatan : '' }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$pa_kpa->nama}}</div>
-                <div class="signature-title">{{$pa_kpa->pangkat}}</div>
-                <div class="signature-title">NIP. {{$pa_kpa->nip}}</div>
+                <div class="signature-line">{{ isset($pa_kpa->nama) ? $pa_kpa->nama : '' }}</div>
+                <div class="signature-title">{{ isset($pa_kpa->pangkat) ? $pa_kpa->pangkat : '' }}</div>
+                <div class="signature-title">NIP. {{ isset($pa_kpa->nip) ? $pa_kpa->nip : '' }}</div>
             </div>
         </div>
         <div class="signature" style="flex: 1; text-align: center;">
-            <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $bendahara->jabatan}}</div>
+            <div>Pontianak, {{ isset($tanggalTtd) ? \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') : '' }}</div>
+            <div>{{ isset($bendahara->jabatan) ? $bendahara->jabatan : '' }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$bendahara->nama}}</div>
-                <div class="signature-title">{{$bendahara->pangkat}}</div>
-                <div class="signature-title">NIP. {{$bendahara->nip}}</div>
+                <div class="signature-line">{{ isset($bendahara->nama) ? $bendahara->nama : '' }}</div>
+                <div class="signature-title">{{ isset($bendahara->pangkat) ? $bendahara->pangkat : '' }}</div>
+                <div class="signature-title">NIP. {{ isset($bendahara->nip) ? $bendahara->nip : '' }}</div>
             </div>
         </div>
     </div>

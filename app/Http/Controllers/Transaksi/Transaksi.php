@@ -369,6 +369,7 @@ class Transaksi extends Controller
     {
 
 
+
         $details = json_decode($request->input('details'), true) ?? [];
         $details_tujuan = json_decode($request->input('details_tujuan'), true) ?? [];
         $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
@@ -470,6 +471,16 @@ class Transaksi extends Controller
 
 
             $detailInserts = array_map(function($detail) use ($request) {
+                $jenisPergeseran = $detail['jenis_pergeseran'] ?? '0';
+
+                // Jika berupa array, ambil nilai pertama
+                if (is_array($jenisPergeseran)) {
+                    $jenisPergeseran = !empty($jenisPergeseran) ? reset($jenisPergeseran) : '0';
+                }
+
+                // Pastikan hasil akhir adalah string
+                $jenisPergeseran = (string)$jenisPergeseran;
+
                 $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
                 $perlimpahan = $request->has('jenis_perlimpahan') ? 1 : 0;
                 return [
@@ -485,6 +496,7 @@ class Transaksi extends Controller
                     'nilai' => str_replace(['Rp', '.', ' '], '', $detail['nilai']),
                     'no_sp2d' => $detail['no_sp2d'],
                     'sumber' => $detail['kd_dana'],
+                    'jenis_anggaran' => $jenisPergeseran ?? '0',
                     'volume' => $detail['volume'] ?? 0,
                     'satuan' => $detail['satuan'] ?? null,
                     'total_spd' => str_replace(['Rp', '.', ' '], '', $detail['totalSPD'] ?? '0') ?: '0',

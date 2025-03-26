@@ -920,6 +920,7 @@ function prepareSubmit() {
 
     // Convert dataSementara to a format suitable for Laravel
     let details = dataSementara.map(item => ({
+        jenis_pergeseran: item.jenis_pergeseran || '0',
         kd_sub_kegiatan: item.kd_sub_kegiatan,
         nm_sub_kegiatan: item.nm_sub_kegiatan,
         no_sp2d: item.no_sp2d,
@@ -1231,6 +1232,11 @@ if (!tglBukti || !jenisBeban) {
         if (!validateNilai()) {
             return false; // Jika tidak valid, jangan lanjutkan submit
         }
+
+        let jenisPergeseran = [];
+        $('input[name="jenis_pergeseran[]"]:checked').each(function() {
+            jenisPergeseran.push($(this).val());
+        });
         // Ambil data dari input modal
         let kd_sub_kegiatan = $("#kd_sub_kegiatan").val();
         let nm_sub_kegiatan = $("#nm_sub_kegiatan").val();
@@ -1263,6 +1269,7 @@ if (!tglBukti || !jenisBeban) {
 
         // Simpan data ke array sementara
         dataSementara.push({
+            jenis_pergeseran: jenisPergeseran,
             kd_sub_kegiatan,
             nm_sub_kegiatan,
             no_sp2d,

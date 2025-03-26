@@ -475,9 +475,12 @@
                     <div class="mb-3 row">
                         <div class="col-md-6">
                             <label class="form-label">Jenis Anggaran</label>
-                            <select class="form-control" id="jenis_anggaran">
+                            <select class="form-control" name="jenis_anggaran1" id="jenis_anggaran1">
                                 <option value="" disabled selected>Silahkan Pilih</option>
-                                <option value="Penetapan">M|Penetapan</option>
+                                <option value="0">Penyusunan</option>
+                                <option value="1">Pergeseran I</option>
+                                <option value="2">Pergeseran II</option>
+                                <option value="3">Pergeseran III</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -1613,11 +1616,13 @@ $('#akun_belanja').select2({
             let tanggalTtd = $('#tanggalTtdrekapobjek').val();
             let ttdbendahara = $('#ttdbendaharaobjek').val(); // Pastikan ID ini sesuai
             let ttdpa_kpa = $('#ttdobjek').val();
-            let jenis_anggaran = $('#jenis_anggaran').val();
+            let jenis_anggaran = $('#jenis_anggaran1').val();
             let sub_kegiatan = $('#sub_kegiatan').val(); // Pastikan ID ini sesuai
             let jenis = $('#jenis_objek').val();
             let akun_belanja = $('#akun_belanja').val();
             let jenis_print = $(this).data("jenis");
+
+            console.log($('#jenis_anggaran1').val());
 
             if (!kd_skpd) {
                 Swal.fire({
