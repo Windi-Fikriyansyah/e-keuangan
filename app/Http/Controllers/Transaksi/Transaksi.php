@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
+use DOMDocument;
 
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
@@ -697,10 +698,28 @@ class Transaksi extends Controller
         $filename = $jenis_cetak . '_' . date('Ymd_His') . '.pdf';
         return $pdf->stream($filename);
     } elseif ($jenis == 'excel') {
-        return response($view->render())
+        $filename = str_replace('.xls', '.csv', $filename);
+
+        $csvContent = "";
+
+        foreach ($data as $item) {
+            $csvContent .= sprintf(
+                '"DINKESKB";"%s";"%s";"%s";"%s";"%s"',
+                str_replace('"', '""', $item->rekening_awal),
+                str_replace('"', '""', $item->nm_rekening_tujuan),
+                str_replace('"', '""', $item->rekening_tujuan),
+                number_format($item->nilai, 0, '', ''),
+                str_replace('"', '""', $item->ket_tpp)
+            ) . "\r\n"; // Gunakan \r\n untuk line ending
+        }
+
+        // Tambahkan BOM UTF-8 untuk Excel
+        $csvContent = "\xEF\xBB\xBF" . $csvContent;
+
+        return response($csvContent)
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-            ->header('Content-Type', 'application/vnd.ms-excel')
-            ->header('Content-Disposition', 'attachment; filename=' . $filename);
+            ->header('Content-Type', 'text/csv; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 
     return back()->with('message', 'Dokumen berhasil dicetak.');

@@ -28,7 +28,7 @@
             margin-bottom: 1.5rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             background-color: #fff;
-            font-size: 10px;
+            font-size: 12px;
         }
         .main-table th, .main-table td {
             border: 1px solid #888;
@@ -44,7 +44,7 @@
             padding: 6px;
         }
         .main-table tr:nth-child(even) { background-color: #f9f9f9; }
-        .numbers { text-align: right; font-family: 'Consolas', monospace; font-size: 9px; white-space: nowrap; }
+        .numbers { text-align: right; font-family: 'Consolas', monospace; font-size: 11px; white-space: nowrap; }
         .text-left { text-align: left; }
         .text-center { text-align: center; }
         .footer {

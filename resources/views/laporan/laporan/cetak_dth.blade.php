@@ -58,7 +58,7 @@
             margin-bottom: 1.5rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             background-color: #fff;
-            font-size: 10px;
+            font-size: 12px;
         }
 
         .main-table th,
@@ -105,7 +105,7 @@
         .numbers {
             text-align: right;
             font-family: 'Consolas', monospace;
-            font-size: 9px;
+            font-size: 11px;
             white-space: nowrap;
         }
 

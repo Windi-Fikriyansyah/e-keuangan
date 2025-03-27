@@ -24,7 +24,7 @@
         .table-container { width: 100%; overflow-x: hidden; }
         .main-table {
             width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); background-color: #fff; font-size: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); background-color: #fff; font-size: 12px;
         }
         .main-table th, .main-table td {
             border: 1px solid #ddd; padding: 4px 6px; word-break: break-word; vertical-align: top;
@@ -33,7 +33,7 @@
             background-color: #4a90e2; color: white; font-weight: 600; text-align: left; padding: 6px;
         }
         .main-table tr:nth-child(even) { background-color: #f9f9f9; }
-        .numbers { text-align: right; font-family: 'Consolas', monospace; font-size: 9px; white-space: nowrap; }
+        .numbers { text-align: right; font-family: 'Consolas', monospace; font-size: 11px; white-space: nowrap; }
         .footer {
             margin-top: 1.5rem;
             width: 100%;
