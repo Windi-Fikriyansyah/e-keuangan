@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,8 +44,10 @@
         .table-container {
             width: 100%;
             overflow-x: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
         }
 
         /* Hide scrollbar for Chrome, Safari and Opera */
@@ -84,8 +87,14 @@
         }
 
         /* Utility classes */
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
         .numbers {
             text-align: right;
             font-family: 'Consolas', monospace;
@@ -119,13 +128,17 @@
 
         .signature-line {
             display: inline-block;
-            width: 250px; /* Sesuaikan panjang garis */
+            width: 250px;
+            /* Sesuaikan panjang garis */
             border-bottom: 1px solid #333;
             padding-bottom: 0.4rem;
             font-weight: 600;
-            margin: 0.8rem auto; /* Menengahkan */
-            white-space: nowrap; /* Mencegah teks turun ke baris baru */
-            overflow: hidden; /* Opsional, mencegah teks keluar */
+            margin: 0.8rem auto;
+            /* Menengahkan */
+            white-space: nowrap;
+            /* Mencegah teks turun ke baris baru */
+            overflow: hidden;
+            /* Opsional, mencegah teks keluar */
             text-overflow: ellipsis;
         }
 
@@ -156,6 +169,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>
@@ -207,13 +221,14 @@
             <tbody>
 
                 @forelse($trhtransout as $index => $data)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ isset($data->tgl_sts) ? \Carbon\Carbon::parse($data->tgl_sts)->format('d-m-Y') : '' }}</td>
-                    <td>{{ $data->no_sts ?? $trhbku->no_kas }}</td>
-                    <td>{{ $data->no_sp2d ?? $trhbku->no_sp2d }}</td>
-                    <td>{{ $data->keterangan ?? $trhbku->nm_rek6}}</td>
-                    {{-- <td>
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td>{{ isset($data->tgl_sts) ? \Carbon\Carbon::parse($data->tgl_sts)->format('d-m-Y') : '' }}
+                        </td>
+                        <td>{{ $data->no_sts ?? $trhbku->no_kas }}</td>
+                        <td>{{ $data->no_sp2d ?? $trhbku->no_sp2d }}</td>
+                        <td>{{ $data->keterangan ?? $trhbku->nm_rek6 }}</td>
+                        {{-- <td>
                         @if (!empty($data->id_trhkasin_pkd))
                             {{ $data->uraian }}
                         @else
@@ -221,28 +236,43 @@
                         @endif
                     </td> --}}
 
-                    <td class="text-right">{{ isset($data->gaji) && $data->gaji > 0 ? number_format($data->gaji, 2, ',', '.') : '0,00' }}</td>
-            <!-- Potongan Lain -->
-            <td class="text-right">{{ isset($data->pot_lain) && $data->pot_lain > 0 ? number_format($data->pot_lain, 2, ',', '.') : '0,00' }}</td>
-            <!-- Barang dan Jasa -->
-            <td class="text-right">{{ isset($data->barang_jasa) && $data->barang_jasa > 0 ? number_format($data->barang_jasa, 2, ',', '.') : '0,00' }}</td>
-            <!-- Pihak Ketiga -->
-            <td class="text-right">{{ isset($data->pihak_ketiga) && $data->pihak_ketiga > 0 ? number_format($data->pihak_ketiga, 2, ',', '.') : '0,00' }}</td>
-            <!-- UP -->
-            <td class="text-right">{{ isset($data->UP) && $data->UP > 0 ? number_format($data->UP, 2, ',', '.') : '0,00' }}</td>
-            <!-- GU -->
-            <td class="text-right">{{ isset($data->GU) && $data->GU > 0 ? number_format($data->GU, 2, ',', '.') : '0,00' }}</td>
-            <!-- TU -->
-            <td class="text-right">{{ isset($data->TU) && $data->TU > 0 ? number_format($data->TU, 2, ',', '.') : '0,00' }}</td>
-            <!-- Total -->
-            <td class="text-right">{{ isset($data->total) ? number_format($data->total, 2, ',', '.') : '0,00' }}</td>
+                        <td class="text-right">
+                            {{ isset($data->gaji) && $data->gaji > 0 ? number_format($data->gaji, 2, ',', '.') : '0,00' }}
+                        </td>
+                        <!-- Potongan Lain -->
+                        <td class="text-right">
+                            {{ isset($data->pot_lain) && $data->pot_lain > 0 ? number_format($data->pot_lain, 2, ',', '.') : '0,00' }}
+                        </td>
+                        <!-- Barang dan Jasa -->
+                        <td class="text-right">
+                            {{ isset($data->barang_jasa) && $data->barang_jasa > 0 ? number_format($data->barang_jasa, 2, ',', '.') : '0,00' }}
+                        </td>
+                        <!-- Pihak Ketiga -->
+                        <td class="text-right">
+                            {{ isset($data->pihak_ketiga) && $data->pihak_ketiga > 0 ? number_format($data->pihak_ketiga, 2, ',', '.') : '0,00' }}
+                        </td>
+                        <!-- UP -->
+                        <td class="text-right">
+                            {{ isset($data->UP) && $data->UP > 0 ? number_format($data->UP, 2, ',', '.') : '0,00' }}
+                        </td>
+                        <!-- GU -->
+                        <td class="text-right">
+                            {{ isset($data->GU) && $data->GU > 0 ? number_format($data->GU, 2, ',', '.') : '0,00' }}
+                        </td>
+                        <!-- TU -->
+                        <td class="text-right">
+                            {{ isset($data->TU) && $data->TU > 0 ? number_format($data->TU, 2, ',', '.') : '0,00' }}
+                        </td>
+                        <!-- Total -->
+                        <td class="text-right">
+                            {{ isset($data->total) ? number_format($data->total, 2, ',', '.') : '0,00' }}</td>
 
-                </tr>
+                    </tr>
                 @empty
-                <!-- Only show this if no data is returned -->
-                <tr>
-                    <td colspan="17" class="text-center">Data tidak ditemukan</td>
-                </tr>
+                    <!-- Only show this if no data is returned -->
+                    <tr>
+                        <td colspan="17" class="text-center">Data tidak ditemukan</td>
+                    </tr>
                 @endforelse
 
                 <!-- Static data rows as fallback or example -->
@@ -275,25 +305,25 @@
 
     <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">
         <div class="signature" style="flex: 1; text-align: center;">
-            <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $pa_kpa->jabatan}}</div>
+            <div></div>
+            <div>{{ $pa_kpa->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$pa_kpa->nama}}</div>
-                <div class="signature-title">{{$pa_kpa->pangkat}}</div>
-                <div class="signature-title">NIP. {{$pa_kpa->nip}}</div>
+                <div class="signature-line">{{ $pa_kpa->nama }}</div>
+                <div class="signature-title">{{ $pa_kpa->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $pa_kpa->nip }}</div>
             </div>
         </div>
         <div class="signature" style="flex: 1; text-align: center;">
             <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $bendahara->jabatan}}</div>
+            <div>{{ $bendahara->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$bendahara->nama}}</div>
-                <div class="signature-title">{{$bendahara->pangkat}}</div>
-                <div class="signature-title">NIP. {{$bendahara->nip}}</div>
+                <div class="signature-line">{{ $bendahara->nama }}</div>
+                <div class="signature-title">{{ $bendahara->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $bendahara->nip }}</div>
             </div>
         </div>
     </div>
@@ -308,4 +338,5 @@
         window.onload = calculateTotal;
     </script>
 </body>
+
 </html>

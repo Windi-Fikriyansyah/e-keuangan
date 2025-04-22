@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,12 @@
     <title>Cetak Laporan REALISASI FISIK</title>
     <style>
         /* Reset and base styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
             line-height: 1.4;
@@ -19,21 +25,61 @@
             overflow-x: hidden;
             font-size: 11px;
         }
-        .header { text-align: center; margin-bottom: 1.5rem; padding: 0.5rem; }
-        .header h1 { font-size: 14px; font-weight: 700; line-height: 1.6; margin-bottom: 0.3rem; }
-        .table-container { width: 100%; overflow-x: hidden; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem;
+        }
+
+        .header h1 {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.6;
+            margin-bottom: 0.3rem;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
         .main-table {
-            width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); background-color: #fff; font-size: 12px;
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            font-size: 12px;
         }
-        .main-table th, .main-table td {
-            border: 1px solid #ddd; padding: 4px 6px; word-break: break-word; vertical-align: top;
+
+        .main-table th,
+        .main-table td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            word-break: break-word;
+            vertical-align: top;
         }
+
         .main-table th {
-            background-color: #4a90e2; color: white; font-weight: 600; text-align: left; padding: 6px;
+            background-color: #4a90e2;
+            color: white;
+            font-weight: 600;
+            text-align: left;
+            padding: 6px;
         }
-        .main-table tr:nth-child(even) { background-color: #f9f9f9; }
-        .numbers { text-align: right; font-family: 'Consolas', monospace; font-size: 11px; white-space: nowrap; }
+
+        .main-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .numbers {
+            text-align: right;
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
         .footer {
             margin-top: 1.5rem;
             width: 100%;
@@ -54,13 +100,17 @@
 
         .signature-line {
             display: inline-block;
-            width: 250px; /* Sesuaikan panjang garis */
+            width: 250px;
+            /* Sesuaikan panjang garis */
             border-bottom: 1px solid #333;
             padding-bottom: 0.4rem;
             font-weight: 600;
-            margin: 0.8rem auto; /* Menengahkan */
-            white-space: nowrap; /* Mencegah teks turun ke baris baru */
-            overflow: hidden; /* Opsional, mencegah teks keluar */
+            margin: 0.8rem auto;
+            /* Menengahkan */
+            white-space: nowrap;
+            /* Mencegah teks turun ke baris baru */
+            overflow: hidden;
+            /* Opsional, mencegah teks keluar */
             text-overflow: ellipsis;
         }
 
@@ -69,9 +119,9 @@
             font-size: 10px;
             color: #666;
         }
-
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>REALISASI FISIK<br>
@@ -126,7 +176,8 @@
                     @foreach ($items->sortBy('kd_rek5') as $sub)
                         @php
                             $subSisaAnggaran = ($sub->anggaran_tahun ?? 0) - ($sub->nilai ?? 0);
-                            $subPersentase = ($sub->anggaran_tahun ?? 0) > 0 ? (($sub->nilai ?? 0) / $sub->anggaran_tahun) * 100 : 0;
+                            $subPersentase =
+                                ($sub->anggaran_tahun ?? 0) > 0 ? (($sub->nilai ?? 0) / $sub->anggaran_tahun) * 100 : 0;
                         @endphp
                         <tr>
                             <td>{{ $kd_kegiatan }}.{{ $sub->kd_rek5 ?? '-' }}</td>
@@ -158,27 +209,28 @@
 
     <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">
         <div class="signature" style="flex: 1; text-align: center;">
-            <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $pa_kpa->jabatan}}</div>
+            <div></div>
+            <div>{{ $pa_kpa->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$pa_kpa->nama}}</div>
-                <div class="signature-title">{{$pa_kpa->pangkat}}</div>
-                <div class="signature-title">NIP. {{$pa_kpa->nip}}</div>
+                <div class="signature-line">{{ $pa_kpa->nama }}</div>
+                <div class="signature-title">{{ $pa_kpa->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $pa_kpa->nip }}</div>
             </div>
         </div>
         <div class="signature" style="flex: 1; text-align: center;">
             <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $bendahara->jabatan}}</div>
+            <div>{{ $bendahara->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$bendahara->nama}}</div>
-                <div class="signature-title">{{$bendahara->pangkat}}</div>
-                <div class="signature-title">NIP. {{$bendahara->nip}}</div>
+                <div class="signature-line">{{ $bendahara->nama }}</div>
+                <div class="signature-title">{{ $bendahara->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $bendahara->nip }}</div>
             </div>
         </div>
     </div>
 </body>
+
 </html>

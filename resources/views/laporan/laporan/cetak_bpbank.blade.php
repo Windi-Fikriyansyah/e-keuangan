@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,12 +77,29 @@
         }
 
         /* Column widths */
-        .col-no { width: 5%; }
-        .col-date { width: 10%; }
-        .col-number { width: 12%; }
-        .col-desc { width: 33%; }
-        .col-amount { width: 13%; }
-        .col-balance { width: 14%; }
+        .col-no {
+            width: 5%;
+        }
+
+        .col-date {
+            width: 10%;
+        }
+
+        .col-number {
+            width: 12%;
+        }
+
+        .col-desc {
+            width: 33%;
+        }
+
+        .col-amount {
+            width: 13%;
+        }
+
+        .col-balance {
+            width: 14%;
+        }
 
         /* Utility classes */
         .numbers {
@@ -117,13 +135,17 @@
 
         .signature-line {
             display: inline-block;
-            width: 250px; /* Sesuaikan panjang garis */
+            width: 250px;
+            /* Sesuaikan panjang garis */
             border-bottom: 1px solid #333;
             padding-bottom: 0.4rem;
             font-weight: 600;
-            margin: 0.8rem auto; /* Menengahkan */
-            white-space: nowrap; /* Mencegah teks turun ke baris baru */
-            overflow: hidden; /* Opsional, mencegah teks keluar */
+            margin: 0.8rem auto;
+            /* Menengahkan */
+            white-space: nowrap;
+            /* Mencegah teks turun ke baris baru */
+            overflow: hidden;
+            /* Opsional, mencegah teks keluar */
             text-overflow: ellipsis;
         }
 
@@ -154,6 +176,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>
@@ -215,28 +238,29 @@
 
     <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">
         <div class="signature" style="flex: 1; text-align: center;">
-            <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $pa_kpa->jabatan}}</div>
+            <div></div>
+            <div>{{ $pa_kpa->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$pa_kpa->nama}}</div>
-                <div class="signature-title">{{$pa_kpa->pangkat}}</div>
-                <div class="signature-title">NIP. {{$pa_kpa->nip}}</div>
+                <div class="signature-line">{{ $pa_kpa->nama }}</div>
+                <div class="signature-title">{{ $pa_kpa->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $pa_kpa->nip }}</div>
             </div>
         </div>
         <div class="signature" style="flex: 1; text-align: center;">
             <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $bendahara->jabatan}}</div>
+            <div>{{ $bendahara->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$bendahara->nama}}</div>
-                <div class="signature-title">{{$bendahara->pangkat}}</div>
-                <div class="signature-title">NIP. {{$bendahara->nip}}</div>
+                <div class="signature-line">{{ $bendahara->nama }}</div>
+                <div class="signature-title">{{ $bendahara->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $bendahara->nip }}</div>
             </div>
         </div>
     </div>
 
 </body>
+
 </html>

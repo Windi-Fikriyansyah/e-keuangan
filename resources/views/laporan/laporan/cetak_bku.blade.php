@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,12 +77,29 @@
         }
 
         /* Column widths */
-        .col-no { width: 5%; }
-        .col-date { width: 10%; }
-        .col-number { width: 12%; }
-        .col-desc { width: 33%; }
-        .col-amount { width: 13%; }
-        .col-balance { width: 14%; }
+        .col-no {
+            width: 5%;
+        }
+
+        .col-date {
+            width: 10%;
+        }
+
+        .col-number {
+            width: 12%;
+        }
+
+        .col-desc {
+            width: 33%;
+        }
+
+        .col-amount {
+            width: 13%;
+        }
+
+        .col-balance {
+            width: 14%;
+        }
 
         /* Utility classes */
         .numbers {
@@ -117,13 +135,17 @@
 
         .signature-line {
             display: inline-block;
-            width: 250px; /* Sesuaikan panjang garis */
+            width: 250px;
+            /* Sesuaikan panjang garis */
             border-bottom: 1px solid #333;
             padding-bottom: 0.4rem;
             font-weight: 600;
-            margin: 0.8rem auto; /* Menengahkan */
-            white-space: nowrap; /* Mencegah teks turun ke baris baru */
-            overflow: hidden; /* Opsional, mencegah teks keluar */
+            margin: 0.8rem auto;
+            /* Menengahkan */
+            white-space: nowrap;
+            /* Mencegah teks turun ke baris baru */
+            overflow: hidden;
+            /* Opsional, mencegah teks keluar */
             text-overflow: ellipsis;
         }
 
@@ -153,6 +175,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>
@@ -200,11 +223,16 @@
                         <td class="numbers"></td> {{-- Tidak menampilkan saldo di sini --}}
                     </tr>
                     @php
-                        $key = $item->no_kas . '-' .
-                        ($item->id_trhkasin_pkd ?? '0') . '-' .
-                        ($item->id_trhtransout ?? '0') . '-' .
-                        ($item->id_trmpot ?? '0') . '-' .
-                        ($item->id_strpot ?? '0');
+                        $key =
+                            $item->no_kas .
+                            '-' .
+                            ($item->id_trhkasin_pkd ?? '0') .
+                            '-' .
+                            ($item->id_trhtransout ?? '0') .
+                            '-' .
+                            ($item->id_trmpot ?? '0') .
+                            '-' .
+                            ($item->id_strpot ?? '0');
 
                         $hasUtangBelanja = false;
                     @endphp
@@ -220,7 +248,8 @@
                                     $hasUtangBelanja = true;
                                 }
                             @endphp
-                            <tr class="child-row {{ stripos($detail->nm_rek6, 'utang belanja') !== false ? 'utang-belanja-child-row' : '' }}">
+                            <tr
+                                class="child-row {{ stripos($detail->nm_rek6, 'utang belanja') !== false ? 'utang-belanja-child-row' : '' }}">
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -274,7 +303,8 @@
                 @endforeach
 
                 <tr class="total-row">
-                    <td colspan="4"><strong>Saldo Kas di Bendahara Pengeluaran/Bendahara Pengeluaran Pembantu Periode ini</strong></td>
+                    <td colspan="4"><strong>Saldo Kas di Bendahara Pengeluaran/Bendahara Pengeluaran Pembantu Periode
+                            ini</strong></td>
                     <td class="numbers"><strong>Rp {{ number_format($totalTerima, 2, ',', '.') }}</strong></td>
                     <td class="numbers"><strong>Rp {{ number_format($totalKeluar, 2, ',', '.') }}</strong></td>
                     <td class="numbers"><strong>Rp {{ number_format($saldo, 2, ',', '.') }}</strong></td>
@@ -284,53 +314,54 @@
 
         <br>
 
-    <div class="saldo-summary">
-        <p><strong>Terdiri dari:</strong></p>
-    <table style="width: 30%; border-collapse: collapse;">
-        <tr>
-            <td>1. Saldo Tunai</td>
-            <td style="text-align: right;">Rp {{ number_format(0, 2, ',', '.') }}</td>
-        </tr>
-        <tr>
-            <td>2. Saldo Bank</td>
-            <td style="text-align: right;">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
-        </tr>
+        <div class="saldo-summary">
+            <p><strong>Terdiri dari:</strong></p>
+            <table style="width: 30%; border-collapse: collapse;">
+                <tr>
+                    <td>1. Saldo Tunai</td>
+                    <td style="text-align: right;">Rp {{ number_format(0, 2, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td>2. Saldo Bank</td>
+                    <td style="text-align: right;">Rp {{ number_format($saldo, 2, ',', '.') }}</td>
+                </tr>
 
-        <tr>
-            <td>3. Surat Berharga</td>
-            <td style="text-align: right;">Rp {{ number_format(0, 2, ',', '.') }}</td>
-        </tr>
-        <tr>
-            <td>4. Saldo Pajak</td>
-            <td style="text-align: right;">Rp {{ number_format(0, 2, ',', '.') }}</td>
-        </tr>
-    </table>
-    </div>
+                <tr>
+                    <td>3. Surat Berharga</td>
+                    <td style="text-align: right;">Rp {{ number_format(0, 2, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td>4. Saldo Pajak</td>
+                    <td style="text-align: right;">Rp {{ number_format(0, 2, ',', '.') }}</td>
+                </tr>
+            </table>
+        </div>
     </div>
 
     <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">
         <div class="signature" style="flex: 1; text-align: center;">
-            <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $pa_kpa->jabatan}}</div>
+            <div></div>
+            <div>{{ $pa_kpa->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$pa_kpa->nama}}</div>
-                <div class="signature-title">{{$pa_kpa->pangkat}}</div>
-                <div class="signature-title">NIP. {{$pa_kpa->nip}}</div>
+                <div class="signature-line">{{ $pa_kpa->nama }}</div>
+                <div class="signature-title">{{ $pa_kpa->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $pa_kpa->nip }}</div>
             </div>
         </div>
         <div class="signature" style="flex: 1; text-align: center;">
             <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $bendahara->jabatan}}</div>
+            <div>{{ $bendahara->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$bendahara->nama}}</div>
-                <div class="signature-title">{{$bendahara->pangkat}}</div>
-                <div class="signature-title">NIP. {{$bendahara->nip}}</div>
+                <div class="signature-line">{{ $bendahara->nama }}</div>
+                <div class="signature-title">{{ $bendahara->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $bendahara->nip }}</div>
             </div>
         </div>
     </div>
 </body>
+
 </html>

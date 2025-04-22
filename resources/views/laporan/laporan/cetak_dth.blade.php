@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,8 +44,10 @@
         .table-container {
             width: 100%;
             overflow-x: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
         }
 
         /* Hide scrollbar for Chrome, Safari and Opera */
@@ -83,25 +86,76 @@
         }
 
         /* Column widths */
-        .col-no { width: 40px; text-align: center; }
-        .col-spm { width: 250px; }
-        .col-nilai { width: 150px; }
-        .col-sp2d { width: 150px; }
-        .col-nilai-belanja { width: 150px; }
-        .col-akun-belanja { width: 250px; }
-        .col-akun-potongan { width: 150px; }
-        .col-jenis { width: 60px; }
-        .col-jumlah { width: 120px; }
-        .col-npwp { width: 150px; }
-        .col-rekanan { width: 200px; }
-        .col-ntpn { width: 150px; }
-        .col-no-billi { width: 150px; }
-        .col-no-invoice { width: 150px; }
-        .col-ket { width: 150px; }
+        .col-no {
+            width: 40px;
+            text-align: center;
+        }
+
+        .col-spm {
+            width: 250px;
+        }
+
+        .col-nilai {
+            width: 150px;
+        }
+
+        .col-sp2d {
+            width: 150px;
+        }
+
+        .col-nilai-belanja {
+            width: 150px;
+        }
+
+        .col-akun-belanja {
+            width: 250px;
+        }
+
+        .col-akun-potongan {
+            width: 150px;
+        }
+
+        .col-jenis {
+            width: 60px;
+        }
+
+        .col-jumlah {
+            width: 120px;
+        }
+
+        .col-npwp {
+            width: 150px;
+        }
+
+        .col-rekanan {
+            width: 200px;
+        }
+
+        .col-ntpn {
+            width: 150px;
+        }
+
+        .col-no-billi {
+            width: 150px;
+        }
+
+        .col-no-invoice {
+            width: 150px;
+        }
+
+        .col-ket {
+            width: 150px;
+        }
 
         /* Utility classes */
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
         .numbers {
             text-align: right;
             font-family: 'Consolas', monospace;
@@ -135,13 +189,17 @@
 
         .signature-line {
             display: inline-block;
-            width: 250px; /* Sesuaikan panjang garis */
+            width: 250px;
+            /* Sesuaikan panjang garis */
             border-bottom: 1px solid #333;
             padding-bottom: 0.4rem;
             font-weight: 600;
-            margin: 0.8rem auto; /* Menengahkan */
-            white-space: nowrap; /* Mencegah teks turun ke baris baru */
-            overflow: hidden; /* Opsional, mencegah teks keluar */
+            margin: 0.8rem auto;
+            /* Menengahkan */
+            white-space: nowrap;
+            /* Mencegah teks turun ke baris baru */
+            overflow: hidden;
+            /* Opsional, mencegah teks keluar */
             text-overflow: ellipsis;
         }
 
@@ -174,6 +232,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>
@@ -210,25 +269,24 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($dth as $index => $data)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td></td>
-                    <td class="text-right"></td>
-                    <td>{{ $data->no_sp2d }}</td>
-                    <td class="text-right nilai-belanja" >Rp. {{ number_format($data->total, 0, ',', '.') }}</td>
-                    <td>{{ $data->kd_rek6 }}</td>
-                    <td>{!! $data->kd_potong ?? '-' !!}</td>
-                    <td class="text-center">{!! $data->nm_potong ?? '-' !!}</td>
-                    <td class="text-right nilai-potongan">{!! $data->nilai ?? '-' !!}</td>
-                    <td>{{ $data->npwp }}</td>
-                    <td>{{ $data->nmrekan }}</td>
-                    <td>{{ $data->no_ntpn }}</td>
-                    <td>{!! $data->ebilling ?? '-' !!}</td>
-                    <td></td>
-                    <td>{{ $data->no_bukti }}</td>
-                </tr>
-
+                @foreach ($dth as $index => $data)
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td></td>
+                        <td class="text-right"></td>
+                        <td>{{ $data->no_sp2d }}</td>
+                        <td class="text-right nilai-belanja">Rp. {{ number_format($data->total, 0, ',', '.') }}</td>
+                        <td>{{ $data->kd_rek6 }}</td>
+                        <td>{!! $data->kd_potong ?? '-' !!}</td>
+                        <td class="text-center">{!! $data->nm_potong ?? '-' !!}</td>
+                        <td class="text-right nilai-potongan">{!! $data->nilai ?? '-' !!}</td>
+                        <td>{{ $data->npwp }}</td>
+                        <td>{{ $data->nmrekan }}</td>
+                        <td>{{ $data->no_ntpn }}</td>
+                        <td>{!! $data->ebilling ?? '-' !!}</td>
+                        <td></td>
+                        <td>{{ $data->no_bukti }}</td>
+                    </tr>
                 @endforeach
                 <tr class="total-row">
                     <td colspan="2" class="text-right">Total</td>
@@ -252,25 +310,25 @@
 
     <div class="footer" style="display: flex; justify-content: space-between; gap: 20px;">
         <div class="signature" style="flex: 1; text-align: center;">
-            <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $pa_kpa->jabatan}}</div>
+            <div></div>
+            <div>{{ $pa_kpa->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$pa_kpa->nama}}</div>
-                <div class="signature-title">{{$pa_kpa->pangkat}}</div>
-                <div class="signature-title">NIP. {{$pa_kpa->nip}}</div>
+                <div class="signature-line">{{ $pa_kpa->nama }}</div>
+                <div class="signature-title">{{ $pa_kpa->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $pa_kpa->nip }}</div>
             </div>
         </div>
         <div class="signature" style="flex: 1; text-align: center;">
             <div>Pontianak, {{ \Carbon\Carbon::parse($tanggalTtd)->translatedFormat('j F Y') }}</div>
-            <div>{{ $bendahara->jabatan}}</div>
+            <div>{{ $bendahara->jabatan }}</div>
             <div class="signature-content">
                 <div></div>
                 <br>
-                <div class="signature-line">{{$bendahara->nama}}</div>
-                <div class="signature-title">{{$bendahara->pangkat}}</div>
-                <div class="signature-title">NIP. {{$bendahara->nip}}</div>
+                <div class="signature-line">{{ $bendahara->nama }}</div>
+                <div class="signature-title">{{ $bendahara->pangkat }}</div>
+                <div class="signature-title">NIP. {{ $bendahara->nip }}</div>
             </div>
         </div>
     </div>
@@ -334,4 +392,5 @@
         window.onload = calculateTotal;
     </script>
 </body>
+
 </html>
