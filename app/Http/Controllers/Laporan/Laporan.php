@@ -20,8 +20,8 @@ class Laporan extends Controller
         $kd_skpd = Auth::user()->kd_skpd;
 
         $daftar_skpd = DB::table('users')
-                ->where('kd_skpd', $kd_skpd)
-                ->first(); // Mengambil satu data saja
+            ->where('kd_skpd', $kd_skpd)
+            ->first(); // Mengambil satu data saja
 
 
         return view('laporan.laporan.index', compact('daftar_skpd'));
@@ -112,16 +112,16 @@ class Laporan extends Controller
         $detailGrouped = [];
         foreach ($trdbku as $detail) {
             $key = $detail->no_kas . '-' .
-           ($detail->id_trhkasin_pkd ?? '0') . '-' .
-           ($detail->id_trhtransout ?? '0') . '-' .
-           ($detail->id_trmpot ?? '0') . '-' .
-           ($detail->id_strpot ?? '0');
+                ($detail->id_trhkasin_pkd ?? '0') . '-' .
+                ($detail->id_trhtransout ?? '0') . '-' .
+                ($detail->id_trmpot ?? '0') . '-' .
+                ($detail->id_strpot ?? '0');
 
-    // Simpan detail berdasarkan kunci uniknya
-    if (!isset($detailGrouped[$key])) {
-        $detailGrouped[$key] = [];
-    }
-    $detailGrouped[$key][] = $detail;
+            // Simpan detail berdasarkan kunci uniknya
+            if (!isset($detailGrouped[$key])) {
+                $detailGrouped[$key] = [];
+            }
+            $detailGrouped[$key][] = $detail;
         }
 
         // Ambil data tanda tangan
@@ -160,7 +160,7 @@ class Laporan extends Controller
                 ->setOption('margin-right', 15);
 
             return $pdf->stream('Laporan_BKU.pdf');
-        }else if ($jenis_print == 'excel') {
+        } else if ($jenis_print == 'excel') {
             header("Cache-Control: no-cache, no-store, must-revalidate");
             header("Content-Type: application/vnd.ms-excel");
             header("Content-Disposition: attachment; filename=laporan_BKU.xls");
@@ -168,46 +168,46 @@ class Laporan extends Controller
         }
     }
 
-public function cetakbpp(Request $request)
-{
-    $kd_skpd = $request->kd_skpd;
-    $tanggalawal = $request->tanggalawal;
-    $tanggalakhir = $request->tanggalakhir;
-    $tanggalTtd = $request->tanggalTtd;
-    $jenis_print = $request->jenis_print;
-    $ttdbendaharadth = $request->ttdbendaharadth;
-    $ttdpa_kpa = $request->ttdpa_kpa;
+    public function cetakbpp(Request $request)
+    {
+        $kd_skpd = $request->kd_skpd;
+        $tanggalawal = $request->tanggalawal;
+        $tanggalakhir = $request->tanggalakhir;
+        $tanggalTtd = $request->tanggalTtd;
+        $jenis_print = $request->jenis_print;
+        $ttdbendaharadth = $request->ttdbendaharadth;
+        $ttdpa_kpa = $request->ttdpa_kpa;
 
-    if ($kd_skpd == 'null' || empty($kd_skpd)) {
-        $kd_skpd = '4.01.2.10.0.00.01.0000';
-    }
+        if ($kd_skpd == 'null' || empty($kd_skpd)) {
+            $kd_skpd = '4.01.2.10.0.00.01.0000';
+        }
 
-    // Format tanggal
-    $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
-    $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
+        // Format tanggal
+        $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
+        $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
 
-    $saldoLalu = DB::table('trhbppajak')
-    ->where('kd_skpd', $kd_skpd)
-    ->where('tgl_bukti', '<', $tanggalawal)
-    ->select(DB::raw('SUM(terima) as total_terima, SUM(keluar) as total_keluar'))
-    ->first();
+        $saldoLalu = DB::table('trhbppajak')
+            ->where('kd_skpd', $kd_skpd)
+            ->where('tgl_bukti', '<', $tanggalawal)
+            ->select(DB::raw('SUM(terima) as total_terima, SUM(keluar) as total_keluar'))
+            ->first();
 
-// Kemudian hitung saldonya
-    $saldo = ($saldoLalu->total_terima ?? 0) - ($saldoLalu->total_keluar ?? 0);
+        // Kemudian hitung saldonya
+        $saldo = ($saldoLalu->total_terima ?? 0) - ($saldoLalu->total_keluar ?? 0);
 
-    // Ambil data SKPD
-    $dataSkpd = DB::table('users')
-        ->select('name')
-        ->where('kd_skpd', $kd_skpd)
-        ->first();
+        // Ambil data SKPD
+        $dataSkpd = DB::table('users')
+            ->select('name')
+            ->where('kd_skpd', $kd_skpd)
+            ->first();
 
 
-    // Ambil data utama dari trhtransout
-    $trhtransout = DB::table('trhbppajak')
-        ->where('kd_skpd', $kd_skpd)
-        ->whereBetween('tgl_bukti', [$tanggalawal, $tanggalakhir])
-        ->orderBy('created_at', 'asc')
-        ->get();
+        // Ambil data utama dari trhtransout
+        $trhtransout = DB::table('trhbppajak')
+            ->where('kd_skpd', $kd_skpd)
+            ->whereBetween('tgl_bukti', [$tanggalawal, $tanggalakhir])
+            ->orderBy('created_at', 'asc')
+            ->get();
 
 
         foreach ($trhtransout as $row) {
@@ -219,22 +219,22 @@ public function cetakbpp(Request $request)
                 // Jika ada no_trmpot, ambil semua dari trdtrmpot
                 $billingData = DB::table('trdtrmpot')
                     ->where('no_bukti', $row->no_trmpot)
-                    ->select('ebilling','ntpn','kd_rek6','nm_rek6')
+                    ->select('ebilling', 'ntpn', 'kd_rek6', 'nm_rek6')
                     ->get();
             } else {
                 // Jika tidak ada, gunakan no_strpot untuk ambil dari trdstrpot
                 $billingData = DB::table('trdstrpot')
                     ->where('no_bukti', $row->no_strpot)
-                    ->select('ebilling','ntpn','kd_rek6','nm_rek6')
+                    ->select('ebilling', 'ntpn', 'kd_rek6', 'nm_rek6')
                     ->get();
             }
 
             // Pastikan semua data dimasukkan dalam array
             foreach ($billingData as $billing) {
                 $ebillingList[] = $billing->ebilling ?? '-';
-                $kd_rek_pajak [] = $billing->kd_rek6 ?? '-';
-                $nm_rek_pajak [] = $billing->nm_rek6 ?? '-';
-                $ntpnlist [] = $billing->ntpn ?? '-';
+                $kd_rek_pajak[] = $billing->kd_rek6 ?? '-';
+                $nm_rek_pajak[] = $billing->nm_rek6 ?? '-';
+                $ntpnlist[] = $billing->ntpn ?? '-';
             }
 
             // Gabungkan array menjadi string dengan pemisah koma
@@ -245,299 +245,297 @@ public function cetakbpp(Request $request)
         }
 
 
-    $ttdbendahara = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdbendaharadth)
-        ->first(); // Mengambil satu baris data
+        $ttdbendahara = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdbendaharadth)
+            ->first(); // Mengambil satu baris data
 
-    $ttdpa_kpa1 = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdpa_kpa)
-        ->first();
-    $data = [
-        'dataSkpd' => $dataSkpd,
-        'trhtransout' => $trhtransout,
-        'tipe' => $jenis_print,
-        'tanggalTtd' => $tanggalTtd,
-        'tanggalawal' => $tanggalawal,
-        'tanggalakhir' => $tanggalakhir,
-        'saldoLalu' => $saldo,
-        'bendahara' => $ttdbendahara,
-        'pa_kpa' => $ttdpa_kpa1,
-    ];
+        $ttdpa_kpa1 = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdpa_kpa)
+            ->first();
+        $data = [
+            'dataSkpd' => $dataSkpd,
+            'trhtransout' => $trhtransout,
+            'tipe' => $jenis_print,
+            'tanggalTtd' => $tanggalTtd,
+            'tanggalawal' => $tanggalawal,
+            'tanggalakhir' => $tanggalakhir,
+            'saldoLalu' => $saldo,
+            'bendahara' => $ttdbendahara,
+            'pa_kpa' => $ttdpa_kpa1,
+        ];
 
-    $view = view('laporan.laporan.cetak_bpp', $data);
+        $view = view('laporan.laporan.cetak_bpp', $data);
 
-    if ($jenis_print == 'layar') {
-        return $view;
-    } elseif ($jenis_print == 'pdf') {
-        $pdf = PDF::loadHtml($view->render())
-            ->setPaper('legal')
-            ->setOrientation('landscape')
-            ->setOption('margin-left', 15)
-            ->setOption('margin-right', 15);
+        if ($jenis_print == 'layar') {
+            return $view;
+        } elseif ($jenis_print == 'pdf') {
+            $pdf = PDF::loadHtml($view->render())
+                ->setPaper('legal')
+                ->setOrientation('landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
 
-        return $pdf->stream('Laporan_BPPajak.pdf');
-    } else if ($jenis_print == 'excel') {
-        header("Cache-Control: no-cache, no-store, must-revalidate");
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=laporan_buku_pembantu_pajak.xls");
-        return $view;
-    }
-}
-
-
-public function cetakbpbank(Request $request)
-{
-    $kd_skpd = $request->kd_skpd;
-    $tanggalawal = $request->tanggalawal;
-    $tanggalakhir = $request->tanggalakhir;
-    $tanggalTtd = $request->tanggalTtd;
-    $jenis_print = $request->jenis_print;
-    $ttdbendaharadth = $request->ttdbendaharadth;
-    $ttdpa_kpa = $request->ttdpa_kpa;
-
-    if ($kd_skpd == 'null' || empty($kd_skpd)) {
-        $kd_skpd = '4.01.2.10.0.00.01.0000';
+            return $pdf->stream('Laporan_BPPajak.pdf');
+        } else if ($jenis_print == 'excel') {
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=laporan_buku_pembantu_pajak.xls");
+            return $view;
+        }
     }
 
-    // Format tanggal
-    $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
-    $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
 
-    // Ambil data SKPD
-    $dataSkpd = DB::table('users')
-        ->select('name')
-        ->where('kd_skpd', $kd_skpd)
-        ->first();
+    public function cetakbpbank(Request $request)
+    {
+        $kd_skpd = $request->kd_skpd;
+        $tanggalawal = $request->tanggalawal;
+        $tanggalakhir = $request->tanggalakhir;
+        $tanggalTtd = $request->tanggalTtd;
+        $jenis_print = $request->jenis_print;
+        $ttdbendaharadth = $request->ttdbendaharadth;
+        $ttdpa_kpa = $request->ttdpa_kpa;
+
+        if ($kd_skpd == 'null' || empty($kd_skpd)) {
+            $kd_skpd = '4.01.2.10.0.00.01.0000';
+        }
+
+        // Format tanggal
+        $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
+        $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
+
+        // Ambil data SKPD
+        $dataSkpd = DB::table('users')
+            ->select('name')
+            ->where('kd_skpd', $kd_skpd)
+            ->first();
 
 
 
-    $saldoLalu = DB::table('trhbku')
-    ->where('kd_skpd', $kd_skpd)
-    ->where('tgl_kas', '<', $tanggalawal)
-    ->select(DB::raw('SUM(terima) as total_terima, SUM(keluar) as total_keluar'))
-    ->first();
+        $saldoLalu = DB::table('trhbku')
+            ->where('kd_skpd', $kd_skpd)
+            ->where('tgl_kas', '<', $tanggalawal)
+            ->select(DB::raw('SUM(terima) as total_terima, SUM(keluar) as total_keluar'))
+            ->first();
 
-// Kemudian hitung saldonya
-    $saldo = ($saldoLalu->total_terima ?? 0) - ($saldoLalu->total_keluar ?? 0);
-    // Ambil data utama dari trhtransout
-    $trhtransout = DB::table('trhbku')
-        ->where('kd_skpd', $kd_skpd)
-        ->whereBetween('tgl_kas', [$tanggalawal, $tanggalakhir])
-        ->orderBy('created_at', 'asc')
-        ->get();
+        // Kemudian hitung saldonya
+        $saldo = ($saldoLalu->total_terima ?? 0) - ($saldoLalu->total_keluar ?? 0);
+        // Ambil data utama dari trhtransout
+        $trhtransout = DB::table('trhbku')
+            ->where('kd_skpd', $kd_skpd)
+            ->whereBetween('tgl_kas', [$tanggalawal, $tanggalakhir])
+            ->orderBy('created_at', 'asc')
+            ->get();
 
-    // Mengambil semua no_bukti dari trhtransout
-    $noBuktiList = $trhtransout->pluck('no_kas')->toArray();
+        // Mengambil semua no_bukti dari trhtransout
+        $noBuktiList = $trhtransout->pluck('no_kas')->toArray();
 
-    // Ambil data detail dari trdtransout yang sesuai dengan no_bukti dari trhtransout
-    $trdtransout = DB::table('trdtransout')
-        ->where('kd_skpd', $kd_skpd)
-        ->whereIn('no_bukti', $noBuktiList)
-        ->get();
+        // Ambil data detail dari trdtransout yang sesuai dengan no_bukti dari trhtransout
+        $trdtransout = DB::table('trdtransout')
+            ->where('kd_skpd', $kd_skpd)
+            ->whereIn('no_bukti', $noBuktiList)
+            ->get();
 
-    // Mengelompokkan data detail berdasarkan no_bukti
-    $detailGrouped = [];
-    foreach ($trdtransout as $detail) {
-        $detailGrouped[$detail->no_bukti][] = $detail;
+        // Mengelompokkan data detail berdasarkan no_bukti
+        $detailGrouped = [];
+        foreach ($trdtransout as $detail) {
+            $detailGrouped[$detail->no_bukti][] = $detail;
+        }
+
+        $ttdbendahara = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdbendaharadth)
+            ->first(); // Mengambil satu baris data
+
+        $ttdpa_kpa1 = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdpa_kpa)
+            ->first();
+
+        $data = [
+            'dataSkpd' => $dataSkpd,
+            'trhtransout' => $trhtransout,
+            'detailGrouped' => $detailGrouped, // Kirim data detail yang sudah dikelompokkan
+            'tipe' => $jenis_print,
+            'tanggalTtd' => $tanggalTtd,
+            'tanggalawal' => $tanggalawal,
+            'tanggalakhir' => $tanggalakhir,
+            'saldoLalu' => $saldo,
+            'bendahara' => $ttdbendahara,
+            'pa_kpa' => $ttdpa_kpa1,
+        ];
+
+        $view = view('laporan.laporan.cetak_bpbank', $data);
+
+        if ($jenis_print == 'layar') {
+            return $view;
+        } elseif ($jenis_print == 'pdf') {
+            $pdf = PDF::loadHtml($view->render())
+                ->setPaper('legal')
+                ->setOrientation('landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+
+            return $pdf->stream('Laporan_BPBANK.pdf');
+        } else if ($jenis_print == 'excel') {
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=laporan_buku_pembantu_bank.xls");
+            return $view;
+        }
     }
 
-    $ttdbendahara = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdbendaharadth)
-        ->first(); // Mengambil satu baris data
 
-    $ttdpa_kpa1 = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdpa_kpa)
-        ->first();
 
-    $data = [
-        'dataSkpd' => $dataSkpd,
-        'trhtransout' => $trhtransout,
-        'detailGrouped' => $detailGrouped, // Kirim data detail yang sudah dikelompokkan
-        'tipe' => $jenis_print,
-        'tanggalTtd' => $tanggalTtd,
-        'tanggalawal' => $tanggalawal,
-        'tanggalakhir' => $tanggalakhir,
-        'saldoLalu' => $saldo,
-        'bendahara' => $ttdbendahara,
-        'pa_kpa' => $ttdpa_kpa1,
-    ];
+    public function cetakdth(Request $request)
+    {
+        $kd_skpd = $request->kd_skpd;
+        $tanggalawal = $request->tanggalawal;
+        $tanggalakhir = $request->tanggalakhir;
+        $tanggalTtd = $request->tanggalTtd;
+        $ttdbendaharadth = $request->ttdbendaharadth;
+        $ttdpa_kpa = $request->ttdpa_kpa;
+        $jenis_print = $request->jenis_print;
 
-    $view = view('laporan.laporan.cetak_bpbank', $data);
+        if ($kd_skpd == 'null' || empty($kd_skpd)) {
+            $kd_skpd = '4.01.2.10.0.00.01.0000';
+        }
 
-    if ($jenis_print == 'layar') {
-        return $view;
-    } elseif ($jenis_print == 'pdf') {
-        $pdf = PDF::loadHtml($view->render())
-            ->setPaper('legal')
-            ->setOrientation('landscape')
-            ->setOption('margin-left', 15)
-            ->setOption('margin-right', 15);
+        // Format tanggal
+        $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
+        $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
 
-        return $pdf->stream('Laporan_BPBANK.pdf');
-    }else if ($jenis_print == 'excel') {
-        header("Cache-Control: no-cache, no-store, must-revalidate");
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=laporan_buku_pembantu_bank.xls");
-        return $view;
-    }
-}
+        // Ambil data SKPD
+        $dataSkpd = DB::table('users')
+            ->select('name')
+            ->where('kd_skpd', $kd_skpd)
+            ->first();
 
 
 
-public function cetakdth(Request $request)
-{
-    $kd_skpd = $request->kd_skpd;
-    $tanggalawal = $request->tanggalawal;
-    $tanggalakhir = $request->tanggalakhir;
-    $tanggalTtd = $request->tanggalTtd;
-    $ttdbendaharadth = $request->ttdbendaharadth;
-    $ttdpa_kpa = $request->ttdpa_kpa;
-    $jenis_print = $request->jenis_print;
+        // Ambil data detail dari trdtransout yang sesuai dengan no_bukti dari trhtransout
+        $trhtransout = DB::table('trhstrpot')
+            ->join('trdstrpot', 'trhstrpot.no_bukti', '=', 'trdstrpot.no_bukti')
+            ->join('trhtrmpot', 'trhstrpot.no_terima', '=', 'trhtrmpot.no_bukti')  // Ganti 'some_column' dengan kolom yang relevan untuk join
+            ->join('trhtransout', 'trhtrmpot.id_trhtransout', '=', 'trhtransout.no_bukti')  // Ganti 'some_other_column' dengan kolom yang relevan untuk join
+            ->where('trhstrpot.kd_skpd', $kd_skpd)
+            ->whereBetween('trhstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir])
+            ->where(function ($query) {
+                $query->where('trdstrpot.nm_rek6', 'LIKE', '%utang PPN%')
+                    ->orWhere('trdstrpot.nm_rek6', 'LIKE', '%PPH%');
+            })
+            ->select('trhstrpot.*', 'trhtransout.total')
+            ->distinct()
+            ->get();
 
-    if ($kd_skpd == 'null' || empty($kd_skpd)) {
-        $kd_skpd = '4.01.2.10.0.00.01.0000';
-    }
-
-    // Format tanggal
-    $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
-    $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
-
-    // Ambil data SKPD
-    $dataSkpd = DB::table('users')
-        ->select('name')
-        ->where('kd_skpd', $kd_skpd)
-        ->first();
-
-
-
-    // Ambil data detail dari trdtransout yang sesuai dengan no_bukti dari trhtransout
-    $trhtransout = DB::table('trhstrpot')
-    ->join('trdstrpot', 'trhstrpot.no_bukti', '=', 'trdstrpot.no_bukti')
-    ->join('trhtrmpot', 'trhstrpot.no_terima', '=', 'trhtrmpot.no_bukti')  // Ganti 'some_column' dengan kolom yang relevan untuk join
-    ->join('trhtransout', 'trhtrmpot.id_trhtransout', '=', 'trhtransout.no_bukti')  // Ganti 'some_other_column' dengan kolom yang relevan untuk join
-    ->where('trhstrpot.kd_skpd', $kd_skpd)
-    ->whereBetween('trhstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir])
-    ->where(function ($query) {
-        $query->where('trdstrpot.nm_rek6', 'LIKE', '%utang PPN%')
-              ->orWhere('trdstrpot.nm_rek6', 'LIKE', '%PPH%');
-    })
-    ->select('trhstrpot.*', 'trhtransout.total')
-    ->distinct()
-    ->get();
-
-    foreach ($trhtransout as $row) {
-        $ebillingList = [];
-        $kd_rek_potong = [];
-        $nm_rek_potong = [];
-        $ntpnlist = [];
-        $nilai = [];
+        foreach ($trhtransout as $row) {
+            $ebillingList = [];
+            $kd_rek_potong = [];
+            $nm_rek_potong = [];
+            $ntpnlist = [];
+            $nilai = [];
 
             $billingData = DB::table('trdstrpot')
                 ->where('no_bukti', $row->no_bukti)
                 ->where(function ($query) {
                     $query->where('trdstrpot.nm_rek6', 'LIKE', '%PPN%')
-                          ->orWhere('trdstrpot.nm_rek6', 'LIKE', '%PPH%');
+                        ->orWhere('trdstrpot.nm_rek6', 'LIKE', '%PPH%');
                 })
-                ->select('ebilling','ntpn','kd_rek6 as kd_potong','nm_rek6 as nm_potong','nilai')
+                ->select('ebilling', 'ntpn', 'kd_rek6 as kd_potong', 'nm_rek6 as nm_potong', 'nilai')
                 ->get();
 
 
 
-        // Pastikan semua data dimasukkan dalam array
-        foreach ($billingData as $billing) {
-            $ebillingList[] = $billing->ebilling ?? '-';
-            $kd_rek_potong [] = $billing->kd_potong ?? '-';
-            $nm_rek_potong [] = $billing->nm_potong ?? '-';
-            $ntpnlist [] = $billing->ntpn ?? '-';
-            $nilai [] = $billing->nilai ?? '-';
+            // Pastikan semua data dimasukkan dalam array
+            foreach ($billingData as $billing) {
+                $ebillingList[] = $billing->ebilling ?? '-';
+                $kd_rek_potong[] = $billing->kd_potong ?? '-';
+                $nm_rek_potong[] = $billing->nm_potong ?? '-';
+                $ntpnlist[] = $billing->ntpn ?? '-';
+                $nilai[] = $billing->nilai ?? '-';
+            }
+
+            // Gabungkan array menjadi string dengan pemisah koma
+            $row->ebilling = !empty($ebillingList) ? implode("<br><hr>", $ebillingList) : '-';
+            $row->kd_potong = !empty($kd_rek_potong) ? implode("<br><hr>", $kd_rek_potong) : '-';
+            $row->nm_potong = !empty($nm_rek_potong) ? implode("<br><hr>", $nm_rek_potong) : '-';
+            $row->ntpn = !empty($ntpnlist) ? implode("<br><hr>", $ntpnlist) : '-';
+            $row->nilai = !empty($nilai)
+                ? implode("<br><hr>", array_map(fn($n) => 'Rp. ' . number_format(floatval($n), 0, ',', '.'), $nilai))
+                : '-';
         }
 
-        // Gabungkan array menjadi string dengan pemisah koma
-        $row->ebilling = !empty($ebillingList) ? implode("<br><hr>", $ebillingList) : '-';
-        $row->kd_potong = !empty($kd_rek_potong) ? implode("<br><hr>", $kd_rek_potong) : '-';
-        $row->nm_potong = !empty($nm_rek_potong) ? implode("<br><hr>", $nm_rek_potong) : '-';
-        $row->ntpn = !empty($ntpnlist) ? implode("<br><hr>", $ntpnlist) : '-';
-        $row->nilai = !empty($nilai)
-    ? implode("<br><hr>", array_map(fn($n) => 'Rp. ' . number_format(floatval($n), 0, ',', '.'), $nilai))
-    : '-';
-
-
-    }
-
         $ttdbendahara = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdbendaharadth)
-        ->first(); // Mengambil satu baris data
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdbendaharadth)
+            ->first(); // Mengambil satu baris data
 
-    $ttdpa_kpa1 = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdpa_kpa)
-        ->first();
+        $ttdpa_kpa1 = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdpa_kpa)
+            ->first();
 
-    $data = [
-        'dataSkpd' => $dataSkpd,
-        'dth' => $trhtransout,
-        'tipe' => $jenis_print,
-        'tanggalTtd' => $tanggalTtd,
-        'tanggalawal' => $tanggalawal,
-        'tanggalakhir' => $tanggalakhir,
-        'bendahara' => $ttdbendahara,
-        'pa_kpa' => $ttdpa_kpa1,
-    ];
+        $data = [
+            'dataSkpd' => $dataSkpd,
+            'dth' => $trhtransout,
+            'tipe' => $jenis_print,
+            'tanggalTtd' => $tanggalTtd,
+            'tanggalawal' => $tanggalawal,
+            'tanggalakhir' => $tanggalakhir,
+            'bendahara' => $ttdbendahara,
+            'pa_kpa' => $ttdpa_kpa1,
+        ];
 
-    $view = view('laporan.laporan.cetak_dth', $data);
+        $view = view('laporan.laporan.cetak_dth', $data);
 
-    if ($jenis_print == 'layar') {
-        return $view;
-    } elseif ($jenis_print == 'pdf') {
-        $pdf = PDF::loadHtml($view->render())
-            ->setPaper('legal')
-            ->setOrientation('landscape')
-            ->setOption('margin-left', 15)
-            ->setOption('margin-right', 15);
+        if ($jenis_print == 'layar') {
+            return $view;
+        } elseif ($jenis_print == 'pdf') {
+            $pdf = PDF::loadHtml($view->render())
+                ->setPaper('legal')
+                ->setOrientation('landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
 
-        return $pdf->stream('Laporan_DTH.pdf');
-    }else if ($jenis_print == 'excel') {
-        header("Cache-Control: no-cache, no-store, must-revalidate");
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=laporan_DTH.xls");
-        return $view;
-    }
-}
-
-public function cetakrealisasi(Request $request)
-{
-    $kd_skpd = $request->kd_skpd;
-    $tanggalawal = $request->tanggalawal;
-    $tanggalakhir = $request->tanggalakhir;
-    $tanggalTtd = $request->tanggalTtd;
-    $ttdbendaharadth = $request->ttdbendaharadth;
-    $ttdpa_kpa = $request->ttdpa_kpa;
-    $jenis_print = $request->jenis_print;
-    $jenis_anggaran = $request->jenis_anggaran;
-
-
-    if ($kd_skpd == 'null' || empty($kd_skpd)) {
-        $kd_skpd = '4.01.2.10.0.00.01.0000';
+            return $pdf->stream('Laporan_DTH.pdf');
+        } else if ($jenis_print == 'excel') {
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=laporan_DTH.xls");
+            return $view;
+        }
     }
 
-    // Format tanggal
-    $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
-    $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
+    public function cetakrealisasi(Request $request)
+    {
+        $kd_skpd = $request->kd_skpd;
+        $tanggalawal = $request->tanggalawal;
+        $tanggalakhir = $request->tanggalakhir;
+        $tanggalTtd = $request->tanggalTtd;
+        $ttdbendaharadth = $request->ttdbendaharadth;
+        $ttdpa_kpa = $request->ttdpa_kpa;
+        $jenis_print = $request->jenis_print;
+        $jenis_anggaran = $request->jenis_anggaran;
 
-    // Ambil data SKPD
-    $dataSkpd = DB::table('users')
-        ->select('name')
-        ->where('kd_skpd', $kd_skpd)
-        ->first();
 
-    // Query untuk mengambil data anggaran
-    $trhtransout = DB::table(
-        DB::raw("(
+        if ($kd_skpd == 'null' || empty($kd_skpd)) {
+            $kd_skpd = '4.01.2.10.0.00.01.0000';
+        }
+
+        // Format tanggal
+        $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
+        $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
+
+        // Ambil data SKPD
+        $dataSkpd = DB::table('users')
+            ->select('name')
+            ->where('kd_skpd', $kd_skpd)
+            ->first();
+
+        // Query untuk mengambil data anggaran
+        $trhtransout = DB::table(
+            DB::raw("(
             SELECT
                 kd_sub_kegiatan,
                 nm_sub_kegiatan,
@@ -554,9 +552,9 @@ public function cetakrealisasi(Request $request)
                 kd_rek,
                 nm_rek
         ) as anggaran")
-    )
-    ->leftJoin(
-        DB::raw("(
+        )
+            ->leftJoin(
+                DB::raw("(
             SELECT
                 kd_rek6,
                 kd_sub_kegiatan,
@@ -571,515 +569,553 @@ public function cetakrealisasi(Request $request)
                 kd_rek6,
                 kd_sub_kegiatan
         ) as trdtransout"),
-        function ($join) {
-            $join->on(
-                DB::raw("CAST(anggaran.kd_rek AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
-                '=',
-                DB::raw("CAST(trdtransout.kd_rek6 AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
+                function ($join) {
+                    $join->on(
+                        DB::raw("CAST(anggaran.kd_rek AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
+                        '=',
+                        DB::raw("CAST(trdtransout.kd_rek6 AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
+                    )
+                        ->on(
+                            DB::raw("CAST(anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
+                            '=',
+                            DB::raw("CAST(trdtransout.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
+                        );
+                }
             )
-            ->on(
-                DB::raw("CAST(anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT"),
-                '=',
-                DB::raw("CAST(trdtransout.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE DATABASE_DEFAULT")
-            );
+            ->select(
+                'anggaran.kd_sub_kegiatan as kd_kegiatan',
+                'anggaran.nm_sub_kegiatan as nm_kegiatan',
+                'anggaran.kd_rek as kd_rek5',
+                'anggaran.nm_rek as nm_rek5',
+                'anggaran.anggaran_tahun',
+                DB::raw("COALESCE(trdtransout.total_nilai, 0) as nilai")
+            )
+            ->orderBy('anggaran.kd_sub_kegiatan')
+            ->orderBy('anggaran.kd_rek')
+            ->setBindings([$jenis_anggaran])
+            ->get();
+
+        $ttdbendahara = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdbendaharadth)
+            ->first();
+
+        $ttdpa_kpa1 = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdpa_kpa)
+            ->first();
+
+        $data = [
+            'dataSkpd' => $dataSkpd,
+            'trhtransout' => $trhtransout,
+            'tipe' => $jenis_print,
+            'tanggalTtd' => $tanggalTtd,
+            'tanggalawal' => $tanggalawal,
+            'tanggalakhir' => $tanggalakhir,
+            'bendahara' => $ttdbendahara,
+            'pa_kpa' => $ttdpa_kpa1,
+        ];
+
+        $view = view('laporan.laporan.cetak_realisasi', $data);
+
+        if ($jenis_print == 'layar') {
+            return $view;
+        } elseif ($jenis_print == 'pdf') {
+            $pdf = PDF::loadHtml($view->render())
+                ->setPaper('legal')
+                ->setOrientation('landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+
+            return $pdf->stream('Laporan_DTH.pdf');
+        } else if ($jenis_print == 'excel') {
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=laporan_realisasi.xls");
+            return $view;
         }
-    )
-    ->select(
-        'anggaran.kd_sub_kegiatan as kd_kegiatan',
-        'anggaran.nm_sub_kegiatan as nm_kegiatan',
-        'anggaran.kd_rek as kd_rek5',
-        'anggaran.nm_rek as nm_rek5',
-        'anggaran.anggaran_tahun',
-        DB::raw("COALESCE(trdtransout.total_nilai, 0) as nilai")
-    )
-    ->orderBy('anggaran.kd_sub_kegiatan')
-    ->orderBy('anggaran.kd_rek')
-    ->setBindings([$jenis_anggaran])
-    ->get();
-
-    $ttdbendahara = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdbendaharadth)
-        ->first();
-
-    $ttdpa_kpa1 = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdpa_kpa)
-        ->first();
-
-    $data = [
-        'dataSkpd' => $dataSkpd,
-        'trhtransout' => $trhtransout,
-        'tipe' => $jenis_print,
-        'tanggalTtd' => $tanggalTtd,
-        'tanggalawal' => $tanggalawal,
-        'tanggalakhir' => $tanggalakhir,
-        'bendahara' => $ttdbendahara,
-        'pa_kpa' => $ttdpa_kpa1,
-    ];
-
-    $view = view('laporan.laporan.cetak_realisasi', $data);
-
-    if ($jenis_print == 'layar') {
-        return $view;
-    } elseif ($jenis_print == 'pdf') {
-        $pdf = PDF::loadHtml($view->render())
-            ->setPaper('legal')
-            ->setOrientation('landscape')
-            ->setOption('margin-left', 15)
-            ->setOption('margin-right', 15);
-
-        return $pdf->stream('Laporan_DTH.pdf');
-    } else if ($jenis_print == 'excel') {
-        header("Cache-Control: no-cache, no-store, must-revalidate");
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=laporan_realisasi.xls");
-        return $view;
-    }
-}
-
-
-public function cetakspj(Request $request)
-{
-    $kd_skpd = $request->kd_skpd;
-    $tanggalawal = $request->tanggalawal;
-    $tanggalakhir = $request->tanggalakhir;
-    $tanggalTtd = $request->tanggalTtd;
-    $ttdbendaharadth = $request->ttdbendaharadth;
-    $ttdpa_kpa = $request->ttdpa_kpa;
-    $jenis_print = $request->jenis_print;
-
-    if ($kd_skpd == 'null' || empty($kd_skpd)) {
-        $kd_skpd = '4.01.2.10.0.00.01.0000';
     }
 
-    // Format tanggal
-    $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
-    $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
 
-    // Ambil data SKPD
-    $dataSkpd = DB::table('users')
-        ->select('name')
-        ->where('kd_skpd', $kd_skpd)
-        ->first();
+    public function cetakspj(Request $request)
+    {
+        $kd_skpd = $request->kd_skpd;
+        $tanggalawal = $request->tanggalawal;
+        $tanggalakhir = $request->tanggalakhir;
+        $tanggalTtd = $request->tanggalTtd;
+        $ttdbendaharadth = $request->ttdbendaharadth;
+        $ttdpa_kpa = $request->ttdpa_kpa;
+        $jenis_anggaran_spj = $request->jenis_anggaran_spj;
+        $jenis_print = $request->jenis_print;
+
+        if ($kd_skpd == 'null' || empty($kd_skpd)) {
+            $kd_skpd = '4.01.2.10.0.00.01.0000';
+        }
+
+        // Format tanggal
+        $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
+        $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
+
+        // Ambil data SKPD
+        $dataSkpd = DB::table('users')
+            ->select('name')
+            ->where('kd_skpd', $kd_skpd)
+            ->first();
 
         $trhtransout = DB::table('ms_anggaran')
-        ->leftJoin(DB::raw('trdtransout WITH (NOLOCK)'), function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
-            $join->on(DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                       DB::raw('CAST(trdtransout.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
-                ->on(DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                     DB::raw('CAST(trdtransout.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
-                ->where('trdtransout.kd_skpd', '=', $kd_skpd)
-                ->whereBetween('trdtransout.tgl_bukti', [$tanggalawal, $tanggalakhir]);
-        })
-        ->leftJoin(DB::raw('trhtransout WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
-            $join->on(DB::raw('CAST(trdtransout.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                       DB::raw('CAST(trhtransout.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'));
-        })
-        ->leftJoin(DB::raw('trdkasin_pkd WITH (NOLOCK)'), function ($join) use ($kd_skpd) {
-            $join->on(DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                       DB::raw('CAST(trdkasin_pkd.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
-                ->on(DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                     DB::raw('CAST(trdkasin_pkd.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
-                ->where('trdkasin_pkd.kd_skpd', '=', $kd_skpd);
-        })
-        ->leftJoin(DB::raw('trhkasin_pkd WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
-            $join->on(DB::raw('CAST(trdkasin_pkd.no_sts AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                       DB::raw('CAST(trhkasin_pkd.no_sts AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
-                ->whereBetween('trhkasin_pkd.tgl_sts', [$tanggalawal, $tanggalakhir]);
-        })
-        ->leftJoin(DB::raw('trhtrmpot WITH (NOLOCK)'), function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
-            $join->on(DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                       DB::raw('CAST(trhtrmpot.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
-                ->on(DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                     DB::raw('CAST(trhtrmpot.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
-                ->where('trhtrmpot.kd_skpd', '=', $kd_skpd)
-                ->whereBetween('trhtrmpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
-        })
-        ->leftJoin(DB::raw('trdtrmpot WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
-            $join->on(DB::raw('CAST(trhtrmpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                       DB::raw('CAST(trdtrmpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'));
-        })
-        ->leftJoin(DB::raw('trhstrpot WITH (NOLOCK)'), function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
-            $join->on(DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                       DB::raw('CAST(trhstrpot.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
-                ->on(DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                     DB::raw('CAST(trhstrpot.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'))
-                ->where('trhstrpot.kd_skpd', '=', $kd_skpd)
-                ->whereBetween('trhstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
-        })
-        ->leftJoin(DB::raw('trdstrpot WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
-            $join->on(DB::raw('CAST(trhstrpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'), '=',
-                       DB::raw('CAST(trdstrpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'));
-        })
-        ->select(
-            'ms_anggaran.kd_sub_kegiatan',
-            'ms_anggaran.nm_sub_kegiatan',
-            'ms_anggaran.kd_rek',
-            'ms_anggaran.nm_rek',
-            'ms_anggaran.anggaran_tahun',
+            ->where('ms_anggaran.jenis_anggaran', $jenis_anggaran_spj)
+            ->leftJoin(DB::raw('trdtransout WITH (NOLOCK)'), function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+                $join->on(
+                    DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                    '=',
+                    DB::raw('CAST(trdtransout.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                )
+                    ->on(
+                        DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                        '=',
+                        DB::raw('CAST(trdtransout.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                    )
+                    ->where('trdtransout.kd_skpd', '=', $kd_skpd)
+                    ->whereBetween('trdtransout.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+            })
+            ->leftJoin(DB::raw('trhtransout WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
+                $join->on(
+                    DB::raw('CAST(trdtransout.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                    '=',
+                    DB::raw('CAST(trhtransout.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                );
+            })
+            ->leftJoin(DB::raw('trdkasin_pkd WITH (NOLOCK)'), function ($join) use ($kd_skpd) {
+                $join->on(
+                    DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                    '=',
+                    DB::raw('CAST(trdkasin_pkd.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                )
+                    ->on(
+                        DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                        '=',
+                        DB::raw('CAST(trdkasin_pkd.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                    )
+                    ->where('trdkasin_pkd.kd_skpd', '=', $kd_skpd);
+            })
+            ->leftJoin(DB::raw('trhkasin_pkd WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
+                $join->on(
+                    DB::raw('CAST(trdkasin_pkd.no_sts AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                    '=',
+                    DB::raw('CAST(trhkasin_pkd.no_sts AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                )
+                    ->whereBetween('trhkasin_pkd.tgl_sts', [$tanggalawal, $tanggalakhir]);
+            })
+            ->leftJoin(DB::raw('trhtrmpot WITH (NOLOCK)'), function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+                $join->on(
+                    DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                    '=',
+                    DB::raw('CAST(trhtrmpot.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                )
+                    ->on(
+                        DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                        '=',
+                        DB::raw('CAST(trhtrmpot.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                    )
+                    ->where('trhtrmpot.kd_skpd', '=', $kd_skpd)
+                    ->whereBetween('trhtrmpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+            })
+            ->leftJoin(DB::raw('trdtrmpot WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
+                $join->on(
+                    DB::raw('CAST(trhtrmpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                    '=',
+                    DB::raw('CAST(trdtrmpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                );
+            })
+            ->leftJoin(DB::raw('trhstrpot WITH (NOLOCK)'), function ($join) use ($kd_skpd, $tanggalawal, $tanggalakhir) {
+                $join->on(
+                    DB::raw('CAST(ms_anggaran.kd_rek AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                    '=',
+                    DB::raw('CAST(trhstrpot.kd_rek6 AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                )
+                    ->on(
+                        DB::raw('CAST(ms_anggaran.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                        '=',
+                        DB::raw('CAST(trhstrpot.kd_sub_kegiatan AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                    )
+                    ->where('trhstrpot.kd_skpd', '=', $kd_skpd)
+                    ->whereBetween('trhstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir]);
+            })
+            ->leftJoin(DB::raw('trdstrpot WITH (NOLOCK)'), function ($join) use ($tanggalawal, $tanggalakhir) {
+                $join->on(
+                    DB::raw('CAST(trhstrpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS'),
+                    '=',
+                    DB::raw('CAST(trdstrpot.no_bukti AS NVARCHAR(100)) COLLATE SQL_Latin1_General_CP1_CI_AS')
+                );
+            })
+            ->select(
+                'ms_anggaran.kd_sub_kegiatan',
+                'ms_anggaran.nm_sub_kegiatan',
+                'ms_anggaran.kd_rek',
+                'ms_anggaran.nm_rek',
+                'ms_anggaran.anggaran_tahun',
 
-            // SPJ-LS Gaji (s.d Bulan lalu)
-            DB::raw("COALESCE(SUM(CASE
+                // SPJ-LS Gaji (s.d Bulan lalu)
+                DB::raw("COALESCE(SUM(CASE
                 WHEN (trhtransout.jenis_beban = 'GAJI'  AND trhtransout.tgl_bukti < '$tanggalawal') THEN trdtransout.nilai
                 WHEN (trhkasin_pkd.jns_cp = 'GAJI' AND trhkasin_pkd.tgl_sts < '$tanggalawal') THEN trdkasin_pkd.rupiah
                 WHEN (trhtrmpot.beban = 'GAJI' AND trhtrmpot.tgl_bukti < '$tanggalawal') THEN trdtrmpot.nilai
                 WHEN (trhstrpot.beban = 'GAJI' AND trhstrpot.tgl_bukti < '$tanggalawal') THEN trdstrpot.nilai
                 ELSE 0 END), 0) as spj_ls_gaji_sd_bulan_lalu"),
 
-            // SPJ-LS Gaji (Bulan ini)
-            DB::raw("COALESCE(SUM(CASE
+                // SPJ-LS Gaji (Bulan ini)
+                DB::raw("COALESCE(SUM(CASE
                 WHEN (trhtransout.jenis_beban = 'GAJI'  AND trhtransout.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtransout.nilai
                 WHEN (trhkasin_pkd.jns_cp = 'GAJI' AND trhkasin_pkd.tgl_sts BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdkasin_pkd.rupiah
                 WHEN (trhtrmpot.beban = 'GAJI'  AND trhtrmpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtrmpot.nilai
                 WHEN (trhstrpot.beban = 'GAJI' AND trhstrpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdstrpot.nilai
                 ELSE 0 END), 0) as spj_ls_gaji_bulan_ini"),
 
-            // SPJ-LS Barang & Jasa (s.d Bulan lalu)
-            DB::raw("COALESCE(SUM(CASE
+                // SPJ-LS Barang & Jasa (s.d Bulan lalu)
+                DB::raw("COALESCE(SUM(CASE
                 WHEN (trhtransout.jenis_beban = 'Barang & Jasa' AND trhtransout.tgl_bukti < '$tanggalawal') THEN trdtransout.nilai
                 WHEN (trhkasin_pkd.jns_cp = 'Barang & Jasa' AND trhkasin_pkd.tgl_sts < '$tanggalawal') THEN trdkasin_pkd.rupiah
                 WHEN (trhtrmpot.beban = 'Barang & Jasa' AND trhtrmpot.tgl_bukti < '$tanggalawal') THEN trdtrmpot.nilai
                 WHEN (trhstrpot.beban = 'Barang & Jasa' AND trhstrpot.tgl_bukti < '$tanggalawal') THEN trdstrpot.nilai
                 ELSE 0 END), 0) as spj_ls_barang_sd_bulan_lalu"),
 
-            // SPJ-LS Barang & Jasa (Bulan ini)
-            DB::raw("COALESCE(SUM(CASE
+                // SPJ-LS Barang & Jasa (Bulan ini)
+                DB::raw("COALESCE(SUM(CASE
                 WHEN (trhtransout.jenis_beban = 'Barang & Jasa'  AND trhtransout.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtransout.nilai
                 WHEN (trhkasin_pkd.jns_cp = 'Barang & Jasa' AND trhkasin_pkd.tgl_sts BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdkasin_pkd.rupiah
                 WHEN (trhtrmpot.beban = 'Barang & Jasa' AND trhtrmpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtrmpot.nilai
                 WHEN (trhstrpot.beban = 'Barang & Jasa' AND trhstrpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdstrpot.nilai
                 ELSE 0 END), 0) as spj_ls_barang_bulan_ini"),
 
-            // SPJ UP/GU/TU (s.d Bulan lalu)
-            DB::raw("COALESCE(SUM(CASE
+                // SPJ UP/GU/TU (s.d Bulan lalu)
+                DB::raw("COALESCE(SUM(CASE
                 WHEN (trhtransout.jenis_beban IN ('UP', 'GU', 'TU') AND trhtransout.tgl_bukti < '$tanggalawal') THEN trdtransout.nilai
                 WHEN (trhkasin_pkd.jns_cp IN ('UP', 'GU', 'TU') AND trhkasin_pkd.tgl_sts < '$tanggalawal') THEN trdkasin_pkd.rupiah
                 WHEN (trhtrmpot.beban IN ('UP', 'GU', 'TU') AND trhtrmpot.tgl_bukti < '$tanggalawal') THEN trdtrmpot.nilai
                 WHEN (trhstrpot.beban IN ('UP', 'GU', 'TU') AND trhstrpot.tgl_bukti < '$tanggalawal') THEN trdstrpot.nilai
                 ELSE 0 END), 0) as spj_up_gu_tu_sd_bulan_lalu"),
 
-            // SPJ UP/GU/TU (Bulan ini)
-            DB::raw("COALESCE(SUM(CASE
+                // SPJ UP/GU/TU (Bulan ini)
+                DB::raw("COALESCE(SUM(CASE
                 WHEN (trhtransout.jenis_beban IN ('UP', 'GU', 'TU') AND trhtransout.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtransout.nilai
                 WHEN (trhkasin_pkd.jns_cp IN ('UP', 'GU', 'TU') AND trhkasin_pkd.tgl_sts BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdkasin_pkd.rupiah
                 WHEN (trhtrmpot.beban IN ('UP', 'GU', 'TU') AND trhtrmpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdtrmpot.nilai
                 WHEN (trhstrpot.beban IN ('UP', 'GU', 'TU') AND trhstrpot.tgl_bukti BETWEEN '$tanggalawal' AND '$tanggalakhir') THEN trdstrpot.nilai
                 ELSE 0 END), 0) as spj_up_gu_tu_bulan_ini")
-        )
-        ->groupBy(
-            'ms_anggaran.kd_sub_kegiatan',
-            'ms_anggaran.nm_sub_kegiatan',
-            'ms_anggaran.kd_rek',
-            'ms_anggaran.nm_rek',
-            'ms_anggaran.anggaran_tahun'
-        )
-        ->orderBy('ms_anggaran.kd_sub_kegiatan')
-        ->orderBy('ms_anggaran.kd_rek')
-        ->get();
-    // Ambil tanda tangan bendahara dan KPA
-    $ttdbendahara = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdbendaharadth)
-        ->first();
+            )
+            ->groupBy(
+                'ms_anggaran.kd_sub_kegiatan',
+                'ms_anggaran.nm_sub_kegiatan',
+                'ms_anggaran.kd_rek',
+                'ms_anggaran.nm_rek',
+                'ms_anggaran.anggaran_tahun'
+            )
+            ->orderBy('ms_anggaran.kd_sub_kegiatan')
+            ->orderBy('ms_anggaran.kd_rek')
+            ->get();
+        // Ambil tanda tangan bendahara dan KPA
+        $ttdbendahara = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdbendaharadth)
+            ->first();
 
-    $ttdpa_kpa1 = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdpa_kpa)
-        ->first();
+        $ttdpa_kpa1 = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdpa_kpa)
+            ->first();
 
-    // Data yang akan dikirim ke view
-    $data = [
-        'dataSkpd' => $dataSkpd,
-        'trhtransout' => $trhtransout,
-        'tipe' => $jenis_print,
-        'tanggalTtd' => $tanggalTtd,
-        'tanggalawal' => $tanggalawal,
-        'tanggalakhir' => $tanggalakhir,
-        'bendahara' => $ttdbendahara,
-        'pa_kpa' => $ttdpa_kpa1,
-    ];
+        // Data yang akan dikirim ke view
+        $data = [
+            'dataSkpd' => $dataSkpd,
+            'trhtransout' => $trhtransout,
+            'tipe' => $jenis_print,
+            'tanggalTtd' => $tanggalTtd,
+            'tanggalawal' => $tanggalawal,
+            'tanggalakhir' => $tanggalakhir,
+            'bendahara' => $ttdbendahara,
+            'pa_kpa' => $ttdpa_kpa1,
+        ];
 
-    $view = view('laporan.laporan.cetak_spj', $data);
+        $view = view('laporan.laporan.cetak_spj', $data);
 
-    if ($jenis_print == 'layar') {
-        return $view;
-    } elseif ($jenis_print == 'pdf') {
-        $pdf = PDF::loadHtml($view->render())
-            ->setPaper('legal')
-            ->setOrientation('landscape')
-            ->setOption('margin-left', 15)
-            ->setOption('margin-right', 15);
+        if ($jenis_print == 'layar') {
+            return $view;
+        } elseif ($jenis_print == 'pdf') {
+            $pdf = PDF::loadHtml($view->render())
+                ->setPaper('legal')
+                ->setOrientation('landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
 
-        return $pdf->stream('Laporan_DTH.pdf');
-    }else if ($jenis_print == 'excel') {
-        header("Cache-Control: no-cache, no-store, must-revalidate");
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=laporan_SPJ.xls");
-        return $view;
-    }
-}
-
-
-
-
-public function cetakobjek(Request $request)
-{
-    $kd_skpd = $request->kd_skpd;
-    $tanggalawal = $request->tanggalawal;
-    $tanggalakhir = $request->tanggalakhir;
-    $tanggalTtd = $request->tanggalTtd;
-    $ttdbendaharadth = $request->ttdbendaharadth;
-    $ttdpa_kpa = $request->ttdpa_kpa;
-    $jenis_print = $request->jenis_print;
-    $jenis_anggaran = $request->jenis_anggaran;
-    $sub_kegiatan = $request->sub_kegiatan;
-    $jenis = $request->jenis;
-    $akun_belanja = $request->akun_belanja;
-
-    if ($kd_skpd == 'null' || empty($kd_skpd)) {
-        $kd_skpd = '4.01.2.10.0.00.01.0000';
+            return $pdf->stream('Laporan_DTH.pdf');
+        } else if ($jenis_print == 'excel') {
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=laporan_SPJ.xls");
+            return $view;
+        }
     }
 
-    // Format tanggal
-    $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
-    $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
-
-    // Ambil data SKPD
-    $dataSkpd = DB::table('users')
-        ->select('name')
-        ->where('kd_skpd', $kd_skpd)
-        ->first();
 
 
 
-    $kegiatan = DB::table('trdtransout')
-    ->where('kd_sub_kegiatan', $sub_kegiatan)
-    ->select('kd_sub_kegiatan','nm_sub_kegiatan')
-    ->first();
-    $jumlah = DB::table('ms_anggaran')
-    ->where('kd_rek', $akun_belanja)
-    ->where('kd_sub_kegiatan', $sub_kegiatan)
-    ->where('jenis_anggaran', $jenis_anggaran)
-    ->select('*')
-    ->first();
+    public function cetakobjek(Request $request)
+    {
+        $kd_skpd = $request->kd_skpd;
+        $tanggalawal = $request->tanggalawal;
+        $tanggalakhir = $request->tanggalakhir;
+        $tanggalTtd = $request->tanggalTtd;
+        $ttdbendaharadth = $request->ttdbendaharadth;
+        $ttdpa_kpa = $request->ttdpa_kpa;
+        $jenis_print = $request->jenis_print;
+        $jenis_anggaran = $request->jenis_anggaran;
+        $sub_kegiatan = $request->sub_kegiatan;
+        $jenis = $request->jenis;
+        $akun_belanja = $request->akun_belanja;
 
-    // Ambil data detail dari trdtransout yang sesuai dengan no_bukti dari trhtransout
-    $trhtransout = DB::table('trhtransout')
-    ->join('trdtransout', 'trhtransout.no_bukti', '=', 'trdtransout.no_bukti')
-    ->where('trhtransout.kd_skpd', $kd_skpd)
-    ->where('trhtransout.jenis_terima_sp2d', "0")
-    ->where('trdtransout.kd_sub_kegiatan', $sub_kegiatan)
-    ->where('trdtransout.kd_rek6', $akun_belanja)
-    ->where('trdtransout.jenis_anggaran', $jenis_anggaran)
-    ->whereBetween('trhtransout.tgl_bukti', [$tanggalawal, $tanggalakhir])
-    ->select('trdtransout.*','trhtransout.tgl_bukti','trhtransout.ket')
-    ->get();
+        if ($kd_skpd == 'null' || empty($kd_skpd)) {
+            $kd_skpd = '4.01.2.10.0.00.01.0000';
+        }
 
-    $kd_dana_list = $trhtransout->pluck('sumber')->unique()->filter();
+        // Format tanggal
+        $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
+        $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
 
-    $sumber = DB::table('ms_sumberdana')
-    ->whereIn('id', $kd_dana_list->toArray())
-    ->get()
-    ->keyBy('id');
+        // Ambil data SKPD
+        $dataSkpd = DB::table('users')
+            ->select('name')
+            ->where('kd_skpd', $kd_skpd)
+            ->first();
 
-    $trhtransout->transform(function ($item) use ($sumber) {
-        $item->sumber_dana = $sumber[$item->sumber]->sumber_dana ?? 'Tidak Ada Sumber Dana';
-        return $item;
-    });
+
+
+        $kegiatan = DB::table('trdtransout')
+            ->where('kd_sub_kegiatan', $sub_kegiatan)
+            ->select('kd_sub_kegiatan', 'nm_sub_kegiatan')
+            ->first();
+        $jumlah = DB::table('ms_anggaran')
+            ->where('kd_rek', $akun_belanja)
+            ->where('kd_sub_kegiatan', $sub_kegiatan)
+            ->where('jenis_anggaran', $jenis_anggaran)
+            ->select('*')
+            ->first();
+
+        // Ambil data detail dari trdtransout yang sesuai dengan no_bukti dari trhtransout
+        $trhtransout = DB::table('trhtransout')
+            ->join('trdtransout', 'trhtransout.no_bukti', '=', 'trdtransout.no_bukti')
+            ->where('trhtransout.kd_skpd', $kd_skpd)
+            ->where('trhtransout.jenis_terima_sp2d', "0")
+            ->where('trdtransout.kd_sub_kegiatan', $sub_kegiatan)
+            ->where('trdtransout.kd_rek6', $akun_belanja)
+            ->where('trdtransout.jenis_anggaran', $jenis_anggaran)
+            ->whereBetween('trhtransout.tgl_bukti', [$tanggalawal, $tanggalakhir])
+            ->select('trdtransout.*', 'trhtransout.tgl_bukti', 'trhtransout.ket')
+            ->get();
+
+        $kd_dana_list = $trhtransout->pluck('sumber')->unique()->filter();
+
+        $sumber = DB::table('ms_sumberdana')
+            ->whereIn('id', $kd_dana_list->toArray())
+            ->get()
+            ->keyBy('id');
+
+        $trhtransout->transform(function ($item) use ($sumber) {
+            $item->sumber_dana = $sumber[$item->sumber]->sumber_dana ?? 'Tidak Ada Sumber Dana';
+            return $item;
+        });
 
 
 
 
 
         $ttdbendahara = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdbendaharadth)
-        ->first(); // Mengambil satu baris data
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdbendaharadth)
+            ->first(); // Mengambil satu baris data
 
-    $ttdpa_kpa1 = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdpa_kpa)
-        ->first();
+        $ttdpa_kpa1 = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdpa_kpa)
+            ->first();
 
-    $data = [
-        'dataSkpd' => $dataSkpd,
-        'trhtransout' => $trhtransout,
-        'tipe' => $jenis_print,
-        'tanggalTtd' => $tanggalTtd,
-        'tanggalawal' => $tanggalawal,
-        'tanggalakhir' => $tanggalakhir,
-        'bendahara' => $ttdbendahara,
-        'pa_kpa' => $ttdpa_kpa1,
-        'jumlah_anggaran' => $jumlah,
-        'kegiatan' => $kegiatan
-    ];
+        $data = [
+            'dataSkpd' => $dataSkpd,
+            'trhtransout' => $trhtransout,
+            'tipe' => $jenis_print,
+            'tanggalTtd' => $tanggalTtd,
+            'tanggalawal' => $tanggalawal,
+            'tanggalakhir' => $tanggalakhir,
+            'bendahara' => $ttdbendahara,
+            'pa_kpa' => $ttdpa_kpa1,
+            'jumlah_anggaran' => $jumlah,
+            'kegiatan' => $kegiatan
+        ];
 
-    $view = view('laporan.laporan.cetak_objek', $data);
+        $view = view('laporan.laporan.cetak_objek', $data);
 
-    if ($jenis_print == 'layar') {
-        return $view;
-    } elseif ($jenis_print == 'pdf') {
-        $pdf = PDF::loadHtml($view->render())
-            ->setPaper('legal')
-            ->setOrientation('landscape')
-            ->setOption('margin-left', 15)
-            ->setOption('margin-right', 15);
+        if ($jenis_print == 'layar') {
+            return $view;
+        } elseif ($jenis_print == 'pdf') {
+            $pdf = PDF::loadHtml($view->render())
+                ->setPaper('legal')
+                ->setOrientation('landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
 
-        return $pdf->stream('Laporan_rincian_objek.pdf');
-    }else if ($jenis_print == 'excel') {
-        header("Cache-Control: no-cache, no-store, must-revalidate");
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=laporan_rincian_objek.xls");
-        return $view;
-    }
-}
-
-
-public function tandaTangan(Request $request)
-{
-    $query = DB::table('masterTtd');
-
-    if (!empty($request->kodeSkpd)) {
-        $query->where('kodeSkpd', $request->kodeSkpd)
-              ->where('kode', 'BK'); // Jika 'bendahara' adalah string, gunakan tanda kutip
+            return $pdf->stream('Laporan_rincian_objek.pdf');
+        } else if ($jenis_print == 'excel') {
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=laporan_rincian_objek.xls");
+            return $view;
+        }
     }
 
-    $ttd = $query->get();
 
-    return response()->json($ttd);
-}
+    public function tandaTangan(Request $request)
+    {
+        $query = DB::table('masterTtd');
 
+        if (!empty($request->kodeSkpd)) {
+            $query->where('kodeSkpd', $request->kodeSkpd)
+                ->where('kode', 'BK'); // Jika 'bendahara' adalah string, gunakan tanda kutip
+        }
 
-public function tandaTanganPa(Request $request)
-{
-    $query = DB::table('masterTtd');
+        $ttd = $query->get();
 
-    if (!empty($request->kodeSkpd)) {
-        $query->where('kodeSkpd', $request->kodeSkpd)
-              ->where('kode', 'PA'); // Jika 'bendahara' adalah string, gunakan tanda kutip
+        return response()->json($ttd);
     }
 
-    $ttd = $query->get();
 
-    return response()->json($ttd);
-}
+    public function tandaTanganPa(Request $request)
+    {
+        $query = DB::table('masterTtd');
 
+        if (!empty($request->kodeSkpd)) {
+            $query->where('kodeSkpd', $request->kodeSkpd)
+                ->where('kode', 'PA'); // Jika 'bendahara' adalah string, gunakan tanda kutip
+        }
 
-public function getsubkegiatan(Request $request)
-{
-    $kodeSkpd = $request->kodeSkpd;
-    $search = $request->q;
+        $ttd = $query->get();
 
-    if (!$kodeSkpd) {
-        return response()->json([], 400);
+        return response()->json($ttd);
     }
 
-    $query = DB::table('trdtransout')
-        ->where('kd_skpd', $kodeSkpd)
-        ->select('kd_sub_kegiatan', 'nm_sub_kegiatan')
-        ->distinct();
 
-    // Tambahkan pencarian jika parameter q ada
-    if ($search) {
-        $query->where(function($q) use ($search) {
-            $q->where('kd_sub_kegiatan', 'like', "%{$search}%")
-              ->orWhere('nm_sub_kegiatan', 'like', "%{$search}%");
-        });
+    public function getsubkegiatan(Request $request)
+    {
+        $kodeSkpd = $request->kodeSkpd;
+        $search = $request->q;
+
+        if (!$kodeSkpd) {
+            return response()->json([], 400);
+        }
+
+        $query = DB::table('trdtransout')
+            ->where('kd_skpd', $kodeSkpd)
+            ->select('kd_sub_kegiatan', 'nm_sub_kegiatan')
+            ->distinct();
+
+        // Tambahkan pencarian jika parameter q ada
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('kd_sub_kegiatan', 'like', "%{$search}%")
+                    ->orWhere('nm_sub_kegiatan', 'like', "%{$search}%");
+            });
+        }
+
+        // Ambil beberapa hasil untuk pilihan dropdown
+        $results = $query->limit(10)->get();
+
+        return response()->json($results);
     }
 
-    // Ambil beberapa hasil untuk pilihan dropdown
-    $results = $query->limit(10)->get();
 
-    return response()->json($results);
-}
+    public function getakunbelanja(Request $request)
+    {
+        $kodeSkpd = $request->kodeSkpd;
+        $search = $request->q;
 
+        if (!$kodeSkpd) {
+            return response()->json([], 400);
+        }
 
-public function getakunbelanja(Request $request)
-{
-    $kodeSkpd = $request->kodeSkpd;
-    $search = $request->q;
+        $query = DB::table('trdtransout')
+            ->where('kd_skpd', $kodeSkpd)
+            ->select('kd_rek6', 'nm_rek6')
+            ->distinct();
 
-    if (!$kodeSkpd) {
-        return response()->json([], 400);
+        // Tambahkan pencarian jika parameter q ada
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('kd_rek6', 'like', "%{$search}%")
+                    ->orWhere('nm_rek6', 'like', "%{$search}%");
+            });
+        }
+
+        // Ambil beberapa hasil untuk pilihan dropdown
+        $results = $query->limit(10)->get();
+
+        return response()->json($results);
     }
 
-    $query = DB::table('trdtransout')
-        ->where('kd_skpd', $kodeSkpd)
-        ->select('kd_rek6', 'nm_rek6')
-        ->distinct();
+    public function cetakrinciancp(Request $request)
+    {
+        $kd_skpd = $request->kd_skpd;
+        $tanggalawal = $request->tanggalawal;
+        $tanggalakhir = $request->tanggalakhir;
+        $tanggalTtd = $request->tanggalTtd;
+        $jenis_print = $request->jenis_print ?? 'layar';
+        $ttdbendaharadth = $request->ttdbendaharadth;
+        $ttdpa_kpa = $request->ttdpa_kpa;
+        $bulanTerpilih = date('m', strtotime($tanggalakhir));
+        $tahunTerpilih = date('Y', strtotime($tanggalakhir));
 
-    // Tambahkan pencarian jika parameter q ada
-    if ($search) {
-        $query->where(function($q) use ($search) {
-            $q->where('kd_rek6', 'like', "%{$search}%")
-              ->orWhere('nm_rek6', 'like', "%{$search}%");
-        });
-    }
+        // Gunakan default jika kd_skpd kosong atau 'null'
+        if (empty($kd_skpd) || $kd_skpd == 'null') {
+            $kd_skpd = '4.01.2.10.0.00.01.0000';
+        }
 
-    // Ambil beberapa hasil untuk pilihan dropdown
-    $results = $query->limit(10)->get();
+        // Validasi dan format tanggal
+        try {
+            $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
+            $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Format tanggal tidak valid.');
+        }
 
-    return response()->json($results);
-}
+        // Ambil nama SKPD
+        $dataSkpd = DB::table('users')
+            ->select('name')
+            ->where('kd_skpd', $kd_skpd)
+            ->first();
 
-public function cetakrinciancp(Request $request)
-{
-    $kd_skpd = $request->kd_skpd;
-    $tanggalawal = $request->tanggalawal;
-    $tanggalakhir = $request->tanggalakhir;
-    $tanggalTtd = $request->tanggalTtd;
-    $jenis_print = $request->jenis_print ?? 'layar';
-    $ttdbendaharadth = $request->ttdbendaharadth;
-    $ttdpa_kpa = $request->ttdpa_kpa;
-    $bulanTerpilih = date('m', strtotime($tanggalakhir));
-    $tahunTerpilih = date('Y', strtotime($tanggalakhir));
+        // Ambil data transaksi utama dari trhkasin_pkd dengan kolom yang diperlukan
+        $trhtransout = DB::table('trhkasin_pkd as trh')
+            ->leftJoin('trdkasin_pkd as trd', 'trh.no_sts', '=', 'trd.no_sts')
+            ->select(
+                'trh.no_sts',
+                'trh.tgl_sts',
+                'trh.no_sp2d',
+                'trh.keterangan',
+                'trh.jns_cp',
+                DB::raw('SUM(trd.rupiah) as total'),
+                DB::raw("CASE WHEN trh.jns_cp = 'UP' THEN SUM(trd.rupiah) ELSE 0 END as up"),
+                DB::raw("CASE WHEN trh.jns_cp = 'GU' THEN SUM(trd.rupiah) ELSE 0 END as GU"),
+                DB::raw("CASE WHEN trh.jns_cp = 'TU' THEN SUM(trd.rupiah) ELSE 0 END as TU"),
+                DB::raw("CASE WHEN trh.jns_cp = 'LS GAJI' THEN SUM(trd.rupiah) ELSE 0 END as gaji"),
+                DB::raw("CASE WHEN trh.jns_cp = 'LS Barang & Jasa' THEN SUM(trd.rupiah) ELSE 0 END as barang_jasa"),
+            )
+            ->where('trh.kd_skpd', $kd_skpd)
+            ->whereBetween('trh.tgl_sts', [$tanggalawal, $tanggalakhir])
+            ->groupBy('trh.no_sts', 'trh.tgl_sts', 'trh.no_sp2d', 'trh.keterangan', 'trh.jns_cp')
+            ->get();
 
-    // Gunakan default jika kd_skpd kosong atau 'null'
-    if (empty($kd_skpd) || $kd_skpd == 'null') {
-        $kd_skpd = '4.01.2.10.0.00.01.0000';
-    }
-
-    // Validasi dan format tanggal
-    try {
-        $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
-        $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
-    } catch (\Exception $e) {
-        return back()->with('error', 'Format tanggal tidak valid.');
-    }
-
-    // Ambil nama SKPD
-    $dataSkpd = DB::table('users')
-        ->select('name')
-        ->where('kd_skpd', $kd_skpd)
-        ->first();
-
-    // Ambil data transaksi utama dari trhkasin_pkd dengan kolom yang diperlukan
-    $trhtransout = DB::table('trhkasin_pkd as trh')
-        ->leftJoin('trdkasin_pkd as trd', 'trh.no_sts', '=', 'trd.no_sts')
-        ->select(
-            'trh.no_sts',
-            'trh.tgl_sts',
-            'trh.no_sp2d',
-            'trh.keterangan',
-            'trh.jns_cp',
-            DB::raw('SUM(trd.rupiah) as total'),
-            DB::raw("CASE WHEN trh.jns_cp = 'UP' THEN SUM(trd.rupiah) ELSE 0 END as up"),
-            DB::raw("CASE WHEN trh.jns_cp = 'GU' THEN SUM(trd.rupiah) ELSE 0 END as GU"),
-            DB::raw("CASE WHEN trh.jns_cp = 'TU' THEN SUM(trd.rupiah) ELSE 0 END as TU"),
-            DB::raw("CASE WHEN trh.jns_cp = 'LS GAJI' THEN SUM(trd.rupiah) ELSE 0 END as gaji"),
-            DB::raw("CASE WHEN trh.jns_cp = 'LS Barang & Jasa' THEN SUM(trd.rupiah) ELSE 0 END as barang_jasa"),
-        )
-        ->where('trh.kd_skpd', $kd_skpd)
-        ->whereBetween('trh.tgl_sts', [$tanggalawal, $tanggalakhir])
-        ->groupBy('trh.no_sts', 'trh.tgl_sts', 'trh.no_sp2d', 'trh.keterangan', 'trh.jns_cp')
-        ->get();
-
-    // Ambil data dari trhbku untuk tambahan data yang belum tercatat di trhkasin_pkd
-    $trhbku_data = DB::table('trhbku as trh')
-        ->leftJoin('trdbku as trd', 'trh.no_kas', '=', 'trd.no_kas')
-        ->leftJoin('trhtrmpot as trm', 'trh.id_trmpot', '=', 'trm.no_bukti')
-        ->selectRaw("
+        // Ambil data dari trhbku untuk tambahan data yang belum tercatat di trhkasin_pkd
+        $trhbku_data = DB::table('trhbku as trh')
+            ->leftJoin('trdbku as trd', 'trh.no_kas', '=', 'trd.no_kas')
+            ->leftJoin('trhtrmpot as trm', 'trh.id_trmpot', '=', 'trm.no_bukti')
+            ->selectRaw("
             trh.no_kas as no_sts,
             trh.tgl_kas as tgl_sts,
             trh.no_sp2d,
@@ -1092,145 +1128,144 @@ public function cetakrinciancp(Request $request)
             CASE WHEN trm.beban = 'LS GAJI' THEN trd.terima ELSE 0 END as gaji,
             CASE WHEN trm.beban = 'LS Barang & Jasa' THEN trd.terima ELSE 0 END as barang_jasa
         ")
-        ->where('trh.kd_skpd', $kd_skpd)
-        ->where('trd.nm_rek6', 'like', "%Utang Belanja%")
-        ->whereNotNull('trh.id_trmpot')
-        ->whereNotNull('trd.terima')
-        ->whereNull('trh.id_trhkasin_pkd')
-        ->where('trd.terima', '!=', '0')
-        ->whereBetween('trh.tgl_kas', [$tanggalawal, $tanggalakhir])
-        ->get();
+            ->where('trh.kd_skpd', $kd_skpd)
+            ->where('trd.nm_rek6', 'like', "%Utang Belanja%")
+            ->whereNotNull('trh.id_trmpot')
+            ->whereNotNull('trd.terima')
+            ->whereNull('trh.id_trhkasin_pkd')
+            ->where('trd.terima', '!=', '0')
+            ->whereBetween('trh.tgl_kas', [$tanggalawal, $tanggalakhir])
+            ->get();
 
-    // Gabungkan kedua hasil query
-    $trhtransout = $trhtransout->concat($trhbku_data)->sortBy('tgl_sts')->values();
+        // Gabungkan kedua hasil query
+        $trhtransout = $trhtransout->concat($trhbku_data)->sortBy('tgl_sts')->values();
 
-    // Menghitung total per bulan
-    $bulanAwal = date('n', strtotime($tanggalawal));
-    $bulanAkhir = date('n', strtotime($tanggalakhir));
-    $tahun = date('Y', strtotime($tanggalawal));
+        // Menghitung total per bulan
+        $bulanAwal = date('n', strtotime($tanggalawal));
+        $bulanAkhir = date('n', strtotime($tanggalakhir));
+        $tahun = date('Y', strtotime($tanggalawal));
 
-    $totalPerBulan = [];
+        $totalPerBulan = [];
 
-    for ($bulan = $bulanAwal; $bulan <= $bulanAkhir; $bulan++) {
-        $bulanData = $trhtransout->filter(function ($item) use ($bulan, $tahun) {
-            $tglItem = date('Y-n', strtotime($item->tgl_sts));
-            return $tglItem == "$tahun-$bulan";
-        });
+        for ($bulan = $bulanAwal; $bulan <= $bulanAkhir; $bulan++) {
+            $bulanData = $trhtransout->filter(function ($item) use ($bulan, $tahun) {
+                $tglItem = date('Y-n', strtotime($item->tgl_sts));
+                return $tglItem == "$tahun-$bulan";
+            });
 
-        $namaBulan = date('F', mktime(0, 0, 0, $bulan, 1, $tahun));
+            $namaBulan = date('F', mktime(0, 0, 0, $bulan, 1, $tahun));
 
-        $totalPerBulan[$namaBulan] = [
-            'gaji' => $bulanData->sum('gaji'),
-            'pot_lain' => $bulanData->sum('pot_lain'),
-            'barang_jasa' => $bulanData->sum('barang_jasa'),
-            'pihak_ketiga' => $bulanData->sum('pihak_ketiga'),
-            'UP' => $bulanData->sum('UP'),
-            'GU' => $bulanData->sum('GU'),
-            'TU' => $bulanData->sum('TU'),
-            'total' => $bulanData->sum('total')
+            $totalPerBulan[$namaBulan] = [
+                'gaji' => $bulanData->sum('gaji'),
+                'pot_lain' => $bulanData->sum('pot_lain'),
+                'barang_jasa' => $bulanData->sum('barang_jasa'),
+                'pihak_ketiga' => $bulanData->sum('pihak_ketiga'),
+                'UP' => $bulanData->sum('UP'),
+                'GU' => $bulanData->sum('GU'),
+                'TU' => $bulanData->sum('TU'),
+                'total' => $bulanData->sum('total')
+            ];
+        }
+
+        $jumlahPeriodeTerpilih1 = DB::table('trhkasin_pkd as trh')
+            ->join('trdkasin_pkd as trd', 'trh.no_sts', '=', 'trd.no_sts')
+            ->where('trh.kd_skpd', $kd_skpd)
+            ->whereBetween('trh.tgl_sts', [$tanggalawal, $tanggalakhir])
+            ->sum('trh.total');
+
+        $jumlahPeriodeTerpilih2 = DB::table('trhbku as trh')
+            ->leftJoin('trdbku as trd', 'trh.no_kas', '=', 'trd.no_kas')
+            ->leftJoin('trhtrmpot as trm', 'trh.id_trmpot', '=', 'trm.no_bukti')
+            ->where('trh.kd_skpd', $kd_skpd)
+            ->where('trd.nm_rek6', 'like', "%Utang Belanja%")
+            ->whereNotNull('trh.id_trmpot')
+            ->whereNotNull('trd.terima')
+            ->whereNull('trh.id_trhkasin_pkd')
+            ->where('trd.terima', '!=', '0')
+            ->whereBetween('trh.tgl_kas', [$tanggalawal, $tanggalakhir])
+            ->sum('trd.terima'); // Menghapus alias 'as total' karena sum() hanya menerima nama kolom
+
+        // Menjumlahkan hasil kedua query
+        $jumlahPeriodeTerpilih = $jumlahPeriodeTerpilih1 + $jumlahPeriodeTerpilih2;
+        // Hitung jumlah transaksi sampai bulan sebelumnya
+
+        // Hitung jumlah transaksi sampai bulan yang dipilih
+        $jumlahSampaiBulanTerpilih1 = DB::table('trhkasin_pkd as trh')
+            ->join('trdkasin_pkd as trd', 'trh.no_sts', '=', 'trd.no_sts')
+            ->where('trh.kd_skpd', $kd_skpd)
+            ->whereBetween('trh.tgl_sts', [Carbon::parse('2025-01-01'), $tanggalakhir])
+            ->sum('trh.total');
+
+        $jumlahSampaiBulanTerpilih2 = DB::table('trhbku as trh')
+            ->leftJoin('trdbku as trd', 'trh.no_kas', '=', 'trd.no_kas')
+            ->leftJoin('trhtrmpot as trm', 'trh.id_trmpot', '=', 'trm.no_bukti')
+            ->where('trh.kd_skpd', $kd_skpd)
+            ->where('trd.nm_rek6', 'like', "%Utang Belanja%")
+            ->whereNotNull('trh.id_trmpot')
+            ->whereNotNull('trd.terima')
+            ->whereNull('trh.id_trhkasin_pkd')
+            ->where('trd.terima', '!=', '0')
+            ->whereBetween('trh.tgl_kas', [Carbon::parse('2025-01-01'), $tanggalakhir])
+            ->sum('trd.terima'); // Menghapus alias 'as total' karena sum() hanya menerima nama kolom
+
+        // Menjumlahkan hasil kedua query
+        $jumlahSampaiBulanTerpilih = $jumlahSampaiBulanTerpilih1 + $jumlahSampaiBulanTerpilih2;
+
+        // Total keseluruhan
+        $totalKeseluruhan = [
+            'gaji' => $trhtransout->sum('gaji'),
+            'pot_lain' => $trhtransout->sum('pot_lain'),
+            'barang_jasa' => $trhtransout->sum('barang_jasa'),
+            'pihak_ketiga' => $trhtransout->sum('pihak_ketiga'),
+            'up' => $trhtransout->sum('up'),
+            'gu' => $trhtransout->sum('gu'),
+            'tu' => $trhtransout->sum('tu'),
+            'total' => $trhtransout->sum('total')
         ];
+
+        // Ambil tanda tangan bendahara dan PA/KPA
+        $ttdbendahara = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdbendaharadth)
+            ->first();
+
+        $ttdpa_kpa1 = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdpa_kpa)
+            ->first();
+
+        // Prepare fallback data for empty results
+        $trhbku = null;
+        if ($trhtransout->isEmpty()) {
+            $trhbku = DB::table('trhbku')->where('kd_skpd', $kd_skpd)->first();
+        }
+
+        $data = [
+            'dataSkpd' => $dataSkpd,
+            'trhtransout' => $trhtransout,
+            'jumlahPeriodeTerpilih' => $jumlahPeriodeTerpilih,
+            'jumlahSampaiBulanTerpilih' => $jumlahSampaiBulanTerpilih,
+            'bulanAwal' => date('F Y', strtotime($tanggalawal)),
+            'bulanAkhir' => date('F Y', strtotime($tanggalakhir)),
+            'tipe' => $jenis_print,
+            'tanggalTtd' => $tanggalTtd,
+            'tanggalawal' => $tanggalawal,
+            'tanggalakhir' => $tanggalakhir,
+            'bendahara' => $ttdbendahara,
+            'pa_kpa' => $ttdpa_kpa1,
+            'trhbku' => $trhbku, // For fallback data
+        ];
+
+        // Pilih metode cetak
+        if ($jenis_print == 'layar') {
+            return view('laporan.laporan.cetak_rinciancp', $data);
+        } elseif ($jenis_print == 'pdf') {
+            $pdf = PDF::loadView('laporan.laporan.cetak_rinciancp', $data)
+                ->setPaper('legal', 'landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+
+            return $pdf->stream('Laporan_rinciancp.pdf');
+        }
     }
-
-    $jumlahPeriodeTerpilih1 = DB::table('trhkasin_pkd as trh')
-    ->join('trdkasin_pkd as trd', 'trh.no_sts', '=', 'trd.no_sts')
-    ->where('trh.kd_skpd', $kd_skpd)
-    ->whereBetween('trh.tgl_sts', [$tanggalawal, $tanggalakhir])
-    ->sum('trh.total');
-
-    $jumlahPeriodeTerpilih2 = DB::table('trhbku as trh')
-        ->leftJoin('trdbku as trd', 'trh.no_kas', '=', 'trd.no_kas')
-        ->leftJoin('trhtrmpot as trm', 'trh.id_trmpot', '=', 'trm.no_bukti')
-        ->where('trh.kd_skpd', $kd_skpd)
-        ->where('trd.nm_rek6', 'like', "%Utang Belanja%")
-        ->whereNotNull('trh.id_trmpot')
-        ->whereNotNull('trd.terima')
-        ->whereNull('trh.id_trhkasin_pkd')
-        ->where('trd.terima', '!=', '0')
-        ->whereBetween('trh.tgl_kas', [$tanggalawal, $tanggalakhir])
-        ->sum('trd.terima'); // Menghapus alias 'as total' karena sum() hanya menerima nama kolom
-
-    // Menjumlahkan hasil kedua query
-    $jumlahPeriodeTerpilih = $jumlahPeriodeTerpilih1 + $jumlahPeriodeTerpilih2;
-    // Hitung jumlah transaksi sampai bulan sebelumnya
-
-    // Hitung jumlah transaksi sampai bulan yang dipilih
-    $jumlahSampaiBulanTerpilih1 = DB::table('trhkasin_pkd as trh')
-    ->join('trdkasin_pkd as trd', 'trh.no_sts', '=', 'trd.no_sts')
-    ->where('trh.kd_skpd', $kd_skpd)
-    ->whereBetween('trh.tgl_sts', [Carbon::parse('2025-01-01'), $tanggalakhir])
-    ->sum('trh.total');
-
-    $jumlahSampaiBulanTerpilih2 = DB::table('trhbku as trh')
-    ->leftJoin('trdbku as trd', 'trh.no_kas', '=', 'trd.no_kas')
-    ->leftJoin('trhtrmpot as trm', 'trh.id_trmpot', '=', 'trm.no_bukti')
-    ->where('trh.kd_skpd', $kd_skpd)
-    ->where('trd.nm_rek6', 'like', "%Utang Belanja%")
-    ->whereNotNull('trh.id_trmpot')
-    ->whereNotNull('trd.terima')
-    ->whereNull('trh.id_trhkasin_pkd')
-    ->where('trd.terima', '!=', '0')
-    ->whereBetween('trh.tgl_kas', [Carbon::parse('2025-01-01'), $tanggalakhir])
-    ->sum('trd.terima'); // Menghapus alias 'as total' karena sum() hanya menerima nama kolom
-
-// Menjumlahkan hasil kedua query
-    $jumlahSampaiBulanTerpilih = $jumlahSampaiBulanTerpilih1 + $jumlahSampaiBulanTerpilih2;
-
-    // Total keseluruhan
-    $totalKeseluruhan = [
-        'gaji' => $trhtransout->sum('gaji'),
-        'pot_lain' => $trhtransout->sum('pot_lain'),
-        'barang_jasa' => $trhtransout->sum('barang_jasa'),
-        'pihak_ketiga' => $trhtransout->sum('pihak_ketiga'),
-        'up' => $trhtransout->sum('up'),
-        'gu' => $trhtransout->sum('gu'),
-        'tu' => $trhtransout->sum('tu'),
-        'total' => $trhtransout->sum('total')
-    ];
-
-    // Ambil tanda tangan bendahara dan PA/KPA
-    $ttdbendahara = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdbendaharadth)
-        ->first();
-
-    $ttdpa_kpa1 = DB::table('masterTtd')
-        ->where('kodeSkpd', $kd_skpd)
-        ->where('nip', $ttdpa_kpa)
-        ->first();
-
-    // Prepare fallback data for empty results
-    $trhbku = null;
-    if ($trhtransout->isEmpty()) {
-        $trhbku = DB::table('trhbku')->where('kd_skpd', $kd_skpd)->first();
-    }
-
-    $data = [
-        'dataSkpd' => $dataSkpd,
-        'trhtransout' => $trhtransout,
-        'jumlahPeriodeTerpilih' => $jumlahPeriodeTerpilih,
-        'jumlahSampaiBulanTerpilih' => $jumlahSampaiBulanTerpilih,
-        'bulanAwal' => date('F Y', strtotime($tanggalawal)),
-        'bulanAkhir' => date('F Y', strtotime($tanggalakhir)),
-        'tipe' => $jenis_print,
-        'tanggalTtd' => $tanggalTtd,
-        'tanggalawal' => $tanggalawal,
-        'tanggalakhir' => $tanggalakhir,
-        'bendahara' => $ttdbendahara,
-        'pa_kpa' => $ttdpa_kpa1,
-        'trhbku' => $trhbku, // For fallback data
-    ];
-
-    // Pilih metode cetak
-    if ($jenis_print == 'layar') {
-        return view('laporan.laporan.cetak_rinciancp', $data);
-    } elseif ($jenis_print == 'pdf') {
-        $pdf = PDF::loadView('laporan.laporan.cetak_rinciancp', $data)
-            ->setPaper('legal', 'landscape')
-            ->setOption('margin-left', 15)
-            ->setOption('margin-right', 15);
-
-        return $pdf->stream('Laporan_rinciancp.pdf');
-    }
-}
-
 }

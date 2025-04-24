@@ -606,6 +606,16 @@
                                 <option value="" disabled selected>Silahkan Pilih</option>
                             </select>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Jenis Anggaran</label>
+                            <select class="form-control" name="jenis_anggaran_spj" id="jenis_anggaran_spj">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                                <option value="0">Penyusunan</option>
+                                <option value="1">Pergeseran I</option>
+                                <option value="2">Pergeseran II</option>
+                                <option value="3">Pergeseran III</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-3 text-center">
@@ -703,7 +713,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapdth').val()
                         };
@@ -737,7 +747,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapdth').val()
                         };
@@ -770,7 +780,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekaprinciancp').val()
                         };
@@ -804,7 +814,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekaprinciancp').val()
                         };
@@ -838,7 +848,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapspj').val()
                         };
@@ -872,7 +882,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapspj').val()
                         };
@@ -905,7 +915,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapbku').val()
                         };
@@ -939,7 +949,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapbku').val()
                         };
@@ -972,7 +982,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapbpp').val()
                         };
@@ -1006,7 +1016,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapbpp').val()
                         };
@@ -1039,7 +1049,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapbpbank').val()
                         };
@@ -1073,7 +1083,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapbpbank').val()
                         };
@@ -1106,7 +1116,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekaprealisasi').val()
                         };
@@ -1140,7 +1150,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekaprealisasi').val()
                         };
@@ -1173,7 +1183,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapobjek').val()
                         };
@@ -1207,7 +1217,7 @@
                     data: function(params) {
                         return {
                             _token: $('meta[name="csrf-token"]').attr(
-                            'content'), // Tambahkan CSRF token
+                                'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapobjek').val()
                         };
@@ -1374,7 +1384,7 @@
                 url.searchParams.append("tanggalakhir", tanggalakhir);
                 url.searchParams.append("tanggalTtd", tanggalTtd);
                 url.searchParams.append("ttdbendaharadth",
-                ttdbendahara); // Pastikan cocok dengan request controller
+                    ttdbendahara); // Pastikan cocok dengan request controller
                 url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
                 url.searchParams.append("jenis_print", jenis_print);
 
@@ -1441,7 +1451,7 @@
                 url.searchParams.append("tanggalakhir", tanggalakhir);
                 url.searchParams.append("tanggalTtd", tanggalTtd);
                 url.searchParams.append("ttdbendaharadth",
-                ttdbendahara); // Pastikan cocok dengan request controller
+                    ttdbendahara); // Pastikan cocok dengan request controller
                 url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
                 url.searchParams.append("jenis_print", jenis_print);
 
@@ -1491,7 +1501,7 @@
                 url.searchParams.append("tanggalakhir", tanggalakhir);
                 url.searchParams.append("tanggalTtd", tanggalTtd);
                 url.searchParams.append("ttdbendaharadth",
-                ttdbendahara); // Pastikan cocok dengan request controller
+                    ttdbendahara); // Pastikan cocok dengan request controller
                 url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
                 url.searchParams.append("jenis_print", jenis_print);
 
@@ -1558,7 +1568,7 @@
                 url.searchParams.append("tanggalakhir", tanggalakhir);
                 url.searchParams.append("tanggalTtd", tanggalTtd);
                 url.searchParams.append("ttdbendaharadth",
-                ttdbendahara); // Pastikan cocok dengan request controller
+                    ttdbendahara); // Pastikan cocok dengan request controller
                 url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
                 url.searchParams.append("jenis_print", jenis_print);
 
@@ -1635,7 +1645,7 @@
                 url.searchParams.append("tanggalakhir", tanggalakhir);
                 url.searchParams.append("tanggalTtd", tanggalTtd);
                 url.searchParams.append("ttdbendaharadth",
-                ttdbendahara); // Pastikan cocok dengan request controller
+                    ttdbendahara); // Pastikan cocok dengan request controller
                 url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
                 url.searchParams.append("jenis_anggaran", jenis_anggaran);
                 url.searchParams.append("jenis_print", jenis_print);
@@ -1745,10 +1755,10 @@
                 url.searchParams.append("tanggalakhir", tanggalakhir);
                 url.searchParams.append("tanggalTtd", tanggalTtd);
                 url.searchParams.append("ttdbendaharadth",
-                ttdbendahara); // Pastikan cocok dengan request controller
+                    ttdbendahara); // Pastikan cocok dengan request controller
                 url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
                 url.searchParams.append("jenis_anggaran",
-                jenis_anggaran); // Pastikan cocok dengan request controller
+                    jenis_anggaran); // Pastikan cocok dengan request controller
                 url.searchParams.append("sub_kegiatan", sub_kegiatan);
                 url.searchParams.append("jenis", jenis); // Pastikan cocok dengan request controller
                 url.searchParams.append("akun_belanja", akun_belanja);
@@ -1765,12 +1775,22 @@
                 let tanggalTtd = $('#tanggalTtdrekapspj').val();
                 let ttdbendahara = $('#ttdbendaharaspj').val(); // Pastikan ID ini sesuai
                 let ttdpa_kpa = $('#ttdspj').val();
+                let jenis_anggaran_spj = $('#jenis_anggaran_spj').val();
                 let jenis_print = $(this).data("jenis");
 
                 if (!kd_skpd) {
                     Swal.fire({
                         title: "Peringatan!",
                         text: "Silakan pilih SKPD!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!jenis_anggaran_spj) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih Jenis Anggaran!",
                         icon: "warning"
                     });
                     return;
@@ -1818,8 +1838,9 @@
                 url.searchParams.append("tanggalakhir", tanggalakhir);
                 url.searchParams.append("tanggalTtd", tanggalTtd);
                 url.searchParams.append("ttdbendaharadth",
-                ttdbendahara); // Pastikan cocok dengan request controller
+                    ttdbendahara); // Pastikan cocok dengan request controller
                 url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
+                url.searchParams.append("jenis_anggaran_spj", jenis_anggaran_spj);
                 url.searchParams.append("jenis_print", jenis_print);
 
                 window.open(url.toString(), "_blank");
@@ -1886,7 +1907,7 @@
                 url.searchParams.append("tanggalakhir", tanggalakhir);
                 url.searchParams.append("tanggalTtd", tanggalTtd);
                 url.searchParams.append("ttdbendaharadth",
-                ttdbendahara); // Pastikan cocok dengan request controller
+                    ttdbendahara); // Pastikan cocok dengan request controller
                 url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
                 url.searchParams.append("jenis_print", jenis_print);
 
