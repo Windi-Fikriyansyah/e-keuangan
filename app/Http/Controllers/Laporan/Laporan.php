@@ -897,8 +897,9 @@ class Laporan extends Controller
             ->where('kd_rek', $akun_belanja)
             ->where('kd_sub_kegiatan', $sub_kegiatan)
             ->where('jenis_anggaran', $jenis_anggaran)
-            ->select('*')
+            ->select(DB::raw('SUM(anggaran_tahun) as total_anggaran'))
             ->first();
+
 
         // Ambil data detail dari trdtransout yang sesuai dengan no_bukti dari trhtransout
         $trhtransout = DB::table('trhtransout')

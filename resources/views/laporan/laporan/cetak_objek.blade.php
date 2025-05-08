@@ -184,9 +184,10 @@
                 <tr>
                     <th colspan="4">Jumlah Anggaran</th>
                     <th class="numbers">Rp
-                        {{ isset($jumlah_anggaran->anggaran_tahun) ? number_format($jumlah_anggaran->anggaran_tahun, 2, ',', '.') : '0,00' }}
+                        {{ isset($jumlah_anggaran->total_anggaran) ? number_format($jumlah_anggaran->total_anggaran, 2, ',', '.') : '0,00' }}
                     </th>
                 </tr>
+
                 <tr>
                     <th colspan="4">Total Inputan</th>
                     <th class="numbers">Rp {{ number_format($totalInputan, 2, ',', '.') }}</th>
@@ -195,8 +196,8 @@
                     <th colspan="4">Sisa Anggaran</th>
                     <th class="numbers">
                         Rp
-                        {{ isset($jumlah_anggaran->anggaran_tahun)
-                            ? number_format($jumlah_anggaran->anggaran_tahun - $totalInputan, 2, ',', '.')
+                        {{ isset($jumlah_anggaran->total_anggaran)
+                            ? number_format($jumlah_anggaran->total_anggaran - $totalInputan, 2, ',', '.')
                             : number_format(0 - $totalInputan, 2, ',', '.') }}
                     </th>
                 </tr>
