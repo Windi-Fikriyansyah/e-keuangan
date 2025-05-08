@@ -27,34 +27,60 @@ class Transaksi extends Controller
     }
 
     public function load(Request $request)
-{
-    if ($request->ajax()) {
-        $search = $request->search;
+    {
+        if ($request->ajax()) {
+            $search = $request->search;
 
-        $data = DB::table('trhtransout')
-            ->where('kd_skpd', Auth::user()->kd_skpd);
+            $data = DB::table('trhtransout')
+                ->where('kd_skpd', Auth::user()->kd_skpd);
 
-        if ($search) {
-            $data = $data->where(function ($query) use ($search) {
-                $query->where('no_bukti', 'like', "%" . $search . "%")
-                      ->orWhere('nm_skpd', 'like', "%" . $search . "%")
-                      ->orWhere('ket', 'like', "%" . $search . "%"); // Tambahan untuk pencarian lebih fleksibel
-            });
+            if ($search) {
+                $data = $data->where(function ($query) use ($search) {
+                    $query->where('no_bukti', 'like', "%" . $search . "%")
+                        ->orWhere('nm_skpd', 'like', "%" . $search . "%")
+                        ->orWhere('ket', 'like', "%" . $search . "%"); // Tambahan untuk pencarian lebih fleksibel
+                });
+            }
+
+            return DataTables::of($data->get()) // Tambahkan get() di sini
+                ->addIndexColumn()
+                ->addColumn('aksi', function ($row) {
+                    $btn = '<a href="' . route('transaksi.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
+                    $btn .= '<a href="' . route('transaksi.ubah', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-warning btn-sm" style="margin-right:4px"><i class="fas fa-edit"></i></a>';
+                    $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('transaksi.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
+                    return $btn;
+                })
+                ->rawColumns(['aksi'])
+                ->make(true);
+        }
+    }
+
+
+
+
+    public function checkAnggaran(Request $request)
+    {
+        $exists = DB::table('ms_anggaran')->whereIn('jenis_anggaran', $request->jenis_pergeseran)
+            ->where('kd_sub_kegiatan', $request->kd_sub_kegiatan)
+            ->where('kd_rek', $request->kd_rek)
+            ->where('kd_dana', $request->kd_dana)
+            ->exists();
+
+        if ($exists) {
+            $anggaran = DB::table('ms_anggaran')->whereIn('jenis_anggaran', $request->jenis_pergeseran)
+                ->where('kd_sub_kegiatan', $request->kd_sub_kegiatan)
+                ->where('kd_rek', $request->kd_rek)
+                ->where('kd_dana', $request->kd_dana)
+                ->first();
+
+            return response()->json([
+                'exists' => true,
+                'nilai_anggaran' => $anggaran->nilai_anggaran
+            ]);
         }
 
-        return DataTables::of($data->get()) // Tambahkan get() di sini
-            ->addIndexColumn()
-            ->addColumn('aksi', function ($row) {
-                $btn = '<a href="' . route('transaksi.edit', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-primary btn-sm" style="margin-right:4px"><i class="fas fa-eye"></i></a>';
-                $btn .= '<a href="' . route('transaksi.ubah', Crypt::encrypt($row->no_bukti)) . '" class="btn btn-warning btn-sm" style="margin-right:4px"><i class="fas fa-edit"></i></a>';
-                $btn .= '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('transaksi.destroy', Crypt::encrypt($row->no_bukti)) . '"><i class="fas fa-trash-alt"></i></button>';
-                return $btn;
-            })
-            ->rawColumns(['aksi'])
-            ->make(true);
+        return response()->json(['exists' => false]);
     }
-}
-
 
     public function create()
     {
@@ -65,18 +91,18 @@ class Transaksi extends Controller
         $nm_skpd = Auth::user()->name;
         $rek_pengeluaran = Auth::user()->rek_pengeluaran;
         $kd_sub_kegiatan = DB::table('ms_sub_kegiatan')
-                            ->select('kd_sub_kegiatan','nm_sub_kegiatan') // Ambil hanya kolom yang diperlukan
-                            ->distinct() // Hilangkan duplikasi
-                            ->get();
+            ->select('kd_sub_kegiatan', 'nm_sub_kegiatan') // Ambil hanya kolom yang diperlukan
+            ->distinct() // Hilangkan duplikasi
+            ->get();
 
-          $saldo_awal = DB::table('masterSkpd')
-                            ->where('kodeSkpd', $kd_skpd) // Filter berdasarkan kd_skpd
-                            ->value('saldoawal');
-
-
+        $saldo_awal = DB::table('masterSkpd')
+            ->where('kodeSkpd', $kd_skpd) // Filter berdasarkan kd_skpd
+            ->value('saldoawal');
 
 
-        return view('transaksi.create', compact('kd_skpd','nm_skpd','newNoBukti','rek_pengeluaran','kd_sub_kegiatan','saldo_awal'));
+
+
+        return view('transaksi.create', compact('kd_skpd', 'nm_skpd', 'newNoBukti', 'rek_pengeluaran', 'kd_sub_kegiatan', 'saldo_awal'));
     }
 
     public function ubah($no_bukti)
@@ -88,24 +114,24 @@ class Transaksi extends Controller
         $transaksi = DB::table('trhtransout')->where('no_bukti', $decryptedId)->first();
 
         $potonganDetails = DB::table('trdtransout')
-        ->leftJoin('ms_sumberdana', function ($join) {
-            $join->on(
-                DB::raw('CAST(trdtransout.sumber AS INT)'),
-                '=',
-                'ms_sumberdana.id'
-            );
-        })
-        ->where('trdtransout.no_bukti', $decryptedId)
-        ->select(
-            'trdtransout.nm_sub_kegiatan',
-            'trdtransout.kd_rek6',
-            'trdtransout.nm_rek6',
-            'trdtransout.sumber',
-            'trdtransout.nilai',
-            'ms_sumberdana.nm_dana'
-        )
-        ->distinct() // Tambahkan ini
-        ->get();
+            ->leftJoin('ms_sumberdana', function ($join) {
+                $join->on(
+                    DB::raw('CAST(trdtransout.sumber AS INT)'),
+                    '=',
+                    'ms_sumberdana.id'
+                );
+            })
+            ->where('trdtransout.no_bukti', $decryptedId)
+            ->select(
+                'trdtransout.nm_sub_kegiatan',
+                'trdtransout.kd_rek6',
+                'trdtransout.nm_rek6',
+                'trdtransout.sumber',
+                'trdtransout.nilai',
+                'ms_sumberdana.nm_dana'
+            )
+            ->distinct() // Tambahkan ini
+            ->get();
 
 
         // Cek apakah data ditemukan
@@ -115,7 +141,7 @@ class Transaksi extends Controller
         $rek_pengeluaran = Auth::user()->rek_pengeluaran;
 
         // Tampilkan view untuk mengedit data
-        return view('transaksi.ubah', compact('transaksi','potonganDetails','rek_pengeluaran'));
+        return view('transaksi.ubah', compact('transaksi', 'potonganDetails', 'rek_pengeluaran'));
     }
 
     public function getno_transaksi(Request $request)
@@ -133,15 +159,15 @@ class Transaksi extends Controller
             )
             ->where('trhtransout.kd_skpd', $kd_skpd)
             ->where('trhtransout.jenis_terima_sp2d', "1")
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->where('trhtransout.jenis_beban', 'GAJI')
-                      ->orWhere('trhtransout.jenis_beban', 'Barang & Jasa');
+                    ->orWhere('trhtransout.jenis_beban', 'Barang & Jasa');
             })
             ->when(!empty($search), function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('trhtransout.no_bukti', 'LIKE', "%{$search}%")
-                    ->orWhere('trhtransout.tgl_bukti', 'LIKE', "%{$search}%")
-                    ->orWhere('trhtransout.ket', 'LIKE', "%{$search}%");
+                        ->orWhere('trhtransout.tgl_bukti', 'LIKE', "%{$search}%")
+                        ->orWhere('trhtransout.ket', 'LIKE', "%{$search}%");
                 });
             })
             ->groupBy(
@@ -171,14 +197,14 @@ class Transaksi extends Controller
 
         // Ambil data dari trdtrmpot berdasarkan no_bukti yang sesuai
         $trdtrmpot = DB::table('trdtransout')
-        ->join('ms_sumberdana', 'trdtransout.sumber', '=', 'ms_sumberdana.id')
-        ->where('trdtransout.no_bukti', $no_transaksi)
-        ->select(
-            'trdtransout.*', // Ambil semua kolom dari trdtransout
-            'ms_sumberdana.sumber_dana as nm_dana',
-            'ms_sumberdana.id as id_dana' // Ambil nama sumber dana dari ms_sumberdana
-        )
-        ->get();
+            ->join('ms_sumberdana', 'trdtransout.sumber', '=', 'ms_sumberdana.id')
+            ->where('trdtransout.no_bukti', $no_transaksi)
+            ->select(
+                'trdtransout.*', // Ambil semua kolom dari trdtransout
+                'ms_sumberdana.sumber_dana as nm_dana',
+                'ms_sumberdana.id as id_dana' // Ambil nama sumber dana dari ms_sumberdana
+            )
+            ->get();
 
 
         return response()->json([
@@ -191,60 +217,67 @@ class Transaksi extends Controller
 
     public function getSubKegiatan(Request $request)
     {
-    try {
-        $query = DB::table('ms_sub_kegiatan')
-            ->select('kd_sub_kegiatan', 'nm_sub_kegiatan');
+        try {
+            $query = DB::table('ms_sub_kegiatan')
+                ->select('kd_sub_kegiatan', 'nm_sub_kegiatan');
 
-        // Search both kd_sub_kegiatan and nm_sub_kegiatan
-        if ($request->has('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('kd_sub_kegiatan', 'like', '%' . $request->search . '%')
-                    ->orWhere('nm_sub_kegiatan', 'like', '%' . $request->search . '%');
-            });
+            // Search both kd_sub_kegiatan and nm_sub_kegiatan
+            if ($request->has('search')) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('kd_sub_kegiatan', 'like', '%' . $request->search . '%')
+                        ->orWhere('nm_sub_kegiatan', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            $subKegiatan = $query->orderBy('kd_sub_kegiatan')
+                ->get();
+
+            return response()->json($subKegiatan);
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'error' => 'Gagal mengambil data sub kegiatan',
+                'message' => 'Terjadi kesalahan dalam mengambil data'
+            ], 500);
         }
-
-        $subKegiatan = $query->orderBy('kd_sub_kegiatan')
-            ->get();
-
-        return response()->json($subKegiatan);
-    } catch (\Exception $e) {
-
-        return response()->json([
-            'error' => 'Gagal mengambil data sub kegiatan',
-            'message' => 'Terjadi kesalahan dalam mengambil data'
-        ], 500);
-    }
     }
 
+    // Di dalam method getsumberdana
     public function getsumberdana(Request $request)
     {
 
-    try {
-        $query = DB::table('ms_sumberdana')
-            ->select('id','kd_dana', 'nm_dana','anggaran_tahun');
+        try {
+            $query = DB::table('ms_sumberdana')
+                ->select(
+                    'kd_dana',
+                    DB::raw('MAX(nm_dana) as nm_dana'),
+                    DB::raw('MAX(anggaran_tahun) as anggaran_tahun')
+                );
 
-        if ($request->has('id_sumberdana')) {
-                $query->where('id', $request->id_sumberdana);
+
+
+            if ($request->has('search')) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('kd_dana', 'like', '%' . $request->search . '%')
+                        ->orWhere('nm_dana', 'like', '%' . $request->search . '%');
+                });
             }
-        // Search both kd_sub_kegiatan and nm_sub_kegiatan
-        if ($request->has('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('kd_dana', 'like', '%' . $request->search . '%')
-                    ->orWhere('nm_dana', 'like', '%' . $request->search . '%');
-            });
+
+            $sumberDana = $query->groupBy('kd_dana')
+                ->orderBy('kd_dana')
+                ->get();
+
+            return response()->json($sumberDana);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Gagal mengambil data Sumber dana',
+                'message' => 'Terjadi kesalahan dalam mengambil data'
+            ], 500);
         }
-        $subKegiatan = $query->orderBy('kd_dana')
-            ->get();
-
-        return response()->json($subKegiatan);
-    } catch (\Exception $e) {
-
-        return response()->json([
-            'error' => 'Gagal mengambil data Sumber dana',
-            'message' => 'Terjadi kesalahan dalam mengambil data'
-        ], 500);
     }
-    }
+
+    // Method checkAnggaran tetap sama
+
 
     public function gettotalnilai(Request $request)
     {
@@ -263,75 +296,74 @@ class Transaksi extends Controller
     }
 
     public function getrekening(Request $request)
-{
-    try {
-        // Get the selected kd_sub_kegiatan from the request
-        $kd_sub_kegiatan = $request->input('kd_sub_kegiatan');
-        $jenis_pergeseran = $request->input('jenis_pergeseran');
-        // Initialize query from ms_anggaran table
-        $query = DB::table('ms_anggaran');
+    {
+        try {
+            // Get the selected kd_sub_kegiatan from the request
+            $kd_sub_kegiatan = $request->input('kd_sub_kegiatan');
+            $jenis_pergeseran = $request->input('jenis_pergeseran');
+            // Initialize query from ms_anggaran table
+            $query = DB::table('ms_anggaran');
 
-        // Filter by kd_sub_kegiatan if it's provided
-        if ($kd_sub_kegiatan) {
-            $query->where('kd_sub_kegiatan', $kd_sub_kegiatan);
+            // Filter by kd_sub_kegiatan if it's provided
+            if ($kd_sub_kegiatan) {
+                $query->where('kd_sub_kegiatan', $kd_sub_kegiatan);
+            }
+
+            if ($jenis_pergeseran) {
+                $query->where('jenis_anggaran', $jenis_pergeseran);
+            }
+
+            // Select all the required fields
+            $query->select(
+                'kd_rek',
+                'nm_rek',
+                'anggaran_tahun',
+                'anggaran_tw1',
+                'anggaran_tw2',
+                'anggaran_tw3',
+                'anggaran_tw4',
+                'rek1',
+                'rek2',
+                'rek3',
+                'rek4',
+                'rek5',
+                'rek6',
+                'rek7',
+                'rek8',
+                'rek9',
+                'rek10',
+                'rek11',
+                'rek12',
+                'status_anggaran',
+                'status_anggaran_kas',
+                'id_sumberdana'
+            );
+
+            // Handle search functionality if search parameter is provided
+            if ($request->has('search') && !empty($request->search)) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('kd_rek', 'like', '%' . $search . '%')
+                        ->orWhere('nm_rek', 'like', '%' . $search . '%');
+                });
+            }
+
+            // Order the results by kd_rek
+            $rekening = $query->orderBy('kd_rek')->get();
+
+            // Return the results as JSON
+            return response()->json($rekening);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error in getrekening: ' . $e->getMessage());
+
+            // Return a proper error response
+            return response()->json([
+                'error' => 'Gagal mengambil data rekening',
+                'message' => 'Terjadi kesalahan dalam mengambil data: ' . $e->getMessage()
+            ], 500);
         }
-
-        if ($jenis_pergeseran) {
-            $query->where('jenis_anggaran', $jenis_pergeseran);
-        }
-
-        // Select all the required fields
-        $query->select(
-            'kd_rek',
-            'nm_rek',
-            'anggaran_tahun',
-            'anggaran_tw1',
-            'anggaran_tw2',
-            'anggaran_tw3',
-            'anggaran_tw4',
-            'rek1',
-            'rek2',
-            'rek3',
-            'rek4',
-            'rek5',
-            'rek6',
-            'rek7',
-            'rek8',
-            'rek9',
-            'rek10',
-            'rek11',
-            'rek12',
-            'status_anggaran',
-            'status_anggaran_kas',
-            'id_sumberdana'
-        );
-
-        // Handle search functionality if search parameter is provided
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('kd_rek', 'like', '%' . $search . '%')
-                  ->orWhere('nm_rek', 'like', '%' . $search . '%');
-            });
-        }
-
-        // Order the results by kd_rek
-        $rekening = $query->orderBy('kd_rek')->get();
-
-        // Return the results as JSON
-        return response()->json($rekening);
-
-    } catch (\Exception $e) {
-        // Log the error for debugging
-        \Log::error('Error in getrekening: ' . $e->getMessage());
-
-        // Return a proper error response
-        return response()->json([
-            'error' => 'Gagal mengambil data rekening',
-            'message' => 'Terjadi kesalahan dalam mengambil data: ' . $e->getMessage()
-        ], 500);
     }
-}
 
 
 
@@ -346,9 +378,9 @@ class Transaksi extends Controller
             // Validasi dan pencarian data SP2D jika ada parameter 'search'
             if ($request->filled('search')) {
                 $searchTerm = $request->input('search');
-                $query->where(function($q) use ($searchTerm) {
+                $query->where(function ($q) use ($searchTerm) {
                     $q->where('no_sp2d', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('tgl_sp2d', 'like', '%' . $searchTerm . '%');
+                        ->orWhere('tgl_sp2d', 'like', '%' . $searchTerm . '%');
                 });
             }
 
@@ -396,11 +428,11 @@ class Transaksi extends Controller
 
         DB::beginTransaction();
         try {
-            $total = array_sum(array_map(function($detail) {
+            $total = array_sum(array_map(function ($detail) {
                 return str_replace(['Rp', '.', ' '], '', $detail['total'] ?? $detail['nilai']);
             }, $details));
 
-            $nilai_transfer = array_sum(array_map(function($detail_tujuan) {
+            $nilai_transfer = array_sum(array_map(function ($detail_tujuan) {
                 return str_replace(['Rp', '.', ' '], '', $detail_tujuan['nilai_transfer']);
             }, $details_tujuan));
 
@@ -442,12 +474,12 @@ class Transaksi extends Controller
 
 
             $saldo_awal = DB::table('masterSkpd')
-            ->where('kodeSkpd', auth()->user()->kd_skpd)
-            ->value('saldoawal');
+                ->where('kodeSkpd', auth()->user()->kd_skpd)
+                ->value('saldoawal');
 
             $realisasi = DB::table('masterSkpd')
-            ->where('kodeSkpd', auth()->user()->kd_skpd)
-            ->value('realisasi');
+                ->where('kodeSkpd', auth()->user()->kd_skpd)
+                ->value('realisasi');
 
 
             if ($saldo_awal === null) {
@@ -457,7 +489,7 @@ class Transaksi extends Controller
                 $realisasi = 0;
             }
 
-            $total_belanja= $request->total_belanja;
+            $total_belanja = $request->total_belanja;
             // **Mengupdate saldo awal berdasarkan jenis penerimaan**
             $saldo_baru = ($jenis_terima_sp2d == 1) ? ($saldo_awal + $total_belanja) : ($saldo_awal - $total_belanja);
             if ($jenis_terima_sp2d == 0) {
@@ -470,8 +502,17 @@ class Transaksi extends Controller
                     'realisasi' => $realisasi
                 ]);
 
+            foreach ($details as $detail) {
+                DB::table('ms_anggaran')
+                    ->where('kd_rek', $detail['kd_rek'])
+                    ->where('kd_sub_kegiatan', $detail['kd_sub_kegiatan'])
+                    ->update([
+                        'kd_dana' => $detail['kd_dana'],
+                        'nilai_anggaran' => str_replace(['Rp', '.', ' '], '', $detail['nilaisumberdana'] ?? '0') ?: '0',
+                    ]);
+            }
 
-            $detailInserts = array_map(function($detail) use ($request) {
+            $detailInserts = array_map(function ($detail) use ($request) {
                 $jenisPergeseran = $detail['jenis_pergeseran'] ?? '0';
 
                 // Jika berupa array, ambil nilai pertama
@@ -522,7 +563,7 @@ class Transaksi extends Controller
                 DB::table('trdtransout')->insert($detailInserts);
             }
 
-            $detailInserts1 = array_map(function($detail) use ($request) {
+            $detailInserts1 = array_map(function ($detail) use ($request) {
                 $jenis_terima_sp2d = $request->has('jenis_terima_sp2d') ? 1 : 0;
                 return [
                     'no_kas' => $request->no_bukti,
@@ -542,7 +583,7 @@ class Transaksi extends Controller
 
 
             if (!empty($details_tujuan)) {
-                $detailInserts3 = array_map(function($details_tujuan) use ($request) {
+                $detailInserts3 = array_map(function ($details_tujuan) use ($request) {
                     return [
                         'no_voucher' => $request->no_bukti,
                         'tgl_voucher' => $request->tgl_bukti,
@@ -552,7 +593,7 @@ class Transaksi extends Controller
                         'bank_tujuan' => $details_tujuan['bank'],
                         'ket_tpp' => $details_tujuan['ket_tpp'],
                         'kd_skpd' => auth()->user()->kd_skpd,
-                        'nilai' =>str_replace(['Rp', '.', ' '], '', $details_tujuan['nilai_transfer']),
+                        'nilai' => str_replace(['Rp', '.', ' '], '', $details_tujuan['nilai_transfer']),
                     ];
                 }, $details_tujuan);
 
@@ -566,7 +607,6 @@ class Transaksi extends Controller
             DB::commit();
             return redirect()->route('transaksi.index')
                 ->with('success', 'Transaksi berhasil disimpan');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -585,7 +625,7 @@ class Transaksi extends Controller
             ->select('*')
             ->when(!empty($search), function ($query) use ($search) {
                 $query->where('rekening', 'LIKE', "%{$search}%")
-                      ->orWhere('nm_rekening', 'LIKE', "%{$search}%");
+                    ->orWhere('nm_rekening', 'LIKE', "%{$search}%");
             })
             ->when(!empty($kd_skpd), function ($query) use ($kd_skpd) {
                 $query->where('kd_skpd', $kd_skpd); // Filter berdasarkan kode kegiatan
@@ -608,122 +648,121 @@ class Transaksi extends Controller
         });
 
         return response()->json($data);
-
     }
 
     public function print(Request $request)
-{
-    // Ambil data dari request
-    $no_bukti = $request->no_bukti; // Ini adalah array
-    $jenis_cetak = $request->jenis_cetak;
-    $jenis = $request->jenis_print;
+    {
+        // Ambil data dari request
+        $no_bukti = $request->no_bukti; // Ini adalah array
+        $jenis_cetak = $request->jenis_cetak;
+        $jenis = $request->jenis_print;
 
-    // Validasi jika tidak ada no_bukti yang dipilih
-    if (empty($no_bukti)) {
-        return back()->with('error', 'Tidak ada data yang dipilih untuk dicetak.');
-    }
-
-    // Query data berdasarkan no_bukti yang dipilih
-    $data_lpj = DB::table('trdtransout_transfercms')
-        ->select(
-            'trdtransout_transfercms.*',
-            'ms_bank.nama',
-        )
-        ->leftJoin('ms_bank', 'trdtransout_transfercms.bank_tujuan', '=', 'ms_bank.kode')
-        ->whereIn('trdtransout_transfercms.no_voucher', $no_bukti); // Gunakan whereIn untuk array
-
-    // Filter berdasarkan jenis cetak
-    if ($jenis_cetak == 'OB') {
-        // Untuk OB, tampilkan hanya data yang mengandung kata "kalbar" atau "kalimantan barat"
-        $data_lpj = $data_lpj->where(function($query) {
-            $query->whereRaw('LOWER(ms_bank.nama) LIKE ?', ['%kalbar%']);
-        });
-    } elseif ($jenis_cetak == 'SKN') {
-        // Untuk SKN, tampilkan data yang TIDAK mengandung kata "kalbar" atau "kalimantan barat"
-        $data_lpj = $data_lpj->where(function($query) {
-            $query->whereRaw('LOWER(ms_bank.nama) NOT LIKE ?', ['%kalbar%']);
-        });
-    }
-
-    // Ambil data
-    $data = $data_lpj->get();
-
-    // Validasi jika data kosong
-    if ($data->isEmpty()) {
-        return back()->with('error', 'Data tidak ditemukan.');
-    }
-
-    // Ambil keterangan dari data pertama
-    $firstData = $data->first();
-    $ket_tpp = $firstData->ket_tpp;
-
-    // Format tanggal hari ini
-    $tanggal = date('dmY'); // Format: tglbulantahun (misal: 25102023)
-
-    // Ambil atau inisialisasi no_urut dari session
-    $no_urut = $request->session()->get('print_count', 0) + 1;
-    $request->session()->put('print_count', $no_urut);
-
-    // Format no_urut menjadi 3 digit (001, 002, dst)
-    $no_urut_formatted = str_pad($no_urut, 3, '0', STR_PAD_LEFT);
-
-    // Buat nama file sesuai format
-    $filename = "{$jenis_cetak}_DINKESKB_{$tanggal}_{$no_urut_formatted}_{$ket_tpp}.xls";
-
-    // View berdasarkan jenis cetak
-    if ($jenis_cetak == 'OB') {
-        $view = view('transaksi.print.ob', [
-            'data' => $data,
-            'jenis_cetak' => $jenis_cetak
-        ]);
-    } elseif ($jenis_cetak == 'SKN') {
-        $view = view('transaksi.print.skn', [
-            'data' => $data,
-            'jenis_cetak' => $jenis_cetak
-        ]);
-    } else {
-        return back()->with('error', 'Jenis cetakan tidak valid.');
-    }
-
-    // Output berdasarkan jenis (layar, pdf, atau excel)
-    if ($jenis == 'layar') {
-        return $view;
-    } elseif ($jenis == 'pdf') {
-        $pdf = PDF::loadHtml($view->render())
-            ->setPaper('legal')
-            ->setOrientation('landscape')
-            ->setOption('margin-left', 15)
-            ->setOption('margin-right', 15);
-
-        $filename = $jenis_cetak . '_' . date('Ymd_His') . '.pdf';
-        return $pdf->stream($filename);
-    } elseif ($jenis == 'excel') {
-        $filename = str_replace('.xls', '.csv', $filename);
-
-        $csvContent = "";
-
-        foreach ($data as $item) {
-            $csvContent .= sprintf(
-                '"DINKESKB";"%s";"%s";"%s";"%s";"%s"',
-                str_replace('"', '""', $item->rekening_awal),
-                str_replace('"', '""', $item->nm_rekening_tujuan),
-                str_replace('"', '""', $item->rekening_tujuan),
-                number_format($item->nilai, 0, '', ''),
-                str_replace('"', '""', $item->ket_tpp)
-            ) . "\r\n"; // Gunakan \r\n untuk line ending
+        // Validasi jika tidak ada no_bukti yang dipilih
+        if (empty($no_bukti)) {
+            return back()->with('error', 'Tidak ada data yang dipilih untuk dicetak.');
         }
 
-        // Tambahkan BOM UTF-8 untuk Excel
-        $csvContent = "\xEF\xBB\xBF" . $csvContent;
+        // Query data berdasarkan no_bukti yang dipilih
+        $data_lpj = DB::table('trdtransout_transfercms')
+            ->select(
+                'trdtransout_transfercms.*',
+                'ms_bank.nama',
+            )
+            ->leftJoin('ms_bank', 'trdtransout_transfercms.bank_tujuan', '=', 'ms_bank.kode')
+            ->whereIn('trdtransout_transfercms.no_voucher', $no_bukti); // Gunakan whereIn untuk array
 
-        return response($csvContent)
-            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-            ->header('Content-Type', 'text/csv; charset=utf-8')
-            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        // Filter berdasarkan jenis cetak
+        if ($jenis_cetak == 'OB') {
+            // Untuk OB, tampilkan hanya data yang mengandung kata "kalbar" atau "kalimantan barat"
+            $data_lpj = $data_lpj->where(function ($query) {
+                $query->whereRaw('LOWER(ms_bank.nama) LIKE ?', ['%kalbar%']);
+            });
+        } elseif ($jenis_cetak == 'SKN') {
+            // Untuk SKN, tampilkan data yang TIDAK mengandung kata "kalbar" atau "kalimantan barat"
+            $data_lpj = $data_lpj->where(function ($query) {
+                $query->whereRaw('LOWER(ms_bank.nama) NOT LIKE ?', ['%kalbar%']);
+            });
+        }
+
+        // Ambil data
+        $data = $data_lpj->get();
+
+        // Validasi jika data kosong
+        if ($data->isEmpty()) {
+            return back()->with('error', 'Data tidak ditemukan.');
+        }
+
+        // Ambil keterangan dari data pertama
+        $firstData = $data->first();
+        $ket_tpp = $firstData->ket_tpp;
+
+        // Format tanggal hari ini
+        $tanggal = date('dmY'); // Format: tglbulantahun (misal: 25102023)
+
+        // Ambil atau inisialisasi no_urut dari session
+        $no_urut = $request->session()->get('print_count', 0) + 1;
+        $request->session()->put('print_count', $no_urut);
+
+        // Format no_urut menjadi 3 digit (001, 002, dst)
+        $no_urut_formatted = str_pad($no_urut, 3, '0', STR_PAD_LEFT);
+
+        // Buat nama file sesuai format
+        $filename = "{$jenis_cetak}_DINKESKB_{$tanggal}_{$no_urut_formatted}_{$ket_tpp}.xls";
+
+        // View berdasarkan jenis cetak
+        if ($jenis_cetak == 'OB') {
+            $view = view('transaksi.print.ob', [
+                'data' => $data,
+                'jenis_cetak' => $jenis_cetak
+            ]);
+        } elseif ($jenis_cetak == 'SKN') {
+            $view = view('transaksi.print.skn', [
+                'data' => $data,
+                'jenis_cetak' => $jenis_cetak
+            ]);
+        } else {
+            return back()->with('error', 'Jenis cetakan tidak valid.');
+        }
+
+        // Output berdasarkan jenis (layar, pdf, atau excel)
+        if ($jenis == 'layar') {
+            return $view;
+        } elseif ($jenis == 'pdf') {
+            $pdf = PDF::loadHtml($view->render())
+                ->setPaper('legal')
+                ->setOrientation('landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+
+            $filename = $jenis_cetak . '_' . date('Ymd_His') . '.pdf';
+            return $pdf->stream($filename);
+        } elseif ($jenis == 'excel') {
+            $filename = str_replace('.xls', '.csv', $filename);
+
+            $csvContent = "";
+
+            foreach ($data as $item) {
+                $csvContent .= sprintf(
+                    '"DINKESKB";"%s";"%s";"%s";"%s";"%s"',
+                    str_replace('"', '""', $item->rekening_awal),
+                    str_replace('"', '""', $item->nm_rekening_tujuan),
+                    str_replace('"', '""', $item->rekening_tujuan),
+                    number_format($item->nilai, 0, '', ''),
+                    str_replace('"', '""', $item->ket_tpp)
+                ) . "\r\n"; // Gunakan \r\n untuk line ending
+            }
+
+            // Tambahkan BOM UTF-8 untuk Excel
+            $csvContent = "\xEF\xBB\xBF" . $csvContent;
+
+            return response($csvContent)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Content-Type', 'text/csv; charset=utf-8')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        }
+
+        return back()->with('message', 'Dokumen berhasil dicetak.');
     }
-
-    return back()->with('message', 'Dokumen berhasil dicetak.');
-}
 
 
     public function edit($no_bukti)
@@ -736,24 +775,24 @@ class Transaksi extends Controller
         $transaksi = DB::table('trhtransout')->where('no_bukti', $decryptedId)->first();
 
         $potonganDetails = DB::table('trdtransout')
-        ->leftJoin('ms_sumberdana', function ($join) {
-            $join->on(
-                DB::raw('CAST(trdtransout.sumber AS INT)'),
-                '=',
-                'ms_sumberdana.id'
-            );
-        })
-        ->where('trdtransout.no_bukti', $decryptedId)
-        ->select(
-            'trdtransout.nm_sub_kegiatan',
-            'trdtransout.kd_rek6',
-            'trdtransout.nm_rek6',
-            'trdtransout.sumber',
-            'trdtransout.nilai',
-            'ms_sumberdana.nm_dana'
-        )
-        ->distinct() // Tambahkan ini
-        ->get();
+            ->leftJoin('ms_sumberdana', function ($join) {
+                $join->on(
+                    DB::raw('CAST(trdtransout.sumber AS INT)'),
+                    '=',
+                    'ms_sumberdana.id'
+                );
+            })
+            ->where('trdtransout.no_bukti', $decryptedId)
+            ->select(
+                'trdtransout.nm_sub_kegiatan',
+                'trdtransout.kd_rek6',
+                'trdtransout.nm_rek6',
+                'trdtransout.sumber',
+                'trdtransout.nilai',
+                'ms_sumberdana.nm_dana'
+            )
+            ->distinct() // Tambahkan ini
+            ->get();
 
 
         // Cek apakah data ditemukan
@@ -763,7 +802,7 @@ class Transaksi extends Controller
         $rek_pengeluaran = Auth::user()->rek_pengeluaran;
 
         // Tampilkan view untuk mengedit data
-        return view('transaksi.edit', compact('transaksi','potonganDetails','rek_pengeluaran'));
+        return view('transaksi.edit', compact('transaksi', 'potonganDetails', 'rek_pengeluaran'));
     }
 
     public function getrealisasi(Request $request)
@@ -850,5 +889,4 @@ class Transaksi extends Controller
             ], 500);
         }
     }
-
 }

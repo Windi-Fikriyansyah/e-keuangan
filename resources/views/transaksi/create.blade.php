@@ -1671,40 +1671,87 @@
 
                 // Ketika kd_rek dipilih, ambil daftar kd_dana berdasarkan id_sumberdana
                 $('#kd_rek').on('change', function() {
-                    var idSumberDana = $('#kd_rek option:selected').data('id_sumberdana');
+                    $.ajax({
+                        url: "{{ route('transaksi.get-sumberdana') }}",
+                        type: 'GET',
+                        success: function(response) {
+                            $('#kd_dana').empty().append(
+                                '<option value="">Pilih Sumber Dana</option>');
+                            $.each(response, function(index, item) {
+                                $('#kd_dana').append(`
+                    <option value="${item.kd_dana}"
+                            data-nm_dana="${item.nm_dana}"
+                            data-anggaran_tahun="${item.anggaran_tahun}">
+                        ${item.kd_dana} || ${item.nm_dana}
+                    </option>
+                `);
+                            });
+                            $('#kd_dana').trigger('change');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error fetching kd_dana: ", error);
+                        }
+                    });
 
-                    if (idSumberDana) {
-                        $.ajax({
-                            url: "{{ route('transaksi.get-sumberdana') }}",
-                            type: 'GET',
-                            data: {
-                                id_sumberdana: idSumberDana
-                            }, // Kirim id_sumberdana ke controller
-                            success: function(response) {
-                                $('#kd_dana').empty().append(
-                                    '<option value="">Pilih Sumber Dana</option>');
-                                $.each(response, function(index, item) {
-                                    $('#kd_dana').append(`
-                            <option value="${item.id}"
-                             data-id_sumberdana="${item.id}"
-                             data-nm_dana="${item.nm_dana}"
-                             data-anggaran_tahun="${item.anggaran_tahun}">
-                         ${item.kd_dana} || ${item.nm_dana}
-                     </option>
-                 `);
+                    // Still get rekening details as before
+                    var selectedOption = $(this).find('option:selected');
+                    var nmRek = selectedOption.data('nm_rek') || '';
+                    $('#nm_rek').val(nmRek);
 
+                    // Store id_sumberdana value if needed elsewhere
+                    var idSumberDana = selectedOption.data('id_sumberdana') || '';
+                    $('#id_sumberdana').val(idSumberDana);
+                });
 
-                                });
-                                $('#kd_dana').trigger('change');
-                            },
-                            error: function(xhr, status, error) {
-                                console.error("Error fetching kd_dana: ", error);
-                            }
-                        });
-                    } else {
-                        $('#kd_dana').empty().append('<option value="">Pilih Sumber Dana</option>')
-                            .trigger('change');
+                $('#kd_dana').on('change', function() {
+                    var selectedOption = $(this).find('option:selected');
+                    var nmDana = selectedOption.data('nm_dana') || '';
+                    $('#nm_dana').val(nmDana);
+
+                    // Get selected values for checking ms_anggaran
+                    var jenisPergeseran = [];
+                    $('input[name="jenis_pergeseran[]"]:checked').each(function() {
+                        jenisPergeseran.push($(this).val());
+                    });
+                    var kd_sub_kegiatan = $('#kd_sub_kegiatan').val();
+                    var kd_rek = $('#kd_rek').val();
+                    var kd_dana = $(this).val();
+
+                    // If any of the required fields is empty, skip the check
+                    if (!kd_sub_kegiatan || !kd_rek || !kd_dana || jenisPergeseran.length === 0) {
+                        $('#nilaisumberdana').prop('disabled', false).val('');
+                        return;
                     }
+
+                    // Check ms_anggaran for matching record
+                    $.ajax({
+                        url: "{{ route('transaksi.check-anggaran') }}",
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            jenis_pergeseran: jenisPergeseran,
+                            kd_sub_kegiatan: kd_sub_kegiatan,
+                            kd_rek: kd_rek,
+                            kd_dana: kd_dana
+                        },
+                        success: function(response) {
+                            if (response.exists) {
+                                // If record exists, use anggaran_tahun from ms_anggaran
+                                $('#nilaisumberdana').prop('disabled', true)
+                                    .val(formatRupiah1(response.nilai_anggaran));
+                            } else {
+                                // If no record exists, allow manual input
+                                $('#nilaisumberdana').prop('disabled', false).val('');
+                            }
+                            hitungSisa("nilaisumberdana", "realisasinilaisumberdana",
+                                "sisanilaisumberdana");
+                        },
+                        error: function(xhr) {
+                            console.error("Error checking anggaran:", xhr.responseText);
+                            // On error, allow manual input as fallback
+                            $('#nilaisumberdana').prop('disabled', false).val('');
+                        }
+                    });
                 });
 
             });
@@ -1716,14 +1763,7 @@
                 $('#nm_sub_kegiatan').val(nmSubKegiatan);
             });
 
-            $(document).on('change', '#kd_dana', function() {
-                var selectedOption = $(this).find('option:selected');
-                var anggaranTahun = selectedOption.data('anggaran_tahun') || '';
-                var nmSumberdana = selectedOption.data('nm_dana') || '';
-                $('#nm_dana').val(nmSumberdana);
-                $('#nilaisumberdana').val(formatRupiah1(anggaranTahun));
-                hitungSisa("nilaisumberdana", "realisasinilaisumberdana", "sisanilaisumberdana");
-            });
+
 
             $(document).on('change', '[name="tgl_bukti"]', function() {
                 var tglInput = $(this).val();
