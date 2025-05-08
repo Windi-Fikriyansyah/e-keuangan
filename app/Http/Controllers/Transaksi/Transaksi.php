@@ -249,6 +249,7 @@ class Transaksi extends Controller
         try {
             $query = DB::table('ms_sumberdana')
                 ->select(
+                    'id',
                     'kd_dana',
                     DB::raw('MAX(nm_dana) as nm_dana'),
                     DB::raw('MAX(anggaran_tahun) as anggaran_tahun')
@@ -263,7 +264,7 @@ class Transaksi extends Controller
                 });
             }
 
-            $sumberDana = $query->groupBy('kd_dana')
+            $sumberDana = $query->groupBy('kd_dana', 'id')
                 ->orderBy('kd_dana')
                 ->get();
 

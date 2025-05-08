@@ -1679,10 +1679,10 @@
                                 '<option value="">Pilih Sumber Dana</option>');
                             $.each(response, function(index, item) {
                                 $('#kd_dana').append(`
-                    <option value="${item.kd_dana}"
+                    <option value="${item.id}"
                             data-nm_dana="${item.nm_dana}"
                             data-anggaran_tahun="${item.anggaran_tahun}">
-                        ${item.kd_dana} || ${item.nm_dana}
+                        ${item.id} || ${item.nm_dana}
                     </option>
                 `);
                             });
@@ -1699,7 +1699,7 @@
                     $('#nm_rek').val(nmRek);
 
                     // Store id_sumberdana value if needed elsewhere
-                    var idSumberDana = selectedOption.data('id_sumberdana') || '';
+                    var idSumberDana = selectedOption.data('id') || '';
                     $('#id_sumberdana').val(idSumberDana);
                 });
 
