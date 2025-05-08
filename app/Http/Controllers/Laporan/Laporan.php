@@ -907,7 +907,6 @@ class Laporan extends Controller
             ->where('trhtransout.jenis_terima_sp2d', "0")
             ->where('trdtransout.kd_sub_kegiatan', $sub_kegiatan)
             ->where('trdtransout.kd_rek6', $akun_belanja)
-            ->where('trdtransout.jenis_anggaran', $jenis_anggaran)
             ->whereBetween('trhtransout.tgl_bukti', [$tanggalawal, $tanggalakhir])
             ->select('trdtransout.*', 'trhtransout.tgl_bukti', 'trhtransout.ket')
             ->get();
