@@ -138,7 +138,7 @@
             <strong>Nama Rekening :</strong> {{ isset($jumlah_anggaran->kd_rek) ? $jumlah_anggaran->kd_rek : '' }} -
             {{ isset($jumlah_anggaran->nm_rek) ? $jumlah_anggaran->nm_rek : '' }}<br><br>
             <strong>Jumlah Anggaran :</strong> Rp
-            {{ isset($jumlah_anggaran->anggaran_tahun) ? number_format($jumlah_anggaran->anggaran_tahun, 2, ',', '.') : '0,00' }}
+            {{ isset($jumlah_anggaran->total_anggaran) ? number_format($jumlah_anggaran->total_anggaran, 2, ',', '.') : '0,00' }}
         </div>
     </div>
 
