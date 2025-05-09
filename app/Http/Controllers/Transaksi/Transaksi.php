@@ -60,6 +60,7 @@ class Transaksi extends Controller
 
     public function checkAnggaran(Request $request)
     {
+
         $exists = DB::table('ms_anggaran')->whereIn('jenis_anggaran', $request->jenis_pergeseran)
             ->where('kd_sub_kegiatan', $request->kd_sub_kegiatan)
             ->where('kd_rek', $request->kd_rek)
@@ -234,7 +235,7 @@ class Transaksi extends Controller
 
             return response()->json($subKegiatan);
         } catch (\Exception $e) {
-
+            \Log::error('Error in getSubKegiatan: ' . $e->getMessage());
             return response()->json([
                 'error' => 'Gagal mengambil data sub kegiatan',
                 'message' => 'Terjadi kesalahan dalam mengambil data'
@@ -242,82 +243,124 @@ class Transaksi extends Controller
         }
     }
 
-    // Di dalam method getsumberdana
-    public function getsumberdana(Request $request)
-    {
-
-        try {
-            $query = DB::table('ms_sumberdana')
-                ->select(
-                    'id',
-                    'kd_dana',
-                    DB::raw('MAX(nm_dana) as nm_dana'),
-                    DB::raw('MAX(anggaran_tahun) as anggaran_tahun')
-                );
-
-
-
-            if ($request->has('search')) {
-                $query->where(function ($q) use ($request) {
-                    $q->where('kd_dana', 'like', '%' . $request->search . '%')
-                        ->orWhere('nm_dana', 'like', '%' . $request->search . '%');
-                });
-            }
-
-            $sumberDana = $query->groupBy('kd_dana', 'id')
-                ->orderBy('kd_dana')
-                ->get();
-
-            return response()->json($sumberDana);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Gagal mengambil data Sumber dana',
-                'message' => 'Terjadi kesalahan dalam mengambil data'
-            ], 500);
-        }
-    }
-
-    // Method checkAnggaran tetap sama
-
-
     public function gettotalnilai(Request $request)
     {
-        // $kd_rek = $request->kd_rek;
+        try {
+            $kd_rek = $request->input('kd_rek');
+            $kd_sub_kegiatan = $request->input('kd_sub_kegiatan');
+            $kd_dana = $request->input('kd_dana');
+            $jenis_pergeseran = $request->input('jenis_pergeseran');
 
-        $kd_rek = $request->input('kd_rek');
-        // Ambil total nilai dari tabel `trdtransout` berdasarkan kd_rek
-        $totalNilai = DB::table('trdtransout')
-            ->where('kd_rek6', $kd_rek)
-            ->where('jenis_terima_sp2d', "0")
-            ->sum('nilai');
+            $query = DB::table('trdtransout')
+                ->where('jenis_terima_sp2d', "0");
 
-        return response()->json([
-            'total_nilai' => $totalNilai
-        ]);
+            // Filter berdasarkan kd_rek jika disediakan
+            if ($kd_rek) {
+                $query->where('kd_rek6', $kd_rek);
+            }
+
+            // Filter berdasarkan kd_sub_kegiatan jika disediakan
+            if ($kd_sub_kegiatan) {
+                $query->where('kd_sub_kegiatan', $kd_sub_kegiatan);
+            }
+
+            // Filter berdasarkan kd_dana jika disediakan
+            if ($kd_dana) {
+                $query->where('kd_dana', $kd_dana);
+            }
+
+            // Filter berdasarkan jenis_pergeseran jika disediakan
+            if ($jenis_pergeseran && is_array($jenis_pergeseran)) {
+                $query->whereIn('jenis_anggaran', $jenis_pergeseran);
+            } elseif ($jenis_pergeseran) {
+                $query->where('jenis_anggaran', $jenis_pergeseran);
+            }
+
+            $totalNilai = $query->sum('nilai');
+
+            return response()->json([
+                'total_nilai' => $totalNilai
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in gettotalnilai: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Gagal mengambil data total nilai',
+                'message' => 'Terjadi kesalahan dalam mengambil data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getrekening(Request $request)
     {
         try {
-            // Get the selected kd_sub_kegiatan from the request
             $kd_sub_kegiatan = $request->input('kd_sub_kegiatan');
             $jenis_pergeseran = $request->input('jenis_pergeseran');
-            // Initialize query from ms_anggaran table
+
             $query = DB::table('ms_anggaran');
 
-            // Filter by kd_sub_kegiatan if it's provided
+            // Filter berdasarkan kd_sub_kegiatan jika disediakan
             if ($kd_sub_kegiatan) {
                 $query->where('kd_sub_kegiatan', $kd_sub_kegiatan);
             }
 
-            if ($jenis_pergeseran) {
+            // Filter berdasarkan jenis_pergeseran jika disediakan
+            if ($jenis_pergeseran && is_array($jenis_pergeseran)) {
+                $query->whereIn('jenis_anggaran', $jenis_pergeseran);
+            } elseif ($jenis_pergeseran) {
                 $query->where('jenis_anggaran', $jenis_pergeseran);
             }
 
-            // Select all the required fields
             $query->select(
                 'kd_rek',
-                'nm_rek',
+                'nm_rek'
+            )
+                ->groupBy('kd_rek', 'nm_rek');
+
+            if ($request->has('search') && !empty($request->search)) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('kd_rek', 'like', '%' . $search . '%')
+                        ->orWhere('nm_rek', 'like', '%' . $search . '%');
+                });
+            }
+
+            $rekening = $query->orderBy('kd_rek')->get();
+
+            return response()->json($rekening);
+        } catch (\Exception $e) {
+            \Log::error('Error in getrekening: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Gagal mengambil data rekening',
+                'message' => 'Terjadi kesalahan dalam mengambil data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getsumberdana(Request $request)
+    {
+        try {
+            $kd_sub_kegiatan = $request->input('kd_sub_kegiatan');
+            $kd_rek = $request->input('kd_rek');
+            $jenis_pergeseran = $request->input('jenis_pergeseran', 0); // default ke 0 jika null
+
+            $query = DB::table('ms_anggaran');
+
+            // Filter berdasarkan kd_sub_kegiatan jika disediakan
+            if ($kd_sub_kegiatan) {
+                $query->where('kd_sub_kegiatan', $kd_sub_kegiatan);
+            }
+
+            // Filter berdasarkan kd_rek jika disediakan
+            if ($kd_rek) {
+                $query->where('kd_rek', $kd_rek);
+            }
+
+            // Terapkan filter jenis_anggaran = $jenis_pergeseran (default 0)
+            $query->where('jenis_anggaran', $jenis_pergeseran);
+
+            $query->select(
+                'kd_dana',
+                'nm_dana',
                 'anggaran_tahun',
                 'anggaran_tw1',
                 'anggaran_tw2',
@@ -338,33 +381,52 @@ class Transaksi extends Controller
                 'status_anggaran',
                 'status_anggaran_kas',
                 'id_sumberdana'
-            );
+            )
+                ->groupBy(
+                    'kd_dana',
+                    'nm_dana',
+                    'anggaran_tahun',
+                    'anggaran_tw1',
+                    'anggaran_tw2',
+                    'anggaran_tw3',
+                    'anggaran_tw4',
+                    'rek1',
+                    'rek2',
+                    'rek3',
+                    'rek4',
+                    'rek5',
+                    'rek6',
+                    'rek7',
+                    'rek8',
+                    'rek9',
+                    'rek10',
+                    'rek11',
+                    'rek12',
+                    'status_anggaran',
+                    'status_anggaran_kas',
+                    'id_sumberdana'
+                );
 
-            // Handle search functionality if search parameter is provided
             if ($request->has('search') && !empty($request->search)) {
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
-                    $q->where('kd_rek', 'like', '%' . $search . '%')
-                        ->orWhere('nm_rek', 'like', '%' . $search . '%');
+                    $q->where('kd_dana', 'like', '%' . $search . '%')
+                        ->orWhere('nm_dana', 'like', '%' . $search . '%');
                 });
             }
 
-            // Order the results by kd_rek
-            $rekening = $query->orderBy('kd_rek')->get();
+            $sumberdana = $query->orderBy('kd_dana')->get();
 
-            // Return the results as JSON
-            return response()->json($rekening);
+            return response()->json($sumberdana);
         } catch (\Exception $e) {
-            // Log the error for debugging
-            \Log::error('Error in getrekening: ' . $e->getMessage());
-
-            // Return a proper error response
+            \Log::error('Error in getsumberdana: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Gagal mengambil data rekening',
+                'error' => 'Gagal mengambil data sumber dana',
                 'message' => 'Terjadi kesalahan dalam mengambil data: ' . $e->getMessage()
             ], 500);
         }
     }
+
 
 
 
@@ -534,6 +596,8 @@ class Transaksi extends Controller
                     'perlimpahan' => $perlimpahan,
                     'kd_sub_kegiatan' => $detail['kd_sub_kegiatan'],
                     'nm_sub_kegiatan' => $detail['nm_sub_kegiatan'],
+                    'kd_dana' => $detail['kd_dana'],
+                    'nm_dana' => $detail['nm_dana'],
                     'kd_rek6' => $detail['kd_rek'],
                     'nm_rek6' => $detail['nm_rek'],
                     'nilai' => str_replace(['Rp', '.', ' '], '', $detail['nilai']),
@@ -811,16 +875,20 @@ class Transaksi extends Controller
 
         $kd_rek = $request->kd_rek;
         $kd_sub_kegiatan = $request->kd_sub_kegiatan;
+        $kd_dana = $request->kd_dana;
+
 
         $realisasi = DB::table('trdtransout')
             ->where('kd_skpd', auth()->user()->kd_skpd)
             ->where('kd_rek6', $kd_rek)
             ->where('kd_sub_kegiatan', $kd_sub_kegiatan)
+            ->where('kd_dana', $kd_dana)
             ->where('jenis_terima_sp2d', "0")
             ->select(
                 DB::raw('SUM(nilai) as realisasi')
             )
             ->first();
+
 
         // Pastikan nilai realisasi tidak null
         $response = [

@@ -1452,6 +1452,14 @@
                     allowClear: true
                 });
 
+                $('#kd_dana').select2({
+                    dropdownParent: $('#inputKegiatanModal .modal-content'),
+                    placeholder: 'Pilih Sumber Dana',
+                    width: 'resolve',
+                    theme: 'bootstrap-5',
+                    allowClear: true
+                });
+
                 // Ambil data Sub Kegiatan via AJAX
                 $.ajax({
                     url: "{{ route('transaksi.get-sub-kegiatan') }}",
@@ -1476,136 +1484,27 @@
                     }
                 });
 
-                // Inisialisasi Select2 untuk Nomor SP2D
-                // $('#no_sp2d').select2({
-                //     dropdownParent: $('#inputKegiatanModal .modal-content'),
-                //     placeholder: 'Pilih Nomor SP2D',
-                //     width: 'resolve',
-                //     theme: 'bootstrap-5',
-                // });
-
-                // // Ambil data Nomor SP2D via AJAX
-                // $.ajax({
-                //     url: "{{ route('transaksi.get-no_sp2d') }}",
-                //     type: 'GET',
-                //     success: function(response) {
-                //         $('#no_sp2d').empty().append('<option value="">Pilih Nomor SP2D</option>');
-                //         $.each(response, function(index, item) {
-                //             $('#no_sp2d').append(
-                //                 '<option value="' + item.no_sp2d + '">' +
-                //                 item.no_sp2d + ' || ' + item.tgl_sp2d +
-                //                 '</option>'
-                //             );
-                //         });
-                //         $('#no_sp2d').trigger('change');
-                //     },
-                //     error: function(xhr, status, error) {
-                //         console.error("Error fetching no_sp2d: ", error);
-                //     }
-                // });
-
-                // $('#kd_dana').select2({
-                //     dropdownParent: $('#inputKegiatanModal .modal-content'),
-                //     placeholder: 'Pilih Sub Kegiatan',
-                //     width: 'resolve',
-                //     theme: 'bootstrap-5',
-                // });
-
-                // // Ambil data Sub Kegiatan via AJAX
-                // $.ajax({
-                //     url: "{{ route('transaksi.get-sumberdana') }}",
-                //     type: 'GET',
-                //     success: function(response) {
-                //         $('#kd_dana').empty().append('<option value="">Pilih Sub Kegiatan</option>');
-                //         $.each(response, function(index, item) {
-                //             $('#kd_dana').append(`
-            //             <option value="${item.kd_dana}"
-            //                     data-id_sumberdana="${item.id}"
-            //                     data-nm_dana="${item.nm_dana}"
-            //                     data-anggaran_tahun="${item.anggaran_tahun}">
-            //                 ${item.kd_dana} || ${item.nm_dana}
-            //             </option>
-            //         `);
-                //         });
-                //         $('#kd_dana').trigger('change');
-                //     },
-                //     error: function(xhr, status, error) {
-                //         console.error("Error fetching kd_dana: ", error);
-                //     }
-                // });
-
-                $('#kd_rek').change(function() {
-                    var kd_rek = $(this).val();
-                    var kd_sub_kegiatan = $('#kd_sub_kegiatan')
-                        .val(); // Ambil kode rekening yang dipilih
-                    var csrfToken = $('meta[name="csrf-token"]').attr(
-                        'content'); // Ambil CSRF token
-
-                    if (kd_rek) {
-                        $.ajax({
-                            url: "{{ route('transaksi.getrealisasi') }}", // Pastikan route ini sesuai
-                            type: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': csrfToken // Tambahkan CSRF token
-                            },
-                            data: {
-                                kd_rek: kd_rek,
-                                kd_sub_kegiatan: kd_sub_kegiatan
-                            },
-                            dataType: 'json',
-                            success: function(response) {
-                                if (response.success) {
-                                    $('#realisasiSPD').val(formatRupiah2(response
-                                        .realisasiSPD ?? 0));
-                                    $('#realisasiAnggaranKas').val(formatRupiah2(
-                                        response.realisasiAnggaranKas ?? 0));
-                                    $('#realisasiAnggaran').val(formatRupiah2(response
-                                        .realisasiAnggaran ?? 0));
-                                    $('#realisasinilaisumberdana').val(formatRupiah2(
-                                        response.realisasiSumberDana ?? 0));
-
-                                    hitungSisa('totalSPD', 'realisasiSPD', 'sisaSPD');
-                                    hitungSisa('totalAnggaranKas',
-                                        'realisasiAnggaranKas', 'sisaAnggaranKas');
-                                    hitungSisa('anggaran', 'realisasiAnggaran',
-                                        'sisaAnggaran');
-                                    hitungSisa('nilaisumberdana',
-                                        'realisasinilaisumberdana',
-                                        'sisanilaisumberdana');
-                                } else {
-                                    alert("Data realisasi tidak ditemukan!");
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error("AJAX Error: ", status, error);
-                            }
-                        });
-                    }
-                });
-
-                function formatRupiah2(angka) {
-                    let number = parseInt(angka); // Konversi ke integer untuk menghilangkan desimal
-                    let number_string = number.toString().replace(/\B(?=(\d{3})+(?!\d))/g,
-                        '.'); // Pisahkan ribuan dengan titik
-                    return 'Rp. ' + number_string; // Tambahkan prefix Rp.
-                }
-
+                // Event handler untuk jenis pergeseran checkboxes
                 $('input[name="jenis_pergeseran[]"]').on('change', function() {
-                    // If there's already a selected sub-kegiatan, trigger its change event to refresh data
+                    // Jika sub kegiatan sudah dipilih, refresh data
                     var selectedSubKegiatan = $('#kd_sub_kegiatan').val();
                     if (selectedSubKegiatan) {
                         $('#kd_sub_kegiatan').trigger('change');
                     }
                 });
+
+                // Event handler untuk perubahan sub kegiatan
                 $('#kd_sub_kegiatan').on('change', function() {
                     var kd_sub_kegiatan = $(this).val();
                     var nm_sub_kegiatan = $(this).find('option:selected').data('nm_sub_kegiatan') ||
                         '';
 
+                    // Kumpulkan jenis pergeseran yang dipilih
                     var checkedPergeseran = [];
                     $('input[name="jenis_pergeseran[]"]:checked').each(function() {
                         checkedPergeseran.push($(this).val());
                     });
+
                     // Set nama sub kegiatan ke input yang disabled
                     $('#nm_sub_kegiatan').val(nm_sub_kegiatan);
 
@@ -1616,7 +1515,7 @@
                         return;
                     }
 
-                    // Ambil data rekening berdasarkan kd_sub_kegiatan yang dipilih
+                    // Ambil data rekening berdasarkan kd_sub_kegiatan dan jenis_pergeseran yang dipilih
                     $.ajax({
                         url: "{{ route('transaksi.get-rekening') }}",
                         type: 'GET',
@@ -1632,18 +1531,7 @@
                             // Populate rekening options
                             $.each(response, function(index, item) {
                                 $('#kd_rek').append(
-                                    `<option value="${item.kd_rek}"
-                            data-nm_rek="${item.nm_rek}"
-                            data-id_sumberdana="${item.id_sumberdana}"
-                            data-anggaran-tw1="${item.anggaran_tw1}"
-                            data-anggaran-tw2="${item.anggaran_tw2}"
-                            data-anggaran-tw3="${item.anggaran_tw3}"
-                            data-anggaran-tw4="${item.anggaran_tw4}"
-                            data-anggaran="${item.anggaran_tahun}"
-                            data-status_anggaran="${item.status_anggaran}"
-                            data-status_anggaran_kas="${item.status_anggaran_kas}"
-                            ${[...Array(12)].map((_, i) => `data-rek${i+1}="${item[`rek${i+1}`] || 0}"`).join(' ')}
-                        >
+                                    `<option value="${item.kd_rek}" data-nm_rek="${item.nm_rek}">
                             ${item.kd_rek} || ${item.nm_rek}
                         </option>`
                                 );
@@ -1661,109 +1549,282 @@
                     });
                 });
 
-
-                $('#kd_dana').select2({
-                    dropdownParent: $('#inputKegiatanModal .modal-content'),
-                    placeholder: 'Pilih Sumber Dana',
-                    width: 'resolve',
-                    theme: 'bootstrap-5',
-                });
-
-                // Ketika kd_rek dipilih, ambil daftar kd_dana berdasarkan id_sumberdana
+                // Event handler untuk perubahan rekening
                 $('#kd_rek').on('change', function() {
-                    $.ajax({
-                        url: "{{ route('transaksi.get-sumberdana') }}",
-                        type: 'GET',
-                        success: function(response) {
-                            $('#kd_dana').empty().append(
-                                '<option value="">Pilih Sumber Dana</option>');
-                            $.each(response, function(index, item) {
-                                $('#kd_dana').append(`
-                    <option value="${item.id}"
-                            data-nm_dana="${item.nm_dana}"
-                            data-anggaran_tahun="${item.anggaran_tahun}">
-                        ${item.id} || ${item.nm_dana}
-                    </option>
-                `);
-                            });
-                            $('#kd_dana').trigger('change');
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error fetching kd_dana: ", error);
-                        }
-                    });
-
-                    // Still get rekening details as before
-                    var selectedOption = $(this).find('option:selected');
-                    var nmRek = selectedOption.data('nm_rek') || '';
-                    $('#nm_rek').val(nmRek);
-
-                    // Store id_sumberdana value if needed elsewhere
-                    var idSumberDana = selectedOption.data('id') || '';
-                    $('#id_sumberdana').val(idSumberDana);
-                });
-
-                $('#kd_dana').on('change', function() {
-                    var selectedOption = $(this).find('option:selected');
-                    var nmDana = selectedOption.data('nm_dana') || '';
-                    $('#nm_dana').val(nmDana);
-
-                    // Get selected values for checking ms_anggaran
-                    var jenisPergeseran = [];
-                    $('input[name="jenis_pergeseran[]"]:checked').each(function() {
-                        jenisPergeseran.push($(this).val());
-                    });
+                    var kd_rek = $(this).val();
                     var kd_sub_kegiatan = $('#kd_sub_kegiatan').val();
-                    var kd_rek = $('#kd_rek').val();
-                    var kd_dana = $(this).val();
+                    var nm_rek = $(this).find('option:selected').data('nm_rek') || '';
 
-                    // If any of the required fields is empty, skip the check
-                    if (!kd_sub_kegiatan || !kd_rek || !kd_dana || jenisPergeseran.length === 0) {
-                        $('#nilaisumberdana').prop('disabled', false).val('');
+                    // Set nama rekening
+                    $('#nm_rek').val(nm_rek);
+
+                    // Kumpulkan jenis pergeseran yang dipilih
+                    var checkedPergeseran = [];
+                    $('input[name="jenis_pergeseran[]"]:checked').each(function() {
+                        checkedPergeseran.push($(this).val());
+                    });
+
+                    // Reset sumber dana dropdown jika tidak ada rekening yang dipilih
+                    if (!kd_rek) {
+                        $('#kd_dana').empty().append('<option value="">Pilih Sumber Dana</option>')
+                            .trigger('change');
+                        // Reset nilai dalam form
+                        $('#totalSPD').val('');
+                        $('#totalAnggaranKas').val('');
+                        $('#anggaran').val('');
+                        $('#realisasiSPD').val('');
+                        $('#realisasiAnggaranKas').val('');
+                        $('#realisasiAnggaran').val('');
+                        $('#realisasinilaisumberdana').val('');
+                        $('#sisaSPD').val('');
+                        $('#sisaAnggaranKas').val('');
+                        $('#sisaAnggaran').val('');
+                        $('#sisanilaisumberdana').val('');
                         return;
                     }
 
-                    // Check ms_anggaran for matching record
+                    // Ambil data sumber dana berdasarkan kd_sub_kegiatan, kd_rek, dan jenis_pergeseran
                     $.ajax({
-                        url: "{{ route('transaksi.check-anggaran') }}",
-                        type: 'POST',
+                        url: "{{ route('transaksi.get-sumberdana') }}",
+                        type: 'GET',
                         data: {
-                            _token: "{{ csrf_token() }}",
-                            jenis_pergeseran: jenisPergeseran,
                             kd_sub_kegiatan: kd_sub_kegiatan,
                             kd_rek: kd_rek,
-                            kd_dana: kd_dana
+                            jenis_pergeseran: checkedPergeseran
                         },
                         success: function(response) {
-                            if (response.exists) {
-                                // If record exists, use anggaran_tahun from ms_anggaran
-                                $('#nilaisumberdana').prop('disabled', true)
-                                    .val(formatRupiah1(response.nilai_anggaran));
+                            // Reset sumber dana dropdown
+                            $('#kd_dana').empty().append(
+                                '<option value="">Pilih Sumber Dana</option>');
+
+                            // Populate sumber dana options
+                            $.each(response, function(index, item) {
+                                $('#kd_dana').append(
+                                    `<option value="${item.kd_dana}"
+                            data-nm_dana="${item.nm_dana}"
+                            data-id_sumberdana="${item.id_sumberdana}"
+                            data-anggaran-tw1="${item.anggaran_tw1}"
+                            data-anggaran-tw2="${item.anggaran_tw2}"
+                            data-anggaran-tw3="${item.anggaran_tw3}"
+                            data-anggaran-tw4="${item.anggaran_tw4}"
+                            data-anggaran="${item.anggaran_tahun}"
+                            data-status_anggaran="${item.status_anggaran}"
+                            data-status_anggaran_kas="${item.status_anggaran_kas}"
+                            ${[...Array(12)].map((_, i) => `data-rek${i+1}="${item[`rek${i+1}`] || 0}"`).join(' ')}
+                        >
+                            ${item.kd_dana} || ${item.nm_dana}
+                        </option>`
+                                );
+                            });
+
+                            // Refresh Select2 to show the new options
+                            $('#kd_dana').trigger('change');
+                            if (response.length > 0) {
+                                var firstKdDana = response[0].kd_dana;
+                                getRealisasiData(kd_rek, kd_sub_kegiatan,
+                                    checkedPergeseran, firstKdDana);
                             } else {
-                                // If no record exists, allow manual input
-                                $('#nilaisumberdana').prop('disabled', false).val('');
+                                getRealisasiData(kd_rek, kd_sub_kegiatan,
+                                    checkedPergeseran, '');
                             }
-                            hitungSisa("nilaisumberdana", "realisasinilaisumberdana",
-                                "sisanilaisumberdana");
                         },
-                        error: function(xhr) {
-                            console.error("Error checking anggaran:", xhr.responseText);
-                            // On error, allow manual input as fallback
-                            $('#nilaisumberdana').prop('disabled', false).val('');
+                        error: function(xhr, status, error) {
+                            console.error("Error fetching kd_dana: ", error);
+                            $('#kd_dana').empty().append(
+                                    '<option value="">Error loading data</option>')
+                                .trigger('change');
                         }
+                    });
+
+
+                });
+
+                // Event handler untuk perubahan sumber dana
+                $('#kd_dana').on('change', function() {
+                    let selectedOption = $(this).find('option:selected');
+                    let kd_rek = $('#kd_rek').val();
+                    let kd_sub_kegiatan = $('#kd_sub_kegiatan').val();
+                    let kd_dana = $(this).val();
+
+                    // Jika tidak ada sumber dana yang dipilih, kosongkan informasi anggaran
+                    if (!kd_dana) {
+                        $('#totalSPD').val('');
+                        $('#anggaran').val('');
+                        $('#totalAnggaranKas').val('');
+                        $('#nilaisumberdana').val('');
+                        $('#id_sumberdana').val('');
+                        $('#statusAnggaran').val('');
+                        $('#statusAnggaranKas').val('');
+                        return;
+                    }
+
+                    // Ambil data dari atribut data sumber dana yang dipilih
+                    let nmDana = selectedOption.data('nm_dana') || '';
+                    let idSumberDana = selectedOption.data('id_sumberdana') || '';
+                    let anggaranTahun = parseFloat(selectedOption.data('anggaran')) || 0;
+                    let statusAnggaran = selectedOption.data('status_anggaran') || '';
+                    let statusAnggaranKas = selectedOption.data('status_anggaran_kas') || '';
+
+                    // Pastikan selectedMonth & selectedTriwulan sudah di-set
+                    let selectedMonth = $('#kd_rek').data('selected-month') || new Date()
+                        .getMonth() + 1;
+                    let selectedTriwulan = $('#kd_rek').data('selected-triwulan') || Math.ceil(
+                        selectedMonth / 3);
+
+                    // Pilih anggaran triwulan yang sesuai
+                    let totalSPD = parseFloat(selectedOption.data(
+                        `anggaran-tw${selectedTriwulan}`)) || 0;
+
+                    // Ambil anggaran sesuai bulan yang dipilih
+                    let anggaranBulan = parseFloat(selectedOption.data(`rek${selectedMonth}`)) || 0;
+
+                    // Hitung total anggaran kas sampai bulan yang dipilih
+                    let totalAnggaranKas = 0;
+                    for (let i = 1; i <= selectedMonth; i++) {
+                        totalAnggaranKas += parseFloat(selectedOption.data(`rek${i}`)) || 0;
+                    }
+
+                    // Hitung total anggaran sebelumnya
+                    let totalAnggaranSebelumnya = 0;
+                    for (let i = 1; i < selectedMonth; i++) {
+                        totalAnggaranSebelumnya += parseFloat(selectedOption.data(`rek${i}`)) || 0;
+                    }
+
+                    // Hitung total SPD sebelumnya
+                    let totalspdsebelumnya = 0;
+                    for (let i = 1; i < selectedTriwulan; i++) {
+                        totalspdsebelumnya += parseFloat(selectedOption.data(`anggaran-tw${i}`)) ||
+                            0;
+                    }
+
+                    // Kumpulkan jenis pergeseran yang dipilih
+                    var checkedPergeseran = [];
+                    $('input[name="jenis_pergeseran[]"]:checked').each(function() {
+                        checkedPergeseran.push($(this).val());
+                    });
+
+                    getRealisasiData(kd_rek, kd_sub_kegiatan, checkedPergeseran, kd_dana);
+                    // Ambil total nilai realisasi
+                    $.post("{{ route('transaksi.get-total-nilai') }}", {
+                        _token: "{{ csrf_token() }}",
+                        kd_rek: kd_rek,
+                        kd_sub_kegiatan: kd_sub_kegiatan,
+                        kd_dana: kd_dana,
+                        jenis_pergeseran: checkedPergeseran
+                    }).done(function(response) {
+                        let totalNilai = parseFloat(response.total_nilai) || 0;
+                        let totalSPDFinal = (selectedTriwulan === 1) ? totalSPD : totalSPD +
+                            totalspdsebelumnya;
+
+                        // Set nilai ke dalam form
+                        $('#id_sumberdana').val(idSumberDana);
+                        $('#statusAnggaran').val(statusAnggaran);
+                        $('#statusAnggaranKas').val(statusAnggaranKas);
+                        $('#totalSPD').val(formatRupiah1(totalSPDFinal));
+                        $('#anggaran').val(formatRupiah1(anggaranTahun));
+                        $('#totalAnggaranKas').val(formatRupiah1(totalAnggaranKas));
+                        $('#nilaisumberdana').val(formatRupiah1(
+                            anggaranTahun)); // Tambahkan ini untuk nilaisumberdana
+
+                        // Hitung sisa-sisa
+                        hitungSisa("totalSPD", "realisasiSPD", "sisaSPD");
+                        hitungSisa("anggaran", "realisasiAnggaran", "sisaAnggaran");
+                        hitungSisa("totalAnggaranKas", "realisasiAnggaranKas",
+                            "sisaAnggaranKas");
+                        hitungSisa("nilaisumberdana", "realisasinilaisumberdana",
+                            "sisanilaisumberdana");
+                    }).fail(function(xhr, status, error) {
+                        console.error("Error fetching total nilai:", error);
                     });
                 });
 
-            });
+                function getRealisasiData(kd_rek, kd_sub_kegiatan, jenis_pergeseran, kd_dana) {
+                    if (kd_rek && kd_sub_kegiatan) {
+                        var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
+                        $.ajax({
+                            url: "{{ route('transaksi.getrealisasi') }}",
+                            type: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken
+                            },
+                            data: {
+                                kd_rek: kd_rek,
+                                kd_sub_kegiatan: kd_sub_kegiatan,
+                                jenis_pergeseran: jenis_pergeseran,
+                                kd_dana: kd_dana
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.success) {
+                                    // Format nilai realisasi sebagai Rupiah sebelum ditampilkan
+                                    $('#realisasiSPD').val(formatRupiah8(parseFloat(response
+                                        .realisasiSPD) || 0));
+                                    $('#realisasiAnggaranKas').val(formatRupiah8(parseFloat(
+                                        response.realisasiAnggaranKas) || 0));
+                                    $('#realisasiAnggaran').val(formatRupiah8(parseFloat(
+                                        response.realisasiAnggaran) || 0));
+                                    $('#realisasinilaisumberdana').val(formatRupiah8(parseFloat(
+                                        response.realisasiSumberDana) || 0));
+
+                                    // Hitung sisa-sisa setelah mendapatkan realisasi
+                                    hitungSisa("totalSPD", "realisasiSPD", "sisaSPD");
+                                    hitungSisa("anggaran", "realisasiAnggaran", "sisaAnggaran");
+                                    hitungSisa("totalAnggaranKas", "realisasiAnggaranKas",
+                                        "sisaAnggaranKas");
+                                    hitungSisa("nilaisumberdana", "realisasinilaisumberdana",
+                                        "sisanilaisumberdana");
+                                } else {
+                                    // Jika tidak ada data, set ke 0
+                                    $('#realisasiSPD').val(formatRupiah8(0));
+                                    $('#realisasiAnggaranKas').val(formatRupiah8(0));
+                                    $('#realisasiAnggaran').val(formatRupiah8(0));
+                                    $('#realisasinilaisumberdana').val(formatRupiah8(0));
+
+                                    // Hitung sisa-sisa
+                                    hitungSisa("totalSPD", "realisasiSPD", "sisaSPD");
+                                    hitungSisa("anggaran", "realisasiAnggaran", "sisaAnggaran");
+                                    hitungSisa("totalAnggaranKas", "realisasiAnggaranKas",
+                                        "sisaAnggaranKas");
+                                    hitungSisa("nilaisumberdana", "realisasinilaisumberdana",
+                                        "sisanilaisumberdana");
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("AJAX Error: ", status, error);
+                                // Tetap set ke 0 jika terjadi error
+                                $('#realisasiSPD').val(formatRupiah8(0));
+                                $('#realisasiAnggaranKas').val(formatRupiah8(0));
+                                $('#realisasiAnggaran').val(formatRupiah8(0));
+                                $('#realisasinilaisumberdana').val(formatRupiah8(0));
+
+                                // Hitung sisa-sisa
+                                hitungSisa("totalSPD", "realisasiSPD", "sisaSPD");
+                                hitungSisa("anggaran", "realisasiAnggaran", "sisaAnggaran");
+                                hitungSisa("totalAnggaranKas", "realisasiAnggaranKas",
+                                    "sisaAnggaranKas");
+                                hitungSisa("nilaisumberdana", "realisasinilaisumberdana",
+                                    "sisanilaisumberdana");
+                            }
+                        });
+                    }
+                }
+
+                function formatRupiah8(angka) {
+                    if (isNaN(angka)) angka = 0;
+                    return new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0
+                    }).format(angka).replace('Rp', '').trim();
+                }
+            });
 
             $(document).on('change', '#kd_sub_kegiatan', function() {
                 var selectedOption = $(this).find('option:selected');
                 var nmSubKegiatan = selectedOption.data('nm_sub_kegiatan') || '';
                 $('#nm_sub_kegiatan').val(nmSubKegiatan);
             });
-
-
 
             $(document).on('change', '[name="tgl_bukti"]', function() {
                 var tglInput = $(this).val();
@@ -1773,82 +1834,13 @@
                     $('#kd_rek').data('selected-month', selectedMonth);
                     $('#kd_rek').data('selected-triwulan', selectedTriwulan);
                     console.log("Bulan yang dipilih:", selectedMonth);
+
+                    // Jika rekening sudah dipilih, refresh nilainya
+                    if ($('#kd_dana').val()) {
+                        $('#kd_dana').trigger('change');
+                    }
                 }
             });
-
-            // Tangkap perubahan pada dropdown rekening
-            // Tangkap perubahan pada dropdown rekening
-            $(document).on('change', '#kd_rek', function() {
-                let selectedOption = $(this).find('option:selected');
-                let nmrek = selectedOption.data('nm_rek') || '';
-                let idsumberdana = selectedOption.data('id_sumberdana') || '';
-                let anggaranTahun = parseFloat(selectedOption.data('anggaran')) || 0;
-                let status_anggaran = selectedOption.data('status_anggaran') || '';
-                let status_anggaran_kas = selectedOption.data('status_anggaran_kas') || '';
-
-                // Pastikan selectedMonth & selectedTriwulan sudah di-set
-                let selectedMonth = $('#kd_rek').data('selected-month') || new Date().getMonth() + 1;
-                let selectedTriwulan = $('#kd_rek').data('selected-triwulan') || Math.ceil(selectedMonth /
-                    3);
-
-                console.log("Bulan saat ini:", selectedMonth);
-                console.log("Triwulan saat ini:", selectedTriwulan);
-
-                // Pilih anggaran triwulan yang sesuai
-                let totalSPD = parseFloat(selectedOption.data(`anggaran-tw${selectedTriwulan}`)) || 0;
-
-                // Ambil anggaran sesuai bulan yang dipilih
-                let anggaranBulan = parseFloat(selectedOption.data(`rek${selectedMonth}`)) || 0;
-
-                let totalAnggaranKas = 0;
-                for (let i = 1; i <= selectedMonth; i++) {
-                    totalAnggaranKas += parseFloat(selectedOption.data(`rek${i}`)) || 0;
-                }
-
-                let totalAnggaranSebelumnya = 0;
-                for (let i = 1; i < selectedMonth; i++) {
-                    totalAnggaranSebelumnya += parseFloat(selectedOption.data(`rek${i}`)) || 0;
-                }
-
-                let totalspdsebelumnya = 0;
-                for (let i = 1; i < selectedTriwulan; i++) {
-                    totalspdsebelumnya += parseFloat(selectedOption.data(`anggaran-tw${i}`)) || 0;
-                }
-                console.log("Total anggaran sebelumnya:", totalspdsebelumnya);
-
-                let kd_rek = $(this).val();
-
-                $.post("{{ route('transaksi.get-total-nilai') }}", {
-                    _token: "{{ csrf_token() }}",
-                    kd_rek: kd_rek
-                }).done(function(response) {
-                    let totalNilai = parseFloat(response.total_nilai) || 0;
-                    let totalSPDFinal = (selectedTriwulan === 1) ? totalSPD : totalSPD +
-                        totalspdsebelumnya;
-                    // let totalSPDFinal = (selectedTriwulan === 1) ? totalSPD : totalSPD + (totalspdsebelumnya - totalNilai);
-
-                    $('#nm_rek').val(nmrek);
-                    $('#id_sumberdana').val(idsumberdana);
-                    $('#statusAnggaran').val(status_anggaran);
-                    $('#statusAnggaranKas').val(status_anggaran_kas);
-                    $('#totalSPD').val(formatRupiah1(totalSPDFinal));
-                    $('#anggaran').val(formatRupiah1(anggaranTahun));
-                    $('#totalAnggaranKas').val(formatRupiah1(totalAnggaranKas));
-
-                    console.table({
-                        "Total SPD": totalSPDFinal,
-                        "Total Anggaran Kas": totalAnggaranKas,
-                        "Total Nilai": totalNilai
-                    });
-
-                    hitungSisa("totalSPD", "realisasiSPD", "sisaSPD");
-                    hitungSisa("anggaran", "realisasiAnggaran", "sisaAnggaran");
-                    hitungSisa("totalAnggaranKas", "realisasiAnggaranKas", "sisaAnggaranKas");
-                }).fail(function(xhr, status, error) {
-                    console.error("Error fetching total nilai:", error);
-                });
-            });
-
 
 
             function formatRupiah1(angka) {
