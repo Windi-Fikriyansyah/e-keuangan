@@ -1285,7 +1285,7 @@ class Laporan extends Controller
         $jenis_print = $request->jenis_print ?? 'layar';
         $ttdbendaharadth = $request->ttdbendaharadth;
         $ttdpa_kpa = $request->ttdpa_kpa;
-        $jenis_terima_sp2d = $request->jenis_terima_sp2d ?? '1'; // Default to 1 if not provided
+        $jenis_terima_sp2d = $request->jenis_terima_sp2d ?? '0'; // Default to 1 if not provided
 
         // Gunakan default jika kd_skpd kosong atau 'null'
         if (empty($kd_skpd) || $kd_skpd == 'null') {
