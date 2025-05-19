@@ -107,6 +107,23 @@
         </div>
     </div>
 
+    <div class="page-content">
+        <div class="row">
+
+
+            <div class="col-md-6">
+                <div class="card card-info collapsed-card card-outline" id="registersp2d" data-bs-toggle="modal"
+                    data-bs-target="#modalregistersp2d">
+                    <div class="card-body">
+                        <span>Register SP2D</span>
+                        <a class="stretched-link" href="#"></a>
+                        <i class="fa fa-chevron-right float-end mt-2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal BKU -->
     <div id="modalBku" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -696,10 +713,228 @@
         </div>
     </div>
 
+    <div id="modalregistersp2d" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Laporan Rincian SP2D</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="kd_skpdrekapregistersp2d" class="form-label">Kode SKPD</label>
+                            <input type="text" value="{{ $daftar_skpd->kd_skpd ?? '' }}"
+                                id="kd_skpdrekapregistersp2d" name="kd_skpd" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="name_skpdrekapregistersp2d" class="form-label">Nama SKPD</label>
+                            <input type="text" value="{{ $daftar_skpd->name ?? '' }}" id="name_skpdrekapregistersp2d"
+                                name="name_skpd" class="form-control" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-12">
+                            <label class="form-label">Pilih</label>
+                            <select class="form-control" id="pilihwaktu">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                                <option value="bulan">Bulan</option>
+                                <option value="periode">Periode</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal Awal</label>
+                            <input type="date" id="tanggalawalregistersp2d" name="tanggalawal" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal Akhir</label>
+                            <input type="date" id="tanggalakhirregistersp2d" name="tanggalakhir"
+                                class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal TTD</label>
+                            <input type="date" id="tanggalTtdrekapregistersp2d" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bendahara</label>
+                            <select class="form-control" id="ttdbendahararegistersp2d">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">PA/KPA</label>
+                            <select class="form-control" id="ttdregistersp2d">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 text-center">
+                        <button type="button" class="btn btn-danger btn-md cetakregistersp2d"
+                            data-jenis="pdf">PDF</button>
+                        <button type="button" class="btn btn-dark btn-md cetakregistersp2d"
+                            data-jenis="layar">Layar</button>
+                        <button type="button" class="btn btn-dark btn-md cetakregistersp2d"
+                            data-jenis="excel">Excel</button>
+                        <button type="button" class="btn btn-secondary btn-md" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('js')
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tangkap elemen select pilihwaktu
+            const pilihWaktu = document.getElementById('pilihwaktu');
+
+            // Tangkap elemen container tanggal
+            const tanggalAwalContainer = document.getElementById('tanggalawalregistersp2d').parentElement
+                .parentElement;
+
+            // Buat elemen select bulan
+            const bulanSelect = document.createElement('select');
+            bulanSelect.className = 'form-control';
+            bulanSelect.id = 'bulanregistersp2d';
+            bulanSelect.style.display = 'none';
+
+            // Isi opsi bulan
+            const bulanOptions = [{
+                    value: '01',
+                    text: 'Januari'
+                },
+                {
+                    value: '02',
+                    text: 'Februari'
+                },
+                {
+                    value: '03',
+                    text: 'Maret'
+                },
+                {
+                    value: '04',
+                    text: 'April'
+                },
+                {
+                    value: '05',
+                    text: 'Mei'
+                },
+                {
+                    value: '06',
+                    text: 'Juni'
+                },
+                {
+                    value: '07',
+                    text: 'Juli'
+                },
+                {
+                    value: '08',
+                    text: 'Agustus'
+                },
+                {
+                    value: '09',
+                    text: 'September'
+                },
+                {
+                    value: '10',
+                    text: 'Oktober'
+                },
+                {
+                    value: '11',
+                    text: 'November'
+                },
+                {
+                    value: '12',
+                    text: 'Desember'
+                }
+            ];
+
+            // Tambahkan opsi default
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Silahkan Pilih Bulan';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            bulanSelect.appendChild(defaultOption);
+
+            // Tambahkan opsi bulan
+            bulanOptions.forEach(bulan => {
+                const option = document.createElement('option');
+                option.value = bulan.value;
+                option.textContent = bulan.text;
+                bulanSelect.appendChild(option);
+            });
+
+            // Buat div container untuk bulan
+            const bulanContainer = document.createElement('div');
+            bulanContainer.className = 'col-md-12';
+            bulanContainer.style.display = 'none';
+            bulanContainer.innerHTML = '<label class="form-label">Bulan</label>';
+            bulanContainer.appendChild(bulanSelect);
+
+            // Sisipkan bulan container sebelum container tanggal
+            tanggalAwalContainer.parentElement.insertBefore(bulanContainer, tanggalAwalContainer);
+
+            // Tambahkan event listener untuk pilihwaktu
+            pilihWaktu.addEventListener('change', function() {
+                if (this.value === 'bulan') {
+                    // Tampilkan bulan, sembunyikan tanggal
+                    bulanContainer.style.display = 'block';
+                    bulanSelect.style.display = 'block';
+                    tanggalAwalContainer.style.display = 'none';
+
+                    // Reset nilai tanggal
+                    document.getElementById('tanggalawalregistersp2d').value = '';
+                    document.getElementById('tanggalakhirregistersp2d').value = '';
+                } else if (this.value === 'periode') {
+                    // Tampilkan tanggal, sembunyikan bulan
+                    bulanContainer.style.display = 'none';
+                    bulanSelect.style.display = 'none';
+                    tanggalAwalContainer.style.display = 'flex';
+
+                    // Reset nilai bulan
+                    bulanSelect.value = '';
+                } else {
+                    // Sembunyikan keduanya
+                    bulanContainer.style.display = 'none';
+                    tanggalAwalContainer.style.display = 'none';
+                }
+            });
+
+            // Sembunyikan tanggal awal container secara default
+            tanggalAwalContainer.style.display = 'none';
+
+            // Tambahkan event listener untuk bulan select
+            bulanSelect.addEventListener('change', function() {
+                if (this.value) {
+                    const tahun = new Date().getFullYear();
+                    const hariTerakhir = new Date(tahun, this.value, 0).getDate();
+
+                    // Set tanggal awal ke tanggal 1 bulan yang dipilih
+                    document.getElementById('tanggalawalregistersp2d').value = `${tahun}-${this.value}-01`;
+                    // Set tanggal akhir ke hari terakhir bulan yang dipilih
+                    document.getElementById('tanggalakhirregistersp2d').value =
+                        `${tahun}-${this.value}-${hariTerakhir}`;
+                }
+            });
+        });
+
+
         $(document).ready(function() {
 
             $('#ttdbendaharadth').select2({
@@ -803,6 +1038,40 @@
             });
 
 
+            $('#ttdbendahararegistersp2d').select2({
+                theme: "bootstrap-5",
+                width: "100%",
+                placeholder: "Silahkan Pilih...",
+                ajax: {
+                    url: "{{ route('laporan.laporan.tandaTangan') }}",
+                    dataType: 'json',
+                    type: "POST",
+                    data: function(params) {
+                        return {
+                            _token: $('meta[name="csrf-token"]').attr(
+                                'content'), // Tambahkan CSRF token
+                            q: $.trim(params.term),
+                            kodeSkpd: $('#kd_skpdrekapregistersp2d').val()
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map((ttd) => {
+                                return {
+                                    text: ttd.nama,
+                                    id: ttd.nip,
+                                };
+                            }),
+                            pagination: {
+                                more: data.current_page < data.last_page,
+                            },
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+
             $('#ttdrinciancp').select2({
                 theme: "bootstrap-5",
                 width: "100%",
@@ -817,6 +1086,39 @@
                                 'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekaprinciancp').val()
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map((ttd) => {
+                                return {
+                                    text: ttd.nama,
+                                    id: ttd.nip,
+                                };
+                            }),
+                            pagination: {
+                                more: data.current_page < data.last_page,
+                            },
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            $('#ttdregistersp2d').select2({
+                theme: "bootstrap-5",
+                width: "100%",
+                placeholder: "Silahkan Pilih...",
+                ajax: {
+                    url: "{{ route('laporan.laporan.tandaTanganPa') }}",
+                    dataType: 'json',
+                    type: "POST",
+                    data: function(params) {
+                        return {
+                            _token: $('meta[name="csrf-token"]').attr(
+                                'content'), // Tambahkan CSRF token
+                            q: $.trim(params.term),
+                            kodeSkpd: $('#kd_skpdrekapregistersp2d').val()
                         };
                     },
                     processResults: function(data) {
@@ -1911,6 +2213,123 @@
                 url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
                 url.searchParams.append("jenis_print", jenis_print);
 
+                window.open(url.toString(), "_blank");
+            });
+
+
+            $('.cetakregistersp2d').on('click', function() {
+                let kd_skpd = $('#kd_skpdrekapregistersp2d').val();
+                let pilihWaktu = $('#pilihwaktu').val();
+                let bulan = $('#bulanregistersp2d').val();
+                let tanggalawal = $('#tanggalawalregistersp2d').val();
+                let tanggalakhir = $('#tanggalakhirregistersp2d').val();
+                let tanggalTtd = $('#tanggalTtdrekapregistersp2d').val();
+                let ttdbendahara = $('#ttdbendahararegistersp2d').val();
+                let ttdpa_kpa = $('#ttdregistersp2d').val();
+                let jenis_print = $(this).data("jenis");
+
+                // Validasi pilihan waktu (bulan/periode)
+                if (!pilihWaktu) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih jenis waktu (Bulan/Periode)!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                // Validasi untuk pilihan bulan
+                if (pilihWaktu === 'bulan' && !bulan) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih bulan!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                // Validasi untuk pilihan periode
+                if (pilihWaktu === 'periode') {
+                    if (!tanggalawal || !tanggalakhir) {
+                        Swal.fire({
+                            title: "Peringatan!",
+                            text: "Silakan isi tanggal awal dan tanggal akhir!",
+                            icon: "warning"
+                        });
+                        return;
+                    }
+
+                    // Validasi jika tanggal akhir lebih kecil dari tanggal awal
+                    if (new Date(tanggalakhir) < new Date(tanggalawal)) {
+                        Swal.fire({
+                            title: "Peringatan!",
+                            text: "Tanggal akhir tidak boleh lebih kecil dari tanggal awal!",
+                            icon: "warning"
+                        });
+                        return;
+                    }
+                }
+
+                // Validasi bendahara
+                if (!ttdbendahara) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih bendahara!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                // Validasi PA/KPA
+                if (!ttdpa_kpa) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih PA/KPA!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                // Validasi SKPD
+                if (!kd_skpd) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih SKPD!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                // Validasi tanggal TTD
+                if (!tanggalTtd) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih tanggal tanda tangan!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                // Jika pilih bulan, gunakan tanggal yang sudah di-generate otomatis
+                if (pilihWaktu === 'bulan') {
+                    const tahun = new Date().getFullYear();
+                    const hariTerakhir = new Date(tahun, bulan, 0).getDate();
+                    tanggalawal = `${tahun}-${bulan}-01`;
+                    tanggalakhir = `${tahun}-${bulan}-${hariTerakhir}`;
+                }
+
+                // Membuat URL untuk cetak laporan
+                let url = new URL("{{ route('laporan.laporan.cetakregistersp2d') }}", window.location
+                    .origin);
+                url.searchParams.append("kd_skpd", kd_skpd);
+                url.searchParams.append("tanggalawal", tanggalawal);
+                url.searchParams.append("tanggalakhir", tanggalakhir);
+                url.searchParams.append("tanggalTtd", tanggalTtd);
+                url.searchParams.append("ttdbendaharadth", ttdbendahara);
+                url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
+                url.searchParams.append("jenis_print", jenis_print);
+
+                // Buka laporan di tab baru
                 window.open(url.toString(), "_blank");
             });
 

@@ -1274,4 +1274,158 @@ class Laporan extends Controller
             return $pdf->stream('Laporan_rinciancp.pdf');
         }
     }
+
+
+    public function cetakregistersp2d(Request $request)
+    {
+        $kd_skpd = $request->kd_skpd;
+        $tanggalawal = $request->tanggalawal;
+        $tanggalakhir = $request->tanggalakhir;
+        $tanggalTtd = $request->tanggalTtd;
+        $jenis_print = $request->jenis_print ?? 'layar';
+        $ttdbendaharadth = $request->ttdbendaharadth;
+        $ttdpa_kpa = $request->ttdpa_kpa;
+        $jenis_terima_sp2d = $request->jenis_terima_sp2d ?? '1'; // Default to 1 if not provided
+
+        // Gunakan default jika kd_skpd kosong atau 'null'
+        if (empty($kd_skpd) || $kd_skpd == 'null') {
+            $kd_skpd = '4.01.2.10.0.00.01.0000';
+        }
+
+        // Validasi dan format tanggal
+        try {
+            $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
+            $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Format tanggal tidak valid.');
+        }
+
+        // Ambil nama SKPD
+        $dataSkpd = DB::table('users')
+            ->select('name')
+            ->where('kd_skpd', $kd_skpd)
+            ->first();
+
+        // Ambil data transaksi utama dari trhkasin_pkd dengan kolom yang diperlukan
+        $trhtransout = DB::table('trhtransout as trh')
+            ->leftJoin('trdtransout as trd', 'trh.no_bukti', '=', 'trd.no_bukti')
+            ->select(
+                'trh.no_bukti',
+                'trh.tgl_bukti',
+                'trh.no_sp2d',
+                'trh.ket',
+                'trh.jenis_beban',
+                DB::raw('SUM(trd.nilai) as total'),
+                DB::raw("CASE WHEN trh.jenis_beban = 'UP' THEN SUM(trd.nilai) ELSE 0 END as up"),
+                DB::raw("CASE WHEN trh.jenis_beban = 'GU' THEN SUM(trd.nilai) ELSE 0 END as GU"),
+                DB::raw("CASE WHEN trh.jenis_beban = 'TU' THEN SUM(trd.nilai) ELSE 0 END as TU"),
+                DB::raw("CASE WHEN trh.jenis_beban = 'GAJI' THEN SUM(trd.nilai) ELSE 0 END as gaji"),
+                DB::raw("CASE WHEN trh.jenis_beban = 'Barang & Jasa' THEN SUM(trd.nilai) ELSE 0 END as barang_jasa"),
+                DB::raw("CASE WHEN trh.jenis_beban = 'Pihak Ketiga' THEN SUM(trd.nilai) ELSE 0 END as pihak_ketiga"),
+                DB::raw("CASE WHEN trh.jenis_beban = 'Potongan Lain' THEN SUM(trd.nilai) ELSE 0 END as pot_lain")
+            )
+            ->where('trh.kd_skpd', $kd_skpd)
+            ->where('trh.jenis_terima_sp2d', $jenis_terima_sp2d)
+            ->whereBetween('trh.tgl_bukti', [$tanggalawal, $tanggalakhir])
+            ->groupBy('trh.no_bukti', 'trh.tgl_bukti', 'trh.no_sp2d', 'trh.ket', 'trh.jenis_beban')
+            ->get();
+
+        $bulanAwal = date('n', strtotime($tanggalawal));
+        $bulanAkhir = date('n', strtotime($tanggalakhir));
+        $tahun = date('Y', strtotime($tanggalawal));
+
+        $totalPerBulan = [];
+
+        for ($bulan = $bulanAwal; $bulan <= $bulanAkhir; $bulan++) {
+            $bulanData = $trhtransout->filter(function ($item) use ($bulan, $tahun) {
+                $tglItem = date('Y-n', strtotime($item->tgl_bukti));
+                return $tglItem == "$tahun-$bulan";
+            });
+
+            $namaBulan = date('F', mktime(0, 0, 0, $bulan, 1, $tahun));
+
+            $totalPerBulan[$namaBulan] = [
+                'gaji' => $bulanData->sum('gaji'),
+                'pot_lain' => $bulanData->sum('pot_lain'),
+                'barang_jasa' => $bulanData->sum('barang_jasa'),
+                'pihak_ketiga' => $bulanData->sum('pihak_ketiga'),
+                'UP' => $bulanData->sum('up'),
+                'GU' => $bulanData->sum('GU'),
+                'TU' => $bulanData->sum('TU'),
+                'total' => $bulanData->sum('total')
+            ];
+        }
+
+        $jumlahPeriodeTerpilih1 = DB::table('trhtransout as trh')
+            ->join('trdtransout as trd', 'trh.no_bukti', '=', 'trd.no_bukti')
+            ->where('trh.kd_skpd', $kd_skpd)
+            ->where('trh.jenis_terima_sp2d', $jenis_terima_sp2d)
+            ->whereBetween('trh.tgl_bukti', [$tanggalawal, $tanggalakhir])
+            ->sum('trd.nilai');
+
+        // Hitung jumlah transaksi sampai bulan yang dipilih
+        $jumlahSampaiBulanTerpilih1 = DB::table('trhtransout as trh')
+            ->join('trdtransout as trd', 'trh.no_bukti', '=', 'trd.no_bukti')
+            ->where('trh.kd_skpd', $kd_skpd)
+            ->where('trh.jenis_terima_sp2d', $jenis_terima_sp2d)
+            ->whereBetween('trh.tgl_bukti', [Carbon::parse('2025-01-01'), $tanggalakhir])
+            ->sum('trd.nilai');
+
+        // Total keseluruhan
+        $totalKeseluruhan = [
+            'gaji' => $trhtransout->sum('gaji'),
+            'pot_lain' => $trhtransout->sum('pot_lain'),
+            'barang_jasa' => $trhtransout->sum('barang_jasa'),
+            'pihak_ketiga' => $trhtransout->sum('pihak_ketiga'),
+            'up' => $trhtransout->sum('up'),
+            'gu' => $trhtransout->sum('GU'),
+            'tu' => $trhtransout->sum('TU'),
+            'total' => $trhtransout->sum('total')
+        ];
+
+        // Ambil tanda tangan bendahara dan PA/KPA
+        $ttdbendahara = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdbendaharadth)
+            ->first();
+
+        $ttdpa_kpa1 = DB::table('masterTtd')
+            ->where('kodeSkpd', $kd_skpd)
+            ->where('nip', $ttdpa_kpa)
+            ->first();
+
+        // Prepare fallback data for empty results
+        $trhbku = null;
+        if ($trhtransout->isEmpty()) {
+            $trhbku = DB::table('trhbku')->where('kd_skpd', $kd_skpd)->first();
+        }
+
+        $data = [
+            'dataSkpd' => $dataSkpd,
+            'trhtransout' => $trhtransout,
+            'jumlahPeriodeTerpilih' => $jumlahPeriodeTerpilih1,
+            'jumlahSampaiBulanTerpilih' => $jumlahSampaiBulanTerpilih1,
+            'bulanAwal' => date('F Y', strtotime($tanggalawal)),
+            'bulanAkhir' => date('F Y', strtotime($tanggalakhir)),
+            'tipe' => $jenis_print,
+            'tanggalTtd' => $tanggalTtd,
+            'tanggalawal' => $tanggalawal,
+            'tanggalakhir' => $tanggalakhir,
+            'bendahara' => $ttdbendahara,
+            'pa_kpa' => $ttdpa_kpa1,
+            'trhbku' => $trhbku, // For fallback data
+        ];
+
+        // Pilih metode cetak
+        if ($jenis_print == 'layar') {
+            return view('laporan.laporan.cetak_registersp2d', $data);
+        } elseif ($jenis_print == 'pdf') {
+            $pdf = PDF::loadView('laporan.laporan.cetak_registersp2d', $data)
+                ->setPaper('legal', 'landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+
+            return $pdf->stream('Laporan_registersp2d.pdf');
+        }
+    }
 }
