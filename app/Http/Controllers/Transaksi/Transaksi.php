@@ -198,12 +198,11 @@ class Transaksi extends Controller
 
         // Ambil data dari trdtrmpot berdasarkan no_bukti yang sesuai
         $trdtrmpot = DB::table('trdtransout')
-            ->join('ms_sumberdana', 'trdtransout.sumber', '=', 'ms_sumberdana.id')
             ->where('trdtransout.no_bukti', $no_transaksi)
             ->select(
                 'trdtransout.*', // Ambil semua kolom dari trdtransout
-                'ms_sumberdana.sumber_dana as nm_dana',
-                'ms_sumberdana.id as id_dana' // Ambil nama sumber dana dari ms_sumberdana
+                'trdtransout.nm_dana',
+                'trdtransout.kd_dana as id_dana' // Ambil nama sumber dana dari ms_sumberdana
             )
             ->get();
 
@@ -294,8 +293,7 @@ class Transaksi extends Controller
     {
         try {
             $kd_sub_kegiatan = $request->input('kd_sub_kegiatan');
-            $jenis_pergeseran = $request->input('jenis_pergeseran');
-
+            $jenis_pergeseran = $request->input('jenis_pergeseran', 0);
             $query = DB::table('ms_anggaran');
 
             // Filter berdasarkan kd_sub_kegiatan jika disediakan
@@ -303,12 +301,7 @@ class Transaksi extends Controller
                 $query->where('kd_sub_kegiatan', $kd_sub_kegiatan);
             }
 
-            // Filter berdasarkan jenis_pergeseran jika disediakan
-            if ($jenis_pergeseran && is_array($jenis_pergeseran)) {
-                $query->whereIn('jenis_anggaran', $jenis_pergeseran);
-            } elseif ($jenis_pergeseran) {
-                $query->where('jenis_anggaran', $jenis_pergeseran);
-            }
+            $query->where('jenis_anggaran', $jenis_pergeseran);
 
             $query->select(
                 'kd_rek',
@@ -339,9 +332,11 @@ class Transaksi extends Controller
     public function getsumberdana(Request $request)
     {
         try {
+
             $kd_sub_kegiatan = $request->input('kd_sub_kegiatan');
             $kd_rek = $request->input('kd_rek');
             $jenis_pergeseran = $request->input('jenis_pergeseran', 0); // default ke 0 jika null
+
 
             $query = DB::table('ms_anggaran');
 

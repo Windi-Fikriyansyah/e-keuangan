@@ -1655,6 +1655,7 @@
                         $('#id_sumberdana').val('');
                         $('#statusAnggaran').val('');
                         $('#statusAnggaranKas').val('');
+                        $('#nm_dana').val('');
                         return;
                     }
 
@@ -1665,6 +1666,7 @@
                     let statusAnggaran = selectedOption.data('status_anggaran') || '';
                     let statusAnggaranKas = selectedOption.data('status_anggaran_kas') || '';
 
+                    $('#nm_dana').val(nmDana);
                     // Pastikan selectedMonth & selectedTriwulan sudah di-set
                     let selectedMonth = $('#kd_rek').data('selected-month') || new Date()
                         .getMonth() + 1;
