@@ -207,8 +207,8 @@
 
                     <th colspan="3"></th>
                     <th colspan="2"></th>
-                    <th>Gaji<br>HKPG</th>
-                    <th>Pot. Lain</th>
+                    <th></th>
+                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>

@@ -1285,7 +1285,7 @@ class Laporan extends Controller
         $jenis_print = $request->jenis_print ?? 'layar';
         $ttdbendaharadth = $request->ttdbendaharadth;
         $ttdpa_kpa = $request->ttdpa_kpa;
-        $jenis_terima_sp2d = $request->jenis_terima_sp2d ?? '0'; // Default to 1 if not provided
+        $jenis_terima_sp2d = $request->jenis_terima_sp2d ?? '1'; // Default to 1 if not provided
 
         // Gunakan default jika kd_skpd kosong atau 'null'
         if (empty($kd_skpd) || $kd_skpd == 'null') {
@@ -1307,16 +1307,20 @@ class Laporan extends Controller
             ->first();
 
         // Ambil data transaksi utama dari trhkasin_pkd dengan kolom yang diperlukan
-        $trhtransout = DB::table('trhtransout as trh')
+        $rawTransactions = DB::table('trhtransout as trh')
             ->leftJoin('trdtransout as trd', 'trh.no_bukti', '=', 'trd.no_bukti')
+            ->leftJoin('trhtransout as trh_bj', function ($join) {
+                $join->on('trh.no_sp2d', '=', 'trh_bj.no_sp2d')
+                    ->where('trh_bj.jenis_terima_sp2d', '0');
+            })
             ->select(
                 'trh.no_bukti',
                 'trh.tgl_bukti',
                 'trh.no_sp2d',
-                'trh.ket',
+                DB::raw("CASE WHEN trh.jenis_beban = 'Barang & Jasa' THEN trh_bj.ket ELSE trh.ket END as ket"),
                 'trh.jenis_beban',
                 DB::raw('SUM(trd.nilai) as total'),
-                DB::raw("CASE WHEN trh.jenis_beban = 'UP' THEN SUM(trd.nilai) ELSE 0 END as up"),
+                DB::raw("CASE WHEN trh.jenis_beban = 'UP' THEN SUM(trd.nilai) ELSE 0 END as UP"),
                 DB::raw("CASE WHEN trh.jenis_beban = 'GU' THEN SUM(trd.nilai) ELSE 0 END as GU"),
                 DB::raw("CASE WHEN trh.jenis_beban = 'TU' THEN SUM(trd.nilai) ELSE 0 END as TU"),
                 DB::raw("CASE WHEN trh.jenis_beban = 'GAJI' THEN SUM(trd.nilai) ELSE 0 END as gaji"),
@@ -1327,8 +1331,37 @@ class Laporan extends Controller
             ->where('trh.kd_skpd', $kd_skpd)
             ->where('trh.jenis_terima_sp2d', $jenis_terima_sp2d)
             ->whereBetween('trh.tgl_bukti', [$tanggalawal, $tanggalakhir])
-            ->groupBy('trh.no_bukti', 'trh.tgl_bukti', 'trh.no_sp2d', 'trh.ket', 'trh.jenis_beban')
+            ->groupBy('trh.no_bukti', 'trh.tgl_bukti', 'trh.no_sp2d', 'trh.ket', 'trh_bj.ket', 'trh.jenis_beban')
             ->get();
+
+        // Gabungkan data dengan no_sp2d yang sama
+        $trhtransout = collect();
+        $groupedByNoSp2d = $rawTransactions->groupBy('no_sp2d');
+
+        foreach ($groupedByNoSp2d as $no_sp2d => $transactions) {
+            if (count($transactions) > 1) {
+                // Jika ada lebih dari satu transaksi dengan no_sp2d yang sama, gabungkan
+                $combinedTransaction = (object)[
+                    'no_bukti' => $transactions->first()->no_bukti,
+                    'tgl_bukti' => $transactions->first()->tgl_bukti,
+                    'no_sp2d' => $no_sp2d,
+                    'ket' => $transactions->first()->ket, // Gunakan keterangan dari transaksi pertama
+                    'jenis_beban' => $transactions->first()->jenis_beban, // Gunakan jenis beban dari transaksi pertama
+                    'total' => $transactions->sum('total'),
+                    'UP' => $transactions->sum('UP'),
+                    'GU' => $transactions->sum('GU'),
+                    'TU' => $transactions->sum('TU'),
+                    'gaji' => $transactions->sum('gaji'),
+                    'barang_jasa' => $transactions->sum('barang_jasa'),
+                    'pihak_ketiga' => $transactions->sum('pihak_ketiga'),
+                    'pot_lain' => $transactions->sum('pot_lain')
+                ];
+                $trhtransout->push($combinedTransaction);
+            } else {
+                // Jika hanya ada satu transaksi, tambahkan langsung
+                $trhtransout->push($transactions->first());
+            }
+        }
 
         $bulanAwal = date('n', strtotime($tanggalawal));
         $bulanAkhir = date('n', strtotime($tanggalakhir));
@@ -1349,7 +1382,7 @@ class Laporan extends Controller
                 'pot_lain' => $bulanData->sum('pot_lain'),
                 'barang_jasa' => $bulanData->sum('barang_jasa'),
                 'pihak_ketiga' => $bulanData->sum('pihak_ketiga'),
-                'UP' => $bulanData->sum('up'),
+                'UP' => $bulanData->sum('UP'),
                 'GU' => $bulanData->sum('GU'),
                 'TU' => $bulanData->sum('TU'),
                 'total' => $bulanData->sum('total')
@@ -1377,7 +1410,7 @@ class Laporan extends Controller
             'pot_lain' => $trhtransout->sum('pot_lain'),
             'barang_jasa' => $trhtransout->sum('barang_jasa'),
             'pihak_ketiga' => $trhtransout->sum('pihak_ketiga'),
-            'up' => $trhtransout->sum('up'),
+            'up' => $trhtransout->sum('UP'),
             'gu' => $trhtransout->sum('GU'),
             'tu' => $trhtransout->sum('TU'),
             'total' => $trhtransout->sum('total')
