@@ -767,7 +767,7 @@ class Transaksi extends Controller
         $no_urut_formatted = str_pad($no_urut, 3, '0', STR_PAD_LEFT);
 
         // Buat nama file sesuai format
-        $filename = "{$jenis_cetak}_DINKESKB_{$tanggal}_{$no_urut_formatted}_{$ket_tpp}.xls";
+        $filename = "{$jenis_cetak}_DINKESKB_{$tanggal}_{$no_urut_formatted}_{$ket_tpp}.csv";
 
         // View berdasarkan jenis cetak
         if ($jenis_cetak == 'OB') {
@@ -797,13 +797,15 @@ class Transaksi extends Controller
             $filename = $jenis_cetak . '_' . date('Ymd_His') . '.pdf';
             return $pdf->stream($filename);
         } elseif ($jenis == 'excel') {
-            $filename = str_replace('.xls', '.csv', $filename);
-
+            // Create CSV content
             $csvContent = "";
+
+            // Add header row if needed (uncomment if you want headers)
+            // $csvContent .= "Bank Asal,Nama Rekening Tujuan,Rekening Tujuan,Nilai,Keterangan\n";
 
             foreach ($data as $item) {
                 $csvContent .= sprintf(
-                    '"DINKESKB";"%s";"%s";"%s";"%s";"%s"',
+                    '"%s","%s","%s","%s","%s"',
                     str_replace('"', '""', $item->rekening_awal),
                     str_replace('"', '""', $item->nm_rekening_tujuan),
                     str_replace('"', '""', $item->rekening_tujuan),
@@ -823,7 +825,6 @@ class Transaksi extends Controller
 
         return back()->with('message', 'Dokumen berhasil dicetak.');
     }
-
 
     public function edit($no_bukti)
     {
