@@ -66,6 +66,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/lpj/print', [Transaksi::class, 'print'])->middleware('permission:14')->name('print');
             Route::get('ubah/{no_bukti}', [Transaksi::class, 'ubah'])->middleware('permission:14')->name('ubah');
             Route::post('/check-anggaran', [Transaksi::class, 'checkAnggaran'])->name('check-anggaran');
+            Route::put('/transaksi/{no_bukti}', [Transaksi::class, 'update'])->name('update');
+            Route::post('/transaksi/simpan-permanen', [Transaksi::class, 'simpanPermanen'])->name('simpan-permanen');
 
             Route::get('edit/{no_bukti}', [Transaksi::class, 'edit'])->middleware('permission:14')->name('edit');
             Route::get('/cariData', [Transaksi::class, 'cariData'])->middleware('permission:14')->name('cariData');

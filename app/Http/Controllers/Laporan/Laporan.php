@@ -541,7 +541,7 @@ class Laporan extends Controller
                 nm_sub_kegiatan,
                 kd_rek,
                 nm_rek,
-                SUM(anggaran_tahun) as anggaran_tahun
+                MAX(anggaran_tahun) as anggaran_tahun
             FROM
                 ms_anggaran
             WHERE
@@ -918,15 +918,8 @@ class Laporan extends Controller
             ->select('trdtransout.*', 'trhtransout.tgl_bukti', 'trhtransout.ket')
             ->get();
 
-        $kd_dana_list = $trhtransout->pluck('sumber')->unique()->filter();
-
-        $sumber = DB::table('ms_sumberdana')
-            ->whereIn('id', $kd_dana_list->toArray())
-            ->get()
-            ->keyBy('id');
-
-        $trhtransout->transform(function ($item) use ($sumber) {
-            $item->sumber_dana = $sumber[$item->sumber]->sumber_dana ?? 'Tidak Ada Sumber Dana';
+        $trhtransout->transform(function ($item) {
+            $item->sumber_dana = $item->kd_dana ?? 'Tidak Ada Sumber Dana';
             return $item;
         });
 

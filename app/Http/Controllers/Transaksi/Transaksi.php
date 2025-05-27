@@ -106,32 +106,38 @@ class Transaksi extends Controller
         return view('transaksi.create', compact('kd_skpd', 'nm_skpd', 'newNoBukti', 'rek_pengeluaran', 'kd_sub_kegiatan', 'saldo_awal'));
     }
 
+
     public function ubah($no_bukti)
     {
-        // Dekripsi ID yang terenkripsi
-        $decryptedId = Crypt::decrypt($no_bukti);
 
+        $decryptedId = Crypt::decrypt($no_bukti);
+        $kd_skpd = auth()->user()->kd_skpd;
+        $nm_skpd = Auth::user()->name;
+        $rek_pengeluaran = Auth::user()->rek_pengeluaran;
+        $kd_sub_kegiatan = DB::table('ms_sub_kegiatan')
+            ->select('kd_sub_kegiatan', 'nm_sub_kegiatan') // Ambil hanya kolom yang diperlukan
+            ->distinct() // Hilangkan duplikasi
+            ->get();
+
+        $saldo_awal = DB::table('masterSkpd')
+            ->where('kodeSkpd', $kd_skpd) // Filter berdasarkan kd_skpd
+            ->value('saldoawal');
 
         $transaksi = DB::table('trhtransout')->where('no_bukti', $decryptedId)->first();
 
         $potonganDetails = DB::table('trdtransout')
-            ->leftJoin('ms_sumberdana', function ($join) {
-                $join->on(
-                    DB::raw('CAST(trdtransout.sumber AS INT)'),
-                    '=',
-                    'ms_sumberdana.id'
-                );
-            })
+
             ->where('trdtransout.no_bukti', $decryptedId)
             ->select(
+                'trdtransout.id',
                 'trdtransout.nm_sub_kegiatan',
                 'trdtransout.kd_rek6',
                 'trdtransout.nm_rek6',
-                'trdtransout.sumber',
+                'trdtransout.kd_dana',
+                'trdtransout.nm_dana',
                 'trdtransout.nilai',
-                'ms_sumberdana.nm_dana'
             )
-            ->distinct() // Tambahkan ini
+            ->distinct()
             ->get();
 
 
@@ -142,7 +148,7 @@ class Transaksi extends Controller
         $rek_pengeluaran = Auth::user()->rek_pengeluaran;
 
         // Tampilkan view untuk mengedit data
-        return view('transaksi.ubah', compact('transaksi', 'potonganDetails', 'rek_pengeluaran'));
+        return view('transaksi.ubah', compact('transaksi', 'potonganDetails', 'rek_pengeluaran', 'saldo_awal', 'kd_skpd', 'nm_skpd',));
     }
 
     public function getno_transaksi(Request $request)
@@ -828,31 +834,25 @@ class Transaksi extends Controller
 
     public function edit($no_bukti)
     {
-        // Dekripsi ID yang terenkripsi
+
         $decryptedId = Crypt::decrypt($no_bukti);
 
 
-        // Ambil data pajak berdasarkan ID menggunakan Query Builder
+
         $transaksi = DB::table('trhtransout')->where('no_bukti', $decryptedId)->first();
 
         $potonganDetails = DB::table('trdtransout')
-            ->leftJoin('ms_sumberdana', function ($join) {
-                $join->on(
-                    DB::raw('CAST(trdtransout.sumber AS INT)'),
-                    '=',
-                    'ms_sumberdana.id'
-                );
-            })
+
             ->where('trdtransout.no_bukti', $decryptedId)
             ->select(
                 'trdtransout.nm_sub_kegiatan',
                 'trdtransout.kd_rek6',
                 'trdtransout.nm_rek6',
-                'trdtransout.sumber',
+                'trdtransout.kd_dana',
+                'trdtransout.nm_dana',
                 'trdtransout.nilai',
-                'ms_sumberdana.nm_dana'
             )
-            ->distinct() // Tambahkan ini
+            ->distinct()
             ->get();
 
 
