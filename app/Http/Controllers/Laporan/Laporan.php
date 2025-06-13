@@ -919,7 +919,7 @@ class Laporan extends Controller
             ->get();
 
         $trhtransout->transform(function ($item) {
-            $item->sumber_dana = $item->kd_dana ?? 'Tidak Ada Sumber Dana';
+            $item->sumber_dana = $item->nm_dana ?? 'Tidak Ada Sumber Dana';
             return $item;
         });
 
