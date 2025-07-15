@@ -808,15 +808,10 @@ class Transaksi extends Controller
             $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
-            // Tambahkan header (opsional)
-            $sheet->setCellValue('A1', 'Bank Asal');
-            $sheet->setCellValue('B1', 'Nama Rekening Tujuan');
-            $sheet->setCellValue('C1', 'Rekening Tujuan');
-            $sheet->setCellValue('D1', 'Nilai');
-            $sheet->setCellValue('E1', 'Keterangan');
+
 
             // Isi data
-            $row = 2;
+            $row = 1;
             foreach ($data as $item) {
                 $sheet->setCellValue('A' . $row, $item->rekening_awal);
                 $sheet->setCellValue('B' . $row, $item->nm_rekening_tujuan);
