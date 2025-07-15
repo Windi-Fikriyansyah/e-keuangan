@@ -719,7 +719,7 @@ class Transaksi extends Controller
     public function print(Request $request)
     {
         // Ambil data dari request
-        $no_bukti = $request->no_bukti; // Ini adalah array
+        $no_bukti = $request->no_bukti;
         $jenis_cetak = $request->jenis_cetak;
         $jenis = $request->jenis_print;
 
@@ -773,7 +773,8 @@ class Transaksi extends Controller
         $no_urut_formatted = str_pad($no_urut, 3, '0', STR_PAD_LEFT);
 
         // Buat nama file sesuai format
-        $filename = "{$jenis_cetak}_DINKESKB_{$tanggal}_{$no_urut_formatted}_{$ket_tpp}.csv";
+        $filename = "{$jenis_cetak}_DINKESKB_{$tanggal}_{$no_urut_formatted}_{$ket_tpp}.xlsx";
+
 
         // View berdasarkan jenis cetak
         if ($jenis_cetak == 'OB') {
@@ -803,32 +804,43 @@ class Transaksi extends Controller
             $filename = $jenis_cetak . '_' . date('Ymd_His') . '.pdf';
             return $pdf->stream($filename);
         } elseif ($jenis == 'excel') {
-            // Create CSV content
-            $csvContent = "";
+            // Buat spreadsheet baru
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
 
-            // Add header row if needed (uncomment if you want headers)
-            // $csvContent .= "Bank Asal,Nama Rekening Tujuan,Rekening Tujuan,Nilai,Keterangan\n";
+            // Tambahkan header (opsional)
+            $sheet->setCellValue('A1', 'Bank Asal');
+            $sheet->setCellValue('B1', 'Nama Rekening Tujuan');
+            $sheet->setCellValue('C1', 'Rekening Tujuan');
+            $sheet->setCellValue('D1', 'Nilai');
+            $sheet->setCellValue('E1', 'Keterangan');
 
+            // Isi data
+            $row = 2;
             foreach ($data as $item) {
-                $csvContent .= sprintf(
-                    '"%s","%s","%s","%s","%s"',
-                    str_replace('"', '""', $item->rekening_awal),
-                    str_replace('"', '""', $item->nm_rekening_tujuan),
-                    str_replace('"', '""', $item->rekening_tujuan),
-                    number_format($item->nilai, 0, '', ''),
-                    str_replace('"', '""', $item->ket_tpp)
-                ) . "\r\n"; // Gunakan \r\n untuk line ending
+                $sheet->setCellValue('A' . $row, $item->rekening_awal);
+                $sheet->setCellValue('B' . $row, $item->nm_rekening_tujuan);
+                $sheet->setCellValue('C' . $row, $item->rekening_tujuan);
+                $sheet->setCellValue('D' . $row, number_format($item->nilai, 0, '', ''));
+                $sheet->setCellValue('E' . $row, $item->ket_tpp);
+                $row++;
             }
 
-            // Tambahkan BOM UTF-8 untuk Excel
-            $csvContent = "\xEF\xBB\xBF" . $csvContent;
+            // Format kolom nilai sebagai angka
+            $sheet->getStyle('D2:D' . ($row - 1))
+                ->getNumberFormat()
+                ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
 
-            return response($csvContent)
-                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-                ->header('Content-Type', 'text/csv; charset=utf-8')
-                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            // Buat writer Excel
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+            // Simpan ke file sementara
+            $temp_file = tempnam(sys_get_temp_dir(), 'excel');
+            $writer->save($temp_file);
+
+            // Kembalikan sebagai response download
+            return response()->download($temp_file, $filename)->deleteFileAfterSend(true);
         }
-
         return back()->with('message', 'Dokumen berhasil dicetak.');
     }
 
