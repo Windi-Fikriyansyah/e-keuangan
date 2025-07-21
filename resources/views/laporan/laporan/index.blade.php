@@ -121,6 +121,17 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-md-6">
+                <div class="card card-info collapsed-card card-outline" id="rincianpajak" data-bs-toggle="modal"
+                    data-bs-target="#modalrincianpajak">
+                    <div class="card-body">
+                        <span>Rincian Pajak</span>
+                        <a class="stretched-link" href="#"></a>
+                        <i class="fa fa-chevron-right float-end mt-2"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -253,6 +264,81 @@
                         <button type="button" class="btn btn-danger btn-md cetakbpp" data-jenis="pdf">PDF</button>
                         <button type="button" class="btn btn-dark btn-md cetakbpp" data-jenis="layar">Layar</button>
                         <button type="button" class="btn btn-dark btn-md cetakbpp" data-jenis="excel">Excel</button>
+                        <button type="button" class="btn btn-secondary btn-md" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="modalrincianpajak" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Laporan Rincian Pajak</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="kd_skpdrekaprp" class="form-label">Kode SKPD</label>
+                            <input type="text" value="{{ $daftar_skpd->kd_skpd ?? '' }}" id="kd_skpdrekaprp"
+                                name="kd_skpd" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="name_skpdrekaprp" class="form-label">Nama SKPD</label>
+                            <input type="text" value="{{ $daftar_skpd->name ?? '' }}" id="name_skpdrekaprp"
+                                name="name_skpd" class="form-control" readonly>
+                        </div>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal Awal</label>
+                        <input type="date" id="tanggalawalrp" name="tanggalawal1" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal Akhir</label>
+                        <input type="date" id="tanggalakhirrp" name="tanggalakhir1" class="form-control">
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">Tanggal TTD</label>
+                            <input type="date" id="tanggalTtdrekaprp" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bendahara</label>
+                            <select class="form-control" id="ttdbendahararp">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label">PA/KPA</label>
+                            <select class="form-control" id="ttdrp">
+                                <option value="" disabled selected>Silahkan Pilih</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Jenis</label>
+                            <select class="form-control" id="jenis_cetakan">
+                                <option value="" selected>Silahkan Pilih</option>
+                                <option value="rincian">Rincian</option>
+                                <option value="rekap">Rekap</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="mb-3 text-center">
+                        <button type="button" class="btn btn-danger btn-md cetakrp" data-jenis="pdf">PDF</button>
+                        <button type="button" class="btn btn-dark btn-md cetakrp" data-jenis="layar">Layar</button>
+                        <button type="button" class="btn btn-dark btn-md cetakrp" data-jenis="excel">Excel</button>
                         <button type="button" class="btn btn-secondary btn-md" data-bs-dismiss="modal">Tutup</button>
                     </div>
                 </div>
@@ -1307,6 +1393,40 @@
             });
 
 
+            $('#ttdbendahararp').select2({
+                theme: "bootstrap-5",
+                width: "100%",
+                placeholder: "Silahkan Pilih...",
+                ajax: {
+                    url: "{{ route('laporan.laporan.tandaTangan') }}",
+                    dataType: 'json',
+                    type: "POST",
+                    data: function(params) {
+                        return {
+                            _token: $('meta[name="csrf-token"]').attr(
+                                'content'), // Tambahkan CSRF token
+                            q: $.trim(params.term),
+                            kodeSkpd: $('#kd_skpdrekaprp').val()
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map((ttd) => {
+                                return {
+                                    text: ttd.nama,
+                                    id: ttd.nip,
+                                };
+                            }),
+                            pagination: {
+                                more: data.current_page < data.last_page,
+                            },
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+
             $('#ttdbpp').select2({
                 theme: "bootstrap-5",
                 width: "100%",
@@ -1321,6 +1441,40 @@
                                 'content'), // Tambahkan CSRF token
                             q: $.trim(params.term),
                             kodeSkpd: $('#kd_skpdrekapbpp').val()
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map((ttd) => {
+                                return {
+                                    text: ttd.nama,
+                                    id: ttd.nip,
+                                };
+                            }),
+                            pagination: {
+                                more: data.current_page < data.last_page,
+                            },
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+
+            $('#ttdrp').select2({
+                theme: "bootstrap-5",
+                width: "100%",
+                placeholder: "Silahkan Pilih...",
+                ajax: {
+                    url: "{{ route('laporan.laporan.tandaTanganPa') }}",
+                    dataType: 'json',
+                    type: "POST",
+                    data: function(params) {
+                        return {
+                            _token: $('meta[name="csrf-token"]').attr(
+                                'content'), // Tambahkan CSRF token
+                            q: $.trim(params.term),
+                            kodeSkpd: $('#kd_skpdrekaprp').val()
                         };
                     },
                     processResults: function(data) {
@@ -1768,6 +1922,7 @@
                 let tanggalTtd = $('#tanggalTtdrekapbpp').val();
                 let ttdbendahara = $('#ttdbendaharabpp').val(); // Pastikan ID ini sesuai
                 let ttdpa_kpa = $('#ttdbpp').val();
+                let jenis_cetakan = $('#jenis_cetakan').val();
                 let jenis_print = $(this).data("jenis");
 
                 if (!kd_skpd) {
@@ -1809,6 +1964,61 @@
 
                 window.open(url.toString(), "_blank");
             });
+
+
+
+            $('.cetakrp').on('click', function() {
+                let kd_skpd = $('#kd_skpdrekaprp').val();
+                let tanggalawal = $('#tanggalawalrp').val();
+                let tanggalakhir = $('#tanggalakhirrp').val();
+                let tanggalTtd = $('#tanggalTtdrekaprp').val();
+                let ttdbendahara = $('#ttdbendahararp').val(); // Pastikan ID ini sesuai
+                let ttdpa_kpa = $('#ttdrp').val();
+                let jenis_cetakan = $('#jenis_cetakan').val();
+                let jenis_print = $(this).data("jenis");
+
+                if (!kd_skpd) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih SKPD!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!tanggalawal || !tanggalakhir) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih rentang tanggal!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                if (!tanggalTtd) {
+                    Swal.fire({
+                        title: "Peringatan!",
+                        text: "Silakan pilih tanggal tanda tangan!",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                let url = new URL("{{ route('laporan.laporan.cetakrp') }}", window.location.origin);
+                url.searchParams.append("kd_skpd", kd_skpd);
+                url.searchParams.append("tanggalawal", tanggalawal);
+                url.searchParams.append("tanggalakhir", tanggalakhir);
+                url.searchParams.append("tanggalTtd", tanggalTtd);
+                url.searchParams.append("ttdbendaharadth",
+                    ttdbendahara); // Pastikan cocok dengan request controller
+                url.searchParams.append("ttdpa_kpa", ttdpa_kpa);
+                url.searchParams.append("jenis_print", jenis_print);
+                url.searchParams.append("jenis_cetakan", jenis_cetakan);
+
+                window.open(url.toString(), "_blank");
+            });
+
+
 
             $('.cetakdth').on('click', function() {
                 let kd_skpd = $('#kd_skpdrekapdth').val();

@@ -327,6 +327,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('load', [Laporan::class, 'load'])->middleware('permission:33')->name('load');
                 Route::get('cetakbku', [Laporan::class, 'cetakbku'])->name('cetakbku');
                 Route::get('cetakbpp', [Laporan::class, 'cetakbpp'])->name('cetakbpp');
+                Route::get('cetakrp', [Laporan::class, 'cetakrp'])->name('cetakrp');
                 Route::get('cetakbpbank', [Laporan::class, 'cetakbpbank'])->name('cetakbpbank');
                 Route::post('tandaTangan', [Laporan::class, 'tandaTangan'])->name('tandaTangan');
                 Route::post('tandaTanganPa', [Laporan::class, 'tandaTanganPa'])->name('tandaTanganPa');

@@ -178,6 +178,7 @@ class Laporan extends Controller
         $ttdbendaharadth = $request->ttdbendaharadth;
         $ttdpa_kpa = $request->ttdpa_kpa;
 
+
         if ($kd_skpd == 'null' || empty($kd_skpd)) {
             $kd_skpd = '4.01.2.10.0.00.01.0000';
         }
@@ -267,6 +268,229 @@ class Laporan extends Controller
         ];
 
         $view = view('laporan.laporan.cetak_bpp', $data);
+
+        if ($jenis_print == 'layar') {
+            return $view;
+        } elseif ($jenis_print == 'pdf') {
+            $pdf = PDF::loadHtml($view->render())
+                ->setPaper('legal')
+                ->setOrientation('landscape')
+                ->setOption('margin-left', 15)
+                ->setOption('margin-right', 15);
+
+            return $pdf->stream('Laporan_BPPajak.pdf');
+        } else if ($jenis_print == 'excel') {
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=laporan_buku_pembantu_pajak.xls");
+            return $view;
+        }
+    }
+
+
+    public function cetakrp(Request $request)
+    {
+        $kd_skpd = $request->kd_skpd;
+        $tanggalawal = $request->tanggalawal;
+        $tanggalakhir = $request->tanggalakhir;
+        $tanggalTtd = $request->tanggalTtd;
+        $jenis_print = $request->jenis_print;
+        $ttdbendaharadth = $request->ttdbendaharadth;
+        $ttdpa_kpa = $request->ttdpa_kpa;
+        $jenis_cetakan = $request->jenis_cetakan;
+
+        if ($kd_skpd == 'null' || empty($kd_skpd)) {
+            $kd_skpd = '4.01.2.10.0.00.01.0000';
+        }
+
+        // Format tanggal
+        $tanggalawal = date('Y-m-d', strtotime($tanggalawal));
+        $tanggalakhir = date('Y-m-d', strtotime($tanggalakhir));
+
+        $dataSkpd = DB::table('users')
+            ->select('name')
+            ->where('kd_skpd', $kd_skpd)
+            ->first();
+
+        // Get data based on print type
+        if ($jenis_cetakan == 'rekap') {
+            // Get monthly summary data
+            $monthlyData = DB::table('trdstrpot')
+                ->join('trhstrpot', 'trdstrpot.no_bukti', '=', 'trhstrpot.no_bukti')
+                ->select(
+                    DB::raw('MONTH(trhstrpot.tgl_bukti) as bulan'), // Ubah alias menjadi 'bulan'
+                    DB::raw("SUM(CASE
+        WHEN trdstrpot.nm_rek6 LIKE '%PPh%21%' OR
+             trdstrpot.nm_rek6 LIKE '%PPh 21%' OR
+             trdstrpot.nm_rek6 LIKE '%PPh Pasal 21%'
+        THEN trdstrpot.nilai ELSE 0 END) as pph21"),
+                    DB::raw("SUM(CASE
+        WHEN trdstrpot.nm_rek6 LIKE '%PPh%22%' OR
+             trdstrpot.nm_rek6 LIKE '%PPh 22%' OR
+             trdstrpot.nm_rek6 LIKE '%PPh Pasal 22%'
+        THEN trdstrpot.nilai ELSE 0 END) as pph22"),
+                    DB::raw("SUM(CASE
+        WHEN trdstrpot.nm_rek6 LIKE '%PPh%23%' OR
+             trdstrpot.nm_rek6 LIKE '%PPh 23%' OR
+             trdstrpot.nm_rek6 LIKE '%PPh Pasal 23%'
+        THEN trdstrpot.nilai ELSE 0 END) as pph23"),
+                    DB::raw("SUM(CASE
+        WHEN trdstrpot.nm_rek6 LIKE '%PPh%4%' OR
+             trdstrpot.nm_rek6 LIKE '%PPh 4%' OR
+             trdstrpot.nm_rek6 LIKE '%PPh Pasal 4%' OR
+             trdstrpot.nm_rek6 LIKE '%PPh Final%'
+        THEN trdstrpot.nilai ELSE 0 END) as pph4"),
+                    DB::raw("SUM(CASE WHEN trdstrpot.nm_rek6 LIKE '%PPN%' THEN trdstrpot.nilai ELSE 0 END) as ppn")
+                )
+                ->where('trhstrpot.kd_skpd', $kd_skpd)
+                ->whereBetween('trhstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir])
+                ->where(function ($query) {
+                    $query->where('trdstrpot.nm_rek6', 'LIKE', '%PPh%')
+                        ->orWhere('trdstrpot.nm_rek6', 'LIKE', '%PPN%');
+                })
+                ->groupBy(DB::raw('MONTH(trhstrpot.tgl_bukti)')) // Gunakan ekspresi yang sama dengan SELECT
+                ->orderBy('bulan')
+                ->get();
+
+            // Get NTPN counts
+            $ntpnData = DB::table('trdstrpot')
+                ->join('trhstrpot', 'trdstrpot.no_bukti', '=', 'trhstrpot.no_bukti')
+                ->select(
+                    DB::raw("COUNT(CASE WHEN (trdstrpot.ntpn IS NULL OR trdstrpot.ntpn = '') AND
+             (trdstrpot.nm_rek6 LIKE '%PPh%' OR trdstrpot.nm_rek6 LIKE '%PPN%')
+             THEN 1 END) as belum_terinput"),
+                    DB::raw("COUNT(CASE WHEN trdstrpot.ntpn IS NOT NULL AND trdstrpot.ntpn != '' AND
+             (trdstrpot.nm_rek6 LIKE '%PPh%' OR trdstrpot.nm_rek6 LIKE '%PPN%')
+             THEN 1 END) as sudah_terinput"),
+                    DB::raw('MAX(MONTH(trhstrpot.tgl_bukti)) as bulan_terakhir')
+                )
+                ->where('trhstrpot.kd_skpd', $kd_skpd)
+                ->whereBetween('trhstrpot.tgl_bukti', [$tanggalawal, $tanggalakhir])
+                ->where(function ($query) {
+                    $query->where('trdstrpot.nm_rek6', 'LIKE', '%PPh%')
+                        ->orWhere('trdstrpot.nm_rek6', 'LIKE', '%PPN%');
+                })
+                ->first();
+
+            // Prepare monthly data for view
+            $months = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember'
+            ];
+
+            $monthlySummary = [];
+            $totalPph21 = 0;
+            $totalPph22 = 0;
+            $totalPph23 = 0;
+            $totalPph4 = 0;
+            $totalPpn = 0;
+
+            foreach ($months as $monthNum => $monthName) {
+                $monthData = $monthlyData->firstWhere('bulan', $monthNum);
+
+                $pph21 = $monthData ? $monthData->pph21 : 0;
+                $pph22 = $monthData ? $monthData->pph22 : 0;
+                $pph23 = $monthData ? $monthData->pph23 : 0;
+                $pph4 = $monthData ? $monthData->pph4 : 0;
+                $ppn = $monthData ? $monthData->ppn : 0;
+                $jumlah = $pph21 + $pph22 + $pph23 + $pph4 + $ppn;
+
+                $monthlySummary[] = [
+                    'no' => $monthNum,
+                    'bulan' => $monthName,
+                    'pph21' => $pph21,
+                    'pph22' => $pph22,
+                    'pph23' => $pph23,
+                    'pph4' => $pph4,
+                    'ppn' => $ppn,
+                    'jumlah' => $jumlah
+                ];
+
+                $totalPph21 += $pph21;
+                $totalPph22 += $pph22;
+                $totalPph23 += $pph23;
+                $totalPph4 += $pph4;
+                $totalPpn += $ppn;
+            }
+
+            $totalJumlah = $totalPph21 + $totalPph22 + $totalPph23 + $totalPph4 + $totalPpn;
+
+            // Add totals row
+            $monthlySummary[] = [
+                'no' => '',
+                'bulan' => 'Jumlah',
+                'pph21' => $totalPph21,
+                'pph22' => $totalPph22,
+                'pph23' => $totalPph23,
+                'pph4' => $totalPph4,
+                'ppn' => $totalPpn,
+                'jumlah' => $totalJumlah
+            ];
+
+            $ttdbendahara = DB::table('masterTtd')
+                ->where('kodeSkpd', $kd_skpd)
+                ->where('nip', $ttdbendaharadth)
+                ->first();
+
+            $ttdpa_kpa1 = DB::table('masterTtd')
+                ->where('kodeSkpd', $kd_skpd)
+                ->where('nip', $ttdpa_kpa)
+                ->first();
+
+            $data = [
+                'dataSkpd' => $dataSkpd,
+                'monthlySummary' => $monthlySummary,
+                'ntpnData' => $ntpnData,
+                'tipe' => $jenis_print,
+                'tanggalTtd' => $tanggalTtd,
+                'tanggalawal' => $tanggalawal,
+                'tanggalakhir' => $tanggalakhir,
+                'bendahara' => $ttdbendahara,
+                'pa_kpa' => $ttdpa_kpa1,
+            ];
+
+            $view = view('laporan.laporan.cetak_rp_rekap', $data);
+        } else {
+            // Original detailed view logic
+            $trhstrpot = DB::table('trhstrpot')
+                ->where('kd_skpd', $kd_skpd)
+                ->whereBetween('tgl_bukti', [$tanggalawal, $tanggalakhir])
+                ->orderBy('tgl_bukti', 'asc')
+                ->get();
+
+            $ttdbendahara = DB::table('masterTtd')
+                ->where('kodeSkpd', $kd_skpd)
+                ->where('nip', $ttdbendaharadth)
+                ->first();
+
+            $ttdpa_kpa1 = DB::table('masterTtd')
+                ->where('kodeSkpd', $kd_skpd)
+                ->where('nip', $ttdpa_kpa)
+                ->first();
+
+            $data = [
+                'dataSkpd' => $dataSkpd,
+                'trhstrpot' => $trhstrpot,
+                'tipe' => $jenis_print,
+                'tanggalTtd' => $tanggalTtd,
+                'tanggalawal' => $tanggalawal,
+                'tanggalakhir' => $tanggalakhir,
+                'bendahara' => $ttdbendahara,
+                'pa_kpa' => $ttdpa_kpa1,
+            ];
+
+            $view = view('laporan.laporan.cetak_rp_rincian', $data);
+        }
 
         if ($jenis_print == 'layar') {
             return $view;
