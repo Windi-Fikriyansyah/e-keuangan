@@ -813,16 +813,17 @@ class Transaksi extends Controller
             // Isi data
             $row = 1;
             foreach ($data as $item) {
-                $sheet->setCellValue('A' . $row, $item->rekening_awal);
-                $sheet->setCellValue('B' . $row, $item->nm_rekening_tujuan);
-                $sheet->setCellValue('C' . $row, $item->rekening_tujuan);
-                $sheet->setCellValue('D' . $row, number_format($item->nilai, 0, '', ''));
-                $sheet->setCellValue('E' . $row, $item->ket_tpp);
+                $sheet->setCellValue('A' . $row, "DINKESKB");
+                $sheet->setCellValue('B' . $row, $item->rekening_awal);
+                $sheet->setCellValue('C' . $row, $item->nm_rekening_tujuan);
+                $sheet->setCellValue('D' . $row, $item->rekening_tujuan);
+                $sheet->setCellValue('E' . $row, number_format($item->nilai, 0, '', ''));
+                $sheet->setCellValue('F' . $row, $item->ket_tpp);
                 $row++;
             }
 
             // Format kolom nilai sebagai angka
-            $sheet->getStyle('D2:D' . ($row - 1))
+            $sheet->getStyle('E2:E' . ($row - 1))
                 ->getNumberFormat()
                 ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER);
 

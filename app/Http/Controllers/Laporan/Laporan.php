@@ -135,6 +135,7 @@ class Laporan extends Controller
             ->where('nip', $ttdpa_kpa)
             ->first();
 
+
         $data = [
             'dataSkpd' => $dataSkpd,
             'trhtransout' => $trhtransout,
