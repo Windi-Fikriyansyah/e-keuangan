@@ -1118,16 +1118,24 @@ class Laporan extends Controller
             ->where('kd_sub_kegiatan', $sub_kegiatan)
             ->select('kd_sub_kegiatan', 'nm_sub_kegiatan')
             ->first();
+        // $jumlah = DB::table('ms_anggaran')
+        //     ->where('kd_rek', $akun_belanja)
+        //     ->where('kd_sub_kegiatan', $sub_kegiatan)
+        //     ->where('jenis_anggaran', $jenis_anggaran)
+        //     ->select(
+        //         'kd_rek',
+        //         'nm_rek', // pastikan kolom ini ada di tabel ms_anggaran
+        //         DB::raw('SUM(anggaran_tahun) as total_anggaran')
+        //     )
+        //     ->groupBy('kd_rek', 'nm_rek') // karena Anda pakai SUM dan juga ambil kolom lain
+        //     ->first();
+
+
         $jumlah = DB::table('ms_anggaran')
             ->where('kd_rek', $akun_belanja)
             ->where('kd_sub_kegiatan', $sub_kegiatan)
             ->where('jenis_anggaran', $jenis_anggaran)
-            ->select(
-                'kd_rek',
-                'nm_rek', // pastikan kolom ini ada di tabel ms_anggaran
-                DB::raw('SUM(anggaran_tahun) as total_anggaran')
-            )
-            ->groupBy('kd_rek', 'nm_rek') // karena Anda pakai SUM dan juga ambil kolom lain
+            ->select('kd_rek', 'nm_rek', 'anggaran_tahun as total_anggaran')
             ->first();
 
 
