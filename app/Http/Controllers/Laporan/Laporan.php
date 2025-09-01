@@ -1675,6 +1675,10 @@ class Laporan extends Controller
             'trhbku' => $trhbku, // For fallback data
         ];
 
+
+
+
+        $view = view('laporan.laporan.cetak_registersp2d', $data);
         // Pilih metode cetak
         if ($jenis_print == 'layar') {
             return view('laporan.laporan.cetak_registersp2d', $data);
@@ -1685,6 +1689,11 @@ class Laporan extends Controller
                 ->setOption('margin-right', 15);
 
             return $pdf->stream('Laporan_registersp2d.pdf');
+        } else if ($jenis_print == 'excel') {
+            header("Cache-Control: no-cache, no-store, must-revalidate");
+            header("Content-Type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=laporan_BKU.xls");
+            return $view;
         }
     }
 }
