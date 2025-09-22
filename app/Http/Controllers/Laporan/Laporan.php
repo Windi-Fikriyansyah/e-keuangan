@@ -864,6 +864,7 @@ class Laporan extends Controller
 
     public function cetakspj(Request $request)
     {
+        // dd($request->all());
         $kd_skpd = $request->kd_skpd;
         $tanggalawal = $request->tanggalawal;
         $tanggalakhir = $request->tanggalakhir;
@@ -1072,7 +1073,7 @@ class Laporan extends Controller
                 ->setOption('margin-left', 15)
                 ->setOption('margin-right', 15);
 
-            return $pdf->stream('Laporan_DTH.pdf');
+            return $pdf->stream('Laporan_SPJ.pdf');
         } else if ($jenis_print == 'excel') {
             header("Cache-Control: no-cache, no-store, must-revalidate");
             header("Content-Type: application/vnd.ms-excel");
