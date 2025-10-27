@@ -313,6 +313,9 @@
                                 <input type="checkbox" id="pergeseran3" name="jenis_pergeseran[]" value="3"
                                     class="form-check-input me-2">
                                 <label for="pergeseran3">Pergeseran III</label>
+                                <input type="checkbox" id="[perubahan1]" name="jenis_pergeseran[]" value="4"
+                                    class="form-check-input me-2">
+                                <label for="[perubahan1]" class="me-3">Perubahan I</label>
                             </div>
                         </div>
 

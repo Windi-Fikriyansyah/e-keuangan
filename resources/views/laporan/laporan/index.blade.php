@@ -537,6 +537,7 @@
                                 <option value="1" selected>Pergeseran I</option>
                                 <option value="2" selected>Pergeseran II</option>
                                 <option value="3" selected>Pergeseran III</option>
+                                <option value="4" selected>Perubahan</option>
                             </select>
                         </div>
                     </div>
