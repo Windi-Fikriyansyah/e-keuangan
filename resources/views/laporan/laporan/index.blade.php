@@ -587,6 +587,7 @@
                                 <option value="1">Pergeseran I</option>
                                 <option value="2">Pergeseran II</option>
                                 <option value="3">Pergeseran III</option>
+                                <option value="4">Perubahan I</option>
                             </select>
                         </div>
                         <div class="col-md-6">
